@@ -281,12 +281,19 @@ function draw_terrain()
             for y = 0, map_y_size-1 do     
                 local tile = get_tile(x,y).tile
                 if tile > 0 then -- no error was returned
-                    
                     spr(tile, x * 8, y * 8)
     
                     --Debug
-                    --print((y - 1) * 8, (x - 1) * 8, (y - 1) * 8)
-                    --print(y, (x - 1) * 8, (y - 1) * 8)
+                    if (debug_mode) then
+                        --print((y - 1) * 8, (x - 1) * 8, (y - 1) * 8)
+                        --print(y, (x - 1) * 8, (y - 1) * 8)
+                        rect(x * 8, y * 8, x * 8 + 8, y * 8 + 8, 9)
+                        
+                    end
+                else
+                    if (debug_mode) then
+                        rect(x * 8, y * 8, x * 8 + 8, y * 8 + 8, 2)
+                    end
                 end
             end
         end

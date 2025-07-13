@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
+#include globalvars.lua
 #include helper.lua
 #include playerspriteindex.lua
 #include proceduralgen.lua
