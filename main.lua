@@ -16,6 +16,8 @@ local game_pos_y = 0
 local mouse_x = 0
 local mouse_y = 0
 
+
+
 function _init()
     delta_time = 0
     last_time = 0
@@ -44,23 +46,39 @@ function _update()
     delta_time = current_time - last_time  -- Calculate delta time
     last_time = current_time  
 
-    if debug_mode then
-        debug_controls()
-    else
-        camera_x = game_pos_x
-        camera_y = game_pos_y
-    end
-
-    -- Process key input
-    while stat(30) do
-        keyInput = stat(31)
-
-        if (keyInput == "れ") then
-            debug_mode = not(debug_mode)
+    if gameState == gstate.startMenu then
+        -- todo
+        
+    elseif gameState == gstate.playerSelect then
+        
+        local complete = initPlayers(game_pos_x, game_pos_y, delta_time)
+        if complete then
+            gameState = gstate.game
+        end
+    
+    elseif gameState == gstate.game then
+        if debug_mode then
+            debug_controls()
+        else
+            camera_x = game_pos_x
+            camera_y = game_pos_y
         end
 
-        --bouncePlayer(keyInput)       
+        update_players(game_pos_x, game_pos_y, delta_time)
+
+        -- Process key input
+        while stat(30) do
+            keyInput = stat(31)
+
+            if (keyInput == "れ") then
+                debug_mode = not(debug_mode)
+            end
+
+            bouncePlayer(keyInput)       
+        end
     end
+
+   
 end
 
 

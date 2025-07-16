@@ -42,9 +42,9 @@ function enablePlayer(player)
     disabledPlayerCount = disabledPlayerCount - 1
 end
 
-function initPlayers(dt)
+function initPlayers(startingCamPos_x, startingCamPos_y, dt)
     local sprites = {33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}
-    
+
     if stat(30) then 
         local keyInput = stat(31)
         
@@ -63,9 +63,9 @@ function initPlayers(dt)
                 --local sprite = sprites[playerCount % #sprites + 1]
                 local sprite = player_sprite_index[keyInput]
                 players[keyInput] = {
-                    x = 8 + posx + start_position, 
-                    y = 8 + posy + camera_y, 
-                    startPosition = 8 + posy + camera_y,
+                    x = 8 + posx + startingCamPos_x, 
+                    y = 8 + posy + startingCamPos_y, 
+                    startPosition = 8 + posy + startingCamPos_y,
                     width = 8, 
                     height = 8, 
                     boundsOffsetX = 0, 
@@ -97,9 +97,6 @@ function initPlayers(dt)
 
                     posy = posy + 9
                 end
-            elseif not voters[keyInput] then
-                voters[keyInput] = keyInput
-                votesToStart += 1
             end
 
             --printh("bounce")
@@ -133,7 +130,7 @@ function initPlayers(dt)
     return false
 end
 
-function update_players(dt)  
+function update_players(game_pos_x, game_pos_y, dt)  
     for key, player in pairs(players) do
         if player.disabled == false then
 
@@ -161,7 +158,7 @@ function update_players(dt)
             player.onGround = checked_position.onGround
 
             -- Apply final position updates, if any
-            player.x = min(checked_position.x, camera_x+128-player.width)
+            player.x = min(checked_position.x, game_pos_x+128-player.width)
             player.y = checked_position.y
 
              -- Check for respawn bird collisions
@@ -214,8 +211,8 @@ function update_players_testmode(dt)
     for key, player in pairs(players) do
         if player.disabled == false then
 
-            camera_x = player.x - 56
-            --camera_y = player.y + 64
+            game_pos_x = player.x - 56
+            --game_pos_y = player.y + 64
 
             player.vx = 0
             player.vy = 0
@@ -289,12 +286,13 @@ function bouncePlayer(key)
             player.bounce_force = minBounceForce
             sfx(0)
         end
+        --[[
     else
         local sprite = player_sprite_index[key]
         players[key] = {
             x = 8 + posx + start_position, 
-            y = 8 + posy + camera_y, 
-            startPosition = 8 + posy + camera_y,
+            y = 8 + posy + game_pos_y, 
+            startPosition = 8 + posy + game_pos_y,
             width = 8, 
             height = 8, 
             boundsOffsetX = 0, 
@@ -318,7 +316,7 @@ function bouncePlayer(key)
         disablePlayer(players[key])
 
         new_player_added_timer = 1
-
+        ]]
     end
 end
 
