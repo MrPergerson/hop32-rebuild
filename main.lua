@@ -85,7 +85,7 @@ end
 
 function _draw()
         cls()
-        map(0,0,0,camera_y,128,16) -- make this repeatable
+        --map(0,0,0,camera_y,128,16) -- make this repeatable
         map(0,0,1024,camera_y,128,16) -- make this repeatable
         map(0,0,2048,camera_y,128,16) -- make this repeatable
         draw_terrain()

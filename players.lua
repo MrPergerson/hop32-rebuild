@@ -14,12 +14,18 @@ local maxPlayers = 32
 local maxFallVelocity = 100
 disabledPlayerCount = 0
 
-local jump_height = 64
+local jump_height = 8
 local jump_time_to_peak = .5
 local jump_time_to_fall = .5
-local jump_velocity = ((2 * ((jump_height/2))) / jump_time_to_peak) * -1
-local jump_gravity = ((-2 * ((jump_height/2)))  / (jump_time_to_peak * jump_time_to_peak)) * -1
+local jump_x_velocity = 20
+local jump_distance = 16 / 2
+
+local jump_velocity = (2*jump_height * jump_x_velocity / jump_distance) * -1
+local jump_gravity = (-2 * jump_height * (jump_x_velocity * jump_x_velocity)  / (jump_distance * jump_distance)) * -1
 local fall_gravity = ((-2 * ((jump_height/2)))  / (jump_time_to_fall * jump_time_to_fall)) * -1
+
+
+
 
 local d_last_time = 0
 
@@ -147,7 +153,7 @@ function update_players(game_pos_x, game_pos_y, dt)
             if player.onGround == false then
                 if player.vy > 0 then
                     --player.vy += min(fall_gravity, maxFallVelocity)  * dt
-                    player.vy += fall_gravity * dt
+                    player.vy += jump_gravity * dt
                 else
                     player.vy += jump_gravity  * dt
                 end
@@ -155,7 +161,7 @@ function update_players(game_pos_x, game_pos_y, dt)
                 
                 player.bounce_force = max(player.bounce_force - bounceChargeRate, maxBounceForce)
                 if player.vy >= 0 then -- if just landed
-                    printh(time() - d_last_time)
+                    --printh(time() - d_last_time)
                     player.vx = 0
                 end
             end
@@ -293,11 +299,11 @@ function bouncePlayer(key)
     if not (player == nil) then
         if player.onGround and not(player.won) then
             player.vy = jump_velocity --player.bounce_force
-            player.vx = 0 --maxBounceRange
+            player.vx = jump_x_velocity --maxBounceRange
             player.bounce_force = minBounceForce
             sfx(0)
             d_last_time = time()
-            printh(time() .. " jump")
+            --printh(time() .. " jump")
         end
         --[[
     else
