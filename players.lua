@@ -1,7 +1,9 @@
+--https://www.algorithm-archive.org/contents/verlet_integration/verlet_integration.html
+
 poke(0x5F2D, 0x1) -- enable keyboard input
 
 -- game variables
-local GRAVITY = 10  -- Gravity value
+local GRAVITY = 15  -- Gravity value
 local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
 players = {}
 playerCount = 0
@@ -11,21 +13,23 @@ local maxBounceForce = -250
 local maxBounceRange = 28
 local bounceChargeRate = 2.4
 local maxPlayers = 32
-local maxFallVelocity = 100
+local maxFallVelocity = 200
+local jump_acceleration_x = 10
+local jump_acceleration_y = 20
 disabledPlayerCount = 0
 
-local jump_height = 8
-local jump_time_to_peak = .5
-local jump_time_to_fall = .5
-local jump_x_velocity = 20
-local jump_distance = 16 / 2
-
-local jump_velocity = (2*jump_height * jump_x_velocity / jump_distance) * -1
-local jump_gravity = (-2 * jump_height * (jump_x_velocity * jump_x_velocity)  / (jump_distance * jump_distance)) * -1
-local fall_gravity = ((-2 * ((jump_height/2)))  / (jump_time_to_fall * jump_time_to_fall)) * -1
 
 
+local jump_height = 32
+local jump_x_velocity = 10 -- constent
+local jump_distance = 64
+local jump_dist_p1 = jump_distance / 2
+local jump_dist_p2 = jump_distance * .2
 
+    
+local jump_velocity = (-2 * jump_height * jump_x_velocity) / jump_dist_p1
+local jump_gravity = (2 * jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p1 * jump_dist_p1)
+--local fall_gravity = abs(((2 * jump_height * (jump_x_velocity * jump_x_velocity))  / (jump_dist_p2 * jump_dist_p2)))
 
 local d_last_time = 0
 
@@ -80,6 +84,8 @@ function initPlayers(startingCamPos_x, startingCamPos_y, dt)
                 players[keyInput] = {
                     x = 8 + posx + startingCamPos_x, 
                     y = 8 + posy + startingCamPos_y, 
+                    px = 0,
+                    py = 0,
                     startPosition = 8 + posy + startingCamPos_y,
                     width = 8, 
                     height = 8, 
@@ -117,6 +123,9 @@ function initPlayers(startingCamPos_x, startingCamPos_y, dt)
             --printh("bounce")
             
             players[keyInput].y = players[keyInput].startPosition - 2
+
+            players[keyInput].px = players[keyInput].x
+            players[keyInput].py = players[keyInput].y - GRAVITY
   
 
         end
@@ -149,34 +158,49 @@ function update_players(game_pos_x, game_pos_y, dt)
     for key, player in pairs(players) do
         if player.disabled == false then
 
-            -- Apply grounded or ungrounded updates
-            if player.onGround == false then
-                if player.vy > 0 then
-                    --player.vy += min(fall_gravity, maxFallVelocity)  * dt
-                    player.vy += jump_gravity * dt
+            --[[
+                if player.onGround == false then
+                    if velocity_y >= 0 then
+                        --player.py += min(GRAVITY, maxFallVelocity)  * dt
+                        //player.py += GRAVITY  * dt
+                    else
+                        //player.vy += jump_gravity  * dt
+                    end
                 else
-                    player.vy += jump_gravity  * dt
-                end
-            else
-                
-                player.bounce_force = max(player.bounce_force - bounceChargeRate, maxBounceForce)
-                if player.vy >= 0 then -- if just landed
-                    --printh(time() - d_last_time)
-                    player.vx = 0
-                end
-            end
+                    player.bounce_force = max(player.bounce_force - bounceChargeRate, maxBounceForce)
+                    if player.vy >= 0 then -- if just landed
+                        //player.vx = 0
+                    end
+                end            
+            ]]
             
-            -- Calculate the new player position
-            local player_new_x = player.x + player.vx * dt
-            local player_new_y = player.y + player.vy * dt
+            if not(player.vx == 0) then
+                jump_acceleration_x = 0
+            end
+
+            jump_acceleration_y = jump_gravity
+
+            player_new_x = player.x + player.vx * dt + 0.5 * jump_acceleration_x * dt * dt
+            player_new_y = player.y + player.vy * dt + 0.5 * jump_acceleration_y * dt * dt
+            player.vx += jump_acceleration_x * dt
+            player.vy += jump_acceleration_y * dt
+            player.vy = min(player.vy, maxFallVelocity)
+
 
             -- Check new positions for collisions
             local checked_position = check_collision(player_new_x, player_new_y, player.x, player.y)
             player.onGround = checked_position.onGround
 
+            if player.onGround then
+                player.vx = 0
+                player.vy = 0
+            end
+
             -- Apply final position updates, if any
             player.x = min(checked_position.x, game_pos_x+128-player.width)
             player.y = checked_position.y
+
+            --printh("x: " .. player.x .. ", " .. " y: " .. player.y)
 
              -- Check for respawn bird collisions
              for _, respawn in ipairs(activeBirdList) do
@@ -298,8 +322,9 @@ function bouncePlayer(key)
     local player = players[key]
     if not (player == nil) then
         if player.onGround and not(player.won) then
+            player.vx = jump_x_velocity
             player.vy = jump_velocity --player.bounce_force
-            player.vx = jump_x_velocity --maxBounceRange
+            --player.px = jump_x_velocity --maxBounceRange
             player.bounce_force = minBounceForce
             sfx(0)
             d_last_time = time()
