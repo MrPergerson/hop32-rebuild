@@ -20,15 +20,15 @@ disabledPlayerCount = 0
 
 
 
-local jump_height = 32
-local jump_x_velocity = 10 -- constent
-local jump_distance = 64
+local jump_height = 2
+local jump_x_velocity = 4
+local jump_distance = 2
 local jump_dist_p1 = jump_distance / 2
-local jump_dist_p2 = jump_distance * .2
 
-    
+
 local jump_velocity = (-2 * jump_height * jump_x_velocity) / jump_dist_p1
 local jump_gravity = (2 * jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p1 * jump_dist_p1)
+--local jump_dist_p2 = jump_distance * .2
 --local fall_gravity = abs(((2 * jump_height * (jump_x_velocity * jump_x_velocity))  / (jump_dist_p2 * jump_dist_p2)))
 
 local d_last_time = 0
@@ -178,7 +178,7 @@ function update_players(game_pos_x, game_pos_y, dt)
                 jump_acceleration_x = 0
             end
 
-            jump_acceleration_y = jump_gravity
+            jump_acceleration_y = jump_gravity * 8
 
             player_new_x = player.x + player.vx * dt + 0.5 * jump_acceleration_x * dt * dt
             player_new_y = player.y + player.vy * dt + 0.5 * jump_acceleration_y * dt * dt
@@ -322,8 +322,8 @@ function bouncePlayer(key)
     local player = players[key]
     if not (player == nil) then
         if player.onGround and not(player.won) then
-            player.vx = jump_x_velocity
-            player.vy = jump_velocity --player.bounce_force
+            player.vx = jump_x_velocity  * 8
+            player.vy = jump_velocity  * 8 --player.bounce_force
             --player.px = jump_x_velocity --maxBounceRange
             player.bounce_force = minBounceForce
             sfx(0)
