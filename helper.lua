@@ -91,3 +91,7 @@ function timer(interval)
         return false  -- Indicate that the interval has not elapsed
     end
 end
+
+function lerp(a, b, t)
+    return a + (b - a) * t
+end

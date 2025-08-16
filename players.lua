@@ -19,17 +19,23 @@ local jump_acceleration_y = 20
 disabledPlayerCount = 0
 
 
+local min_jump_height = 1.5
+local min_jump_distance = 1.5
+local max_jump_height = 12
+local max_jump_distance = 8
+local bounceCharge = 0 -- [0-1]
+local maxChargeTime = 4 -- seconds
 
-local jump_height = 2
+local jump_height = min_jump_height
+local jump_distance = min_jump_distance
 local jump_x_velocity = 4
-local jump_distance = 2
-local jump_dist_p1 = jump_distance / 2
+local jump_dist_p1 = jump_distance * .6
+local jump_dist_p2 = jump_distance * .4
 
-
-local jump_velocity = (-2 * jump_height * jump_x_velocity) / jump_dist_p1
-local jump_gravity = (2 * jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p1 * jump_dist_p1)
+local jump_velocity = 0
+local jump_gravity = 0
+local fall_gravity = 50 
 --local jump_dist_p2 = jump_distance * .2
---local fall_gravity = abs(((2 * jump_height * (jump_x_velocity * jump_x_velocity))  / (jump_dist_p2 * jump_dist_p2)))
 
 local d_last_time = 0
 
@@ -178,7 +184,12 @@ function update_players(game_pos_x, game_pos_y, dt)
                 jump_acceleration_x = 0
             end
 
-            jump_acceleration_y = jump_gravity * 8
+            if player.vy >= 0 then
+                jump_acceleration_y = fall_gravity * 8
+            else
+                jump_acceleration_y = jump_gravity * 8
+
+            end
 
             player_new_x = player.x + player.vx * dt + 0.5 * jump_acceleration_x * dt * dt
             player_new_y = player.y + player.vy * dt + 0.5 * jump_acceleration_y * dt * dt
@@ -194,6 +205,14 @@ function update_players(game_pos_x, game_pos_y, dt)
             if player.onGround then
                 player.vx = 0
                 player.vy = 0
+
+                bounceCharge = bounceCharge + dt
+                local t = min(bounceCharge / maxChargeTime, 1)
+                jump_height = lerp(min_jump_height, max_jump_height, t)
+                jump_distance = lerp(min_jump_distance, max_jump_distance, t)
+
+                --printh("bc " .. bounceCharge)
+                printh("t: " .. t)
             end
 
             -- Apply final position updates, if any
@@ -322,10 +341,19 @@ function bouncePlayer(key)
     local player = players[key]
     if not (player == nil) then
         if player.onGround and not(player.won) then
+            
+            jump_dist_p1 = jump_distance * .6
+            jump_dist_p2 = jump_distance * .4
+            jump_velocity = (-2 * jump_height * jump_x_velocity) / jump_dist_p1
+            jump_gravity = (2 * jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p1 * jump_dist_p1)
+            fall_gravity = (2 * jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p2 * jump_dist_p2)
+
+
             player.vx = jump_x_velocity  * 8
             player.vy = jump_velocity  * 8 --player.bounce_force
             --player.px = jump_x_velocity --maxBounceRange
-            player.bounce_force = minBounceForce
+            --player.bounce_force = minBounceForce
+            bounceCharge = 0
             sfx(0)
             d_last_time = time()
             --printh(time() .. " jump")
