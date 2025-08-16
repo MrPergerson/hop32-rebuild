@@ -8,36 +8,22 @@ local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
 players = {}
 playerCount = 0
 local playerWonCount = 0
-local minBounceForce = -60
-local maxBounceForce = -250
-local maxBounceRange = 28
-local bounceChargeRate = 2.4
 local maxPlayers = 32
 local maxFallVelocity = 200
-local jump_acceleration_x = 10
-local jump_acceleration_y = 20
 disabledPlayerCount = 0
 
-
+local jump_acceleration_x = 10
+local jump_acceleration_y = 20
 local min_jump_height = 1.5
 local min_jump_distance = 1.5
 local max_jump_height = 12
 local max_jump_distance = 8
+local jump_x_velocity = 4
 local bounceCharge = 0 -- [0-1]
 local maxChargeTime = 4 -- seconds
 
-local jump_height = min_jump_height
-local jump_distance = min_jump_distance
-local jump_x_velocity = 4
-local jump_dist_p1 = jump_distance * .6
-local jump_dist_p2 = jump_distance * .4
 
-local jump_velocity = 0
-local jump_gravity = 0
-local fall_gravity = 50 
---local jump_dist_p2 = jump_distance * .2
-
-local d_last_time = 0
+local d_last_time = 0 -- ??
 
 --voters = {}
 --votesToStart = 0
@@ -90,8 +76,6 @@ function initPlayers(startingCamPos_x, startingCamPos_y, dt)
                 players[keyInput] = {
                     x = 8 + posx + startingCamPos_x, 
                     y = 8 + posy + startingCamPos_y, 
-                    px = 0,
-                    py = 0,
                     startPosition = 8 + posy + startingCamPos_y,
                     width = 8, 
                     height = 8, 
@@ -100,7 +84,11 @@ function initPlayers(startingCamPos_x, startingCamPos_y, dt)
                     vx = 0, 
                     vy = 0, 
                     onGround = false, 
-                    bounce_force = minBounceForce,
+                    bounce_charge = 0,
+                    jump_height = min_jump_height,
+                    jump_distance = min_jump_distance,
+                    jump_gravity = 0,
+                    fall_gravity = 50,
                     key=keyInput, 
                     sprite = sprite, 
                     disabled = false,
@@ -185,9 +173,9 @@ function update_players(game_pos_x, game_pos_y, dt)
             end
 
             if player.vy >= 0 then
-                jump_acceleration_y = fall_gravity * 8
+                jump_acceleration_y = player.fall_gravity * 8
             else
-                jump_acceleration_y = jump_gravity * 8
+                jump_acceleration_y = player.jump_gravity * 8
 
             end
 
@@ -206,10 +194,10 @@ function update_players(game_pos_x, game_pos_y, dt)
                 player.vx = 0
                 player.vy = 0
 
-                bounceCharge = bounceCharge + dt
-                local t = min(bounceCharge / maxChargeTime, 1)
-                jump_height = lerp(min_jump_height, max_jump_height, t)
-                jump_distance = lerp(min_jump_distance, max_jump_distance, t)
+                player.bounce_charge = min(player.bounce_charge + dt , maxChargeTime)
+                local t = player.bounce_charge / maxChargeTime
+                player.jump_height = lerp(min_jump_height, max_jump_height, t)
+                player.jump_distance = lerp(min_jump_distance, max_jump_distance, t)
 
                 --printh("bc " .. bounceCharge)
                 printh("t: " .. t)
@@ -342,21 +330,16 @@ function bouncePlayer(key)
     if not (player == nil) then
         if player.onGround and not(player.won) then
             
-            jump_dist_p1 = jump_distance * .6
-            jump_dist_p2 = jump_distance * .4
-            jump_velocity = (-2 * jump_height * jump_x_velocity) / jump_dist_p1
-            jump_gravity = (2 * jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p1 * jump_dist_p1)
-            fall_gravity = (2 * jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p2 * jump_dist_p2)
-
-
+            local jump_dist_p1 = player.jump_distance * .6
+            local jump_dist_p2 = player.jump_distance * .4
+            local jump_velocity = (-2 * player.jump_height * jump_x_velocity) / jump_dist_p1
+            player.jump_gravity = (2 * player.jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p1 * jump_dist_p1)
+            player.fall_gravity = (2 * player.jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p2 * jump_dist_p2)
             player.vx = jump_x_velocity  * 8
-            player.vy = jump_velocity  * 8 --player.bounce_force
-            --player.px = jump_x_velocity --maxBounceRange
-            --player.bounce_force = minBounceForce
-            bounceCharge = 0
+            player.vy = jump_velocity  * 8
+            player.bounce_charge = 0
             sfx(0)
             d_last_time = time()
-            --printh(time() .. " jump")
         end
         --[[
     else
