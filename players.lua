@@ -151,25 +151,11 @@ end
 function update_players(game_pos_x, game_pos_y, dt)  
     for key, player in pairs(players) do
         if player.disabled == false then
-
-            --[[
-                if player.onGround == false then
-                    if velocity_y >= 0 then
-                        --player.py += min(GRAVITY, maxFallVelocity)  * dt
-                        //player.py += GRAVITY  * dt
-                    else
-                        //player.vy += jump_gravity  * dt
-                    end
-                else
-                    player.bounce_force = max(player.bounce_force - bounceChargeRate, maxBounceForce)
-                    if player.vy >= 0 then -- if just landed
-                        //player.vx = 0
-                    end
-                end            
-            ]]
             
             if not(player.vx == 0) then
                 jump_acceleration_x = 0
+            else
+                jump_acceleration_x = 0 -- what's this for ?? 
             end
 
             if player.vy >= 0 then
@@ -198,16 +184,11 @@ function update_players(game_pos_x, game_pos_y, dt)
                 local t = player.bounce_charge / maxChargeTime
                 player.jump_height = lerp(min_jump_height, max_jump_height, t)
                 player.jump_distance = lerp(min_jump_distance, max_jump_distance, t)
-
-                --printh("bc " .. bounceCharge)
-                printh("t: " .. t)
             end
 
             -- Apply final position updates, if any
             player.x = min(checked_position.x, game_pos_x+128-player.width)
             player.y = checked_position.y
-
-            --printh("x: " .. player.x .. ", " .. " y: " .. player.y)
 
              -- Check for respawn bird collisions
              for _, respawn in ipairs(activeBirdList) do
