@@ -11,8 +11,11 @@ local last_time
 
 local camera_x = 0
 local camera_y = 0
-local game_pos_x = 0
-local game_pos_y = 0
+local timeUntilCameraMoves = 1.5
+local timeUntilRestart = 2
+local camera_speed = 15
+local game_progress_x = 0
+local game_progress_y = 0
 local mouse_x = 0
 local mouse_y = 0
 
@@ -21,13 +24,13 @@ local mouse_y = 0
 function _init()
     delta_time = 0
     last_time = 0
-    game_pos_x = 0
-    game_pos_y = 80
-    camera_x = game_pos_x
-    camera_y = game_pos_y
+    game_progress_x = 0
+    game_progress_y = 80
+    camera_x = game_progress_x
+    camera_y = game_progress_y
 
     init_terrain_gen(10)
-    max_camera_distance = (map_x_size - 16) * 8
+    max_distance = (map_x_size - 16) * 8
 
 end
 
@@ -51,7 +54,7 @@ function _update()
         
     elseif gameState == gstate.playerSelect then
         
-        local complete = initPlayers(game_pos_x, game_pos_y, delta_time)
+        local complete = initPlayers(game_progress_x, game_progress_y, delta_time)
         if complete then
             gameState = gstate.game
         end
@@ -60,11 +63,24 @@ function _update()
         if debug_mode then
             debug_controls()
         else
-            camera_x = game_pos_x
-            camera_y = game_pos_y
+            camera_x = game_progress_x
+            camera_y = game_progress_y
+
+            if timeUntilCameraMoves > 0 then
+                timeUntilCameraMoves -= delta_time
+            else 
+                game_progress_x = min(game_progress_x + camera_speed * delta_time, max_distance)
+            end
+
+            if game_progress_x >= max_distance then
+                gameState = gstate.complete
+            end
+
+            
+
         end
 
-        update_players(game_pos_x, game_pos_y, delta_time)
+        update_players(game_progress_x, game_progress_y, delta_time)
 
         -- Process key input
         while stat(30) do
@@ -76,6 +92,8 @@ function _update()
 
             bouncePlayer(keyInput)       
         end
+    elseif gameState == gstate.complete then
+        printh("complete")
     end
 
    
@@ -85,22 +103,44 @@ end
 
 function _draw()
         cls()
-        --map(0,0,0,camera_y,128,16) -- make this repeatable
+        camera(camera_x, camera_y)
+        map(0,0,0,camera_y,128,16) -- make this repeatable
         map(0,0,1024,camera_y,128,16) -- make this repeatable
         map(0,0,2048,camera_y,128,16) -- make this repeatable
         draw_terrain()
         draw_players(gameStarted)
         
-        camera(camera_x, camera_y)
+        -- UI
+        if gameState == gstate.startMenu then
+            -- menu functions
+        elseif gameState == gstate.playerSelect then
+
+            if playerCount > 0 then
+                if startTimerVisible then 
+                    print("starting in " .. flr(start_timer), camera_x + 70, camera_y, 7)
+                end
+                --print("ready: " .. votesToStart .. "/" .. playerCount, camera_x + 4, camera_y, 7)
+            end
+
+            rectfill(camera_x, 0, camera_x + 128, camera_y + 5, camera_y)
+            print("press any button to join", camera_x + 4, camera_y, 7)
+
+            print("\^w\^thop" .. get_player_count(), camera_x + 46,camera_y + 56)
+
+        elseif gameState == gstate.game then
+           
+        end
+
+        
 
         if (debug_mode) then
             --print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
             --print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
             --print("frame rate: " .. stat(7), camera_x,camera_y+24,6)
 
-            rect(game_pos_x, game_pos_y, game_pos_x + 128, game_pos_y + 128, 7)
-            print(game_pos_x/8 .. "," .. game_pos_y/8, game_pos_x+4, game_pos_y+4)
-            print(game_pos_x/8+16 .. "," .. game_pos_y/8+16, game_pos_x + 128 + 4, game_pos_y + 128 + 4)
+            rect(game_progress_x, game_progress_y, game_progress_x + 128, game_progress_y + 128, 7)
+            print(game_progress_x/8 .. "," .. game_progress_y/8, game_progress_x+4, game_progress_y+4)
+            print(game_progress_x/8+16 .. "," .. game_progress_y/8+16, game_progress_x + 128 + 4, game_progress_y + 128 + 4)
 
             mouse_x = stat(32) + camera_x
             mouse_y = stat(33) + camera_y

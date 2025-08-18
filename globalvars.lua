@@ -3,6 +3,7 @@ keyboard_input = true
 gstate = {
     mainMenu = 0,
     playerSelect = 1,
-    game = 2
+    game = 2,
+    complete = 3
 }
-local gameState = gstate.playerSelect
+gameState = gstate.playerSelect

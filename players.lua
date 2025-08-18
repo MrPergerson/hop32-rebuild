@@ -148,7 +148,7 @@ function initPlayers(startingCamPos_x, startingCamPos_y, dt)
     return false
 end
 
-function update_players(game_pos_x, game_pos_y, dt)  
+function update_players(game_progress_x, game_progress_y, dt)  
     for key, player in pairs(players) do
         if player.disabled == false then
             
@@ -186,8 +186,10 @@ function update_players(game_pos_x, game_pos_y, dt)
                 player.jump_distance = lerp(min_jump_distance, max_jump_distance, t)
             end
 
+
             -- Apply final position updates, if any
-            player.x = min(checked_position.x, game_pos_x+128-player.width)
+            --player.x = min(checked_position.x, game_progress_x+128-player.width)
+            player.x = checked_position.x
             player.y = checked_position.y
 
              -- Check for respawn bird collisions
