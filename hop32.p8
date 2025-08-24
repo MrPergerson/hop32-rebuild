@@ -2,17 +2,20 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
 #include globalvars.lua
+#include level0.p8
 #include helper.lua
 #include playerspriteindex.lua
 #include proceduralgen.lua
+#include chunkload.lua
 #include zombies.lua
 #include ufo.lua
 #include respawnbirds.lua
 #include players.lua
+
 --#include testingmain.lua
---#include main.lua
-#include level0.p8
-#include leveleditor.lua
+#include main.lua
+
+--#include leveleditor.lua
 __gfx__
 000000000000aa00bbbbbbbb54444444677777764cccccccccccccccccccccc48888888888888888888888847700770000000000000000000000000000000000
 00000000000a00a0bbbbbbbb44445544766666674cccccccccccccccccccccc48888888888888888888888847700770000000000000000000044000000000000

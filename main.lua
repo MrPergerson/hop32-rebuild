@@ -25,11 +25,11 @@ function _init()
     delta_time = 0
     last_time = 0
     game_progress_x = 0
-    game_progress_y = 80
+    game_progress_y = 0
     camera_x = game_progress_x
     camera_y = game_progress_y
 
-    init_terrain_gen(10)
+    initLevelLoad()
     max_distance = (map_x_size - 16) * 8
 
 end
@@ -38,11 +38,6 @@ function restart()
     cls()
     _init()
 end
-
-chunk_generated_callback = function(chunk)
-        
-end
-
 
 function _update()
     local current_time = time()  -- Get the current time
@@ -69,11 +64,11 @@ function _update()
             if timeUntilCameraMoves > 0 then
                 timeUntilCameraMoves -= delta_time
             else 
-                game_progress_x = min(game_progress_x + camera_speed * delta_time, max_distance)
+                --game_progress_x = min(game_progress_x + camera_speed * delta_time, max_distance)
             end
 
             if game_progress_x >= max_distance then
-                gameState = gstate.complete
+                --gameState = gstate.complete
             end
 
             
@@ -107,7 +102,7 @@ function _draw()
         map(0,0,0,camera_y,128,16) -- make this repeatable
         map(0,0,1024,camera_y,128,16) -- make this repeatable
         map(0,0,2048,camera_y,128,16) -- make this repeatable
-        draw_terrain()
+        drawChunks()
         draw_players(gameStarted)
         
         -- UI

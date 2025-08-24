@@ -1,149 +1,199 @@
 level0 = {
+  name = "",
   chunks = {
     [0] = {
+      pos_x = 0,
       surface_tiles = {
         {
-          sprite = 2,
-          x = 2,
-          y = 12
-        }
-,
-        {
-          sprite = 2,
-          x = 3,
-          y = 11
-        }
-,
-        {
-          sprite = 2,
-          x = 4,
-          y = 10
-        }
-,
-        {
-          sprite = 2,
-          x = 6,
-          y = 8
-        }
-,
-        {
-          sprite = 2,
-          x = 8,
-          y = 7
-        }
-,
-        {
-          sprite = 2,
-          x = 9,
-          y = 6
-        }
-,
-        {
-          sprite = 2,
-          x = 10,
-          y = 5
-        }
-,
-        {
-          sprite = 2,
-          x = 11,
-          y = 4
-        }
-,
-        {
-          sprite = 2,
-          x = 12,
-          y = 4
-        }
-,
-        {
-          sprite = 2,
-          x = 13,
-          y = 4
-        }
-
-},
-      pos_y = 0,
-      pos_x = 0
-},
-    [1] = {
-      surface_tiles = {
-        {
-          sprite = 2,
+          y = 10,
           x = 19,
-          y = 9
-        }
-,
+          sprite = 2
+        },
         {
-          sprite = 2,
+          y = 10,
           x = 20,
-          y = 9
-        }
-,
+          sprite = 2
+        },
         {
-          sprite = 2,
+          y = 10,
           x = 21,
-          y = 8
-        }
-,
+          sprite = 2
+        },
         {
-          sprite = 2,
+          y = 10,
           x = 22,
-          y = 8
-        }
-,
+          sprite = 2
+        },
         {
-          sprite = 2,
+          y = 9,
           x = 22,
-          y = 7
-        }
-,
+          sprite = 2
+        },
         {
-          sprite = 2,
+          y = 9,
           x = 23,
-          y = 7
-        }
-,
+          sprite = 2
+        },
         {
-          sprite = 2,
-          x = 23,
-          y = 6
-        }
-,
-        {
-          sprite = 2,
+          y = 9,
           x = 24,
-          y = 6
-        }
-,
+          sprite = 2
+        },
         {
-          sprite = 2,
-          x = 24,
-          y = 5
-        }
-,
-        {
-          sprite = 2,
+          y = 9,
           x = 25,
-          y = 5
-        }
-,
+          sprite = 2
+        },
         {
-          sprite = 2,
-          x = 25,
-          y = 4
+          y = 9,
+          x = 26,
+          sprite = 2
+        },
+        {
+          y = 8,
+          x = 26,
+          sprite = 2
+        },
+        {
+          y = 8,
+          x = 27,
+          sprite = 2
+        },
+        {
+          y = 8,
+          x = 28,
+          sprite = 2
+        },
+        {
+          y = 8,
+          x = 29,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 30,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 31,
+          sprite = 2
+        },
+        {
+          y = 10,
+          x = 0,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 1,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 2,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 3,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 4,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 5,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 6,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 7,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 8,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 9,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 10,
+          sprite = 2
+        },
+        {
+          y = 9,
+          x = 11,
+          sprite = 2
+        },
+        {
+          y = 10,
+          x = 12,
+          sprite = 2
+        },
+        {
+          y = 10,
+          x = 13,
+          sprite = 2
+        },
+        {
+          y = 10,
+          x = 14,
+          sprite = 2
+        },
+        {
+          y = 10,
+          x = 15,
+          sprite = 2
+        },
+        {
+          y = 10,
+          x = 16,
+          sprite = 2
+        },
+        {
+          y = 8,
+          x = 4,
+          sprite = 2
+        },
+        {
+          y = 10,
+          x = 18,
+          sprite = 2
+        },
+        {
+          y = 10,
+          x = 17,
+          sprite = 2
         }
 
-},
-      pos_y = 0,
-      pos_x = 128
-},
-    [2] = {
-      surface_tiles = {},
-      pos_y = 0,
-      pos_x = 256
-}
-},
-  name = ""
+      },
+      pos_y = 0
+    },
+    [1] = {
+      pos_x = 128,
+      surface_tiles = {
+         {
+          y = 10,
+          x = 19,
+          sprite = 2
+        }
+      },
+      pos_y = 0
+    }
+  }
 }
 

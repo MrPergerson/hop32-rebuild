@@ -173,7 +173,7 @@ function update_players(game_progress_x, game_progress_y, dt)
 
 
             -- Check new positions for collisions
-            local checked_position = check_collision(player_new_x, player_new_y, player.x, player.y)
+            local checked_position = checkTileCollision(player_new_x, player_new_y, player.x, player.y)
             player.onGround = checked_position.onGround
 
             if player.onGround then
@@ -188,8 +188,8 @@ function update_players(game_progress_x, game_progress_y, dt)
 
 
             -- Apply final position updates, if any
-            --player.x = min(checked_position.x, game_progress_x+128-player.width)
-            player.x = checked_position.x
+            player.x = min(checked_position.x, game_progress_x+128-player.width)
+            --player.x = checked_position.x
             player.y = checked_position.y
 
              -- Check for respawn bird collisions

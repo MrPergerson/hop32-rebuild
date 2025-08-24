@@ -24,7 +24,7 @@ local draw_hole_chance = .5
 
 -- tile ids: air = 0; grass = 2; ground = 3; wall = 4; 
 
-TILE = {
+local TILE = {
     NONE = 0,
     GRASS = 2,
     GROUND = 3,
