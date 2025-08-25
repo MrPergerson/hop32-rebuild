@@ -30,7 +30,7 @@ function _init()
     camera_y = game_progress_y
 
     initLevelLoad()
-    max_distance = (map_x_size - 16) * 8
+    max_distance = 384
 
 end
 
@@ -64,7 +64,8 @@ function _update()
             if timeUntilCameraMoves > 0 then
                 timeUntilCameraMoves -= delta_time
             else 
-                --game_progress_x = min(game_progress_x + camera_speed * delta_time, max_distance)
+                game_progress_x = min(game_progress_x + camera_speed * delta_time, max_distance)
+
             end
 
             if game_progress_x >= max_distance then
@@ -126,7 +127,9 @@ function _draw()
            
         end
 
-        
+        print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
+        print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
+        print("frame rate: " .. stat(7), camera_x,camera_y+24,6)
 
         if (debug_mode) then
             --print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)

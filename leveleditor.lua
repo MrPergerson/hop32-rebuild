@@ -7,7 +7,7 @@ local game_progress_y = 0
 local mouse_x = 0
 local mouse_y = 0
 local max_level_chunks = 4
-local level_chunks = 2
+local level_chunks = 4
 local editor_grid = {}
 
 local level = {
@@ -17,11 +17,16 @@ local level = {
 
 function createChunk(x,y) 
     
-    local tiles = {}
+    local surface_tiles = {}
+
+    for i = 1, 16 do
+        surface_tiles[i] = {x = -1, y = -1, sprite = TILE.NONE}
+    end
+
     return {
         pos_x = x,
         pos_y = y,
-        surface_tiles = {}
+        surface_tiles = surface_tiles
     }
 end
 
@@ -36,16 +41,16 @@ end
 function loadNewLevel()
     -- add chunks
     for i = 1, level_chunks, 1 do
-        level.chunks[i] = createChunk((i) * 128, 0)
+        level.chunks[i] = createChunk((i-1) * 128, 0)
     end
 end
 
 
 function initEditorGrid()
-
-    for x = 0, (#level.chunks) * 16, 1 do
+    printh(#level.chunks)
+    for x = 0, (#level.chunks) * 16 do
         editor_grid[x] = {}
-        for y = 0, 16, 1 do
+        for y = 0, 16 do
             editor_grid[x][y] = {x = x, y = y, color = 2} -- 9 for tiles
         end
     end
@@ -53,7 +58,8 @@ end
 
 function _init()
     --loadNewLevel()
-    level = level0
+    --level = level0
+    level = area1
     initEditorGrid()
 end
 
@@ -77,7 +83,7 @@ function _update()
         -- add it to tiles
         -- then draw in _draw()
 
-        for i = 1, #level.chunks, 1 do
+        for i = 1, #level.chunks do
             if cell_x * 8 < level.chunks[i].pos_x + 128 then
 
                 local surface_tiles = level.chunks[i].surface_tiles
@@ -90,7 +96,7 @@ function _update()
                 end
 
                 if not(found) then
-                    add_unique(surface_tiles, {x = cell_x, y = cell_y, sprite = TILE.GRASS})
+                    surface_tiles[cell_x-(level.chunks[i].pos_x/8)] = {x = cell_x, y = cell_y, sprite = TILE.GRASS}
                     printh("success at " ..i .. " " ..  #level.chunks[i].surface_tiles)
                 end
 
@@ -114,8 +120,10 @@ function _update()
                 end
 
                 printh(found_tile)
-                deli(level.chunks[i].surface_tiles, found_tile)
+                --deli(level.chunks[i].surface_tiles, found_tile)
                 --surface_tiles[found_tile] = {}
+                surface_tiles[cell_x-(level.chunks[i].pos_x/8)] = {x = -1, y = -1, sprite = TILE.NONE}
+
 
                 break;
             end

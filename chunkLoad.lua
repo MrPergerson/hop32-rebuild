@@ -11,7 +11,7 @@ local chunk_y_offset = 0
 local land_progress = 0
 
 local LANDS = {
-    [0] = level0
+    [1] = land1
 }
 
 local SECRET_ROOMS = {}
@@ -49,9 +49,9 @@ function initLevelLoad()
     chunk_x_offset = 0
     chunk_y_offset = 0
 
-    add(loaded_chunks, loadChunk(0, 0, chunk_x_offset, LANDS))
+    add(loaded_chunks, loadChunk(1, 1, chunk_x_offset, LANDS))
     chunk_x_offset += chunk_x_size
-    add(loaded_chunks, loadChunk(0, 1, chunk_x_offset, LANDS))
+    add(loaded_chunks, loadChunk(1, 2, chunk_x_offset, LANDS))
     chunk_x_offset += chunk_x_size
     --add(loaded_chunks, loadChunk(0, 0, chunk_x_offset, LANDS))
     --chunk_x_offset += 1 -- right?
@@ -82,11 +82,13 @@ function loadChunk(index, chunk_index, x_offset, source)
 
     local chunk = {x = x_offset, y = 0, tiles = {}, surface_tiles = {}}
     chunk.surface_tiles = source[index].chunks[chunk_index].surface_tiles
-
+    local surface_tile_index = 0
+    
     for x = x_offset, x_offset + chunk_x_size-1 do 
         chunk.tiles[x] = {}
         
-        local surface_tile = chunk.surface_tiles[1+x]
+        local surface_tile = chunk.surface_tiles[surface_tile_index]
+        surface_tile_index += 1
 
         
             for y = 0, chunk_y_size-1 do
@@ -95,16 +97,21 @@ function loadChunk(index, chunk_index, x_offset, source)
                 if surface_tile then
                     if y > surface_tile.y then
                         sprite = TILE.GROUND
+
+                        
+                            printh(x .. " " .. y)
+                        
                     end
                 end
 
-                chunk.tiles[x][y] = {x = (x + x_offset) * 8, y = y * 8, sprite = sprite}
+                chunk.tiles[x][y] = {x = x * 8, y = y * 8, sprite = sprite}
+                
             end
        
     end
 
 
-
+    printh("=====")
 
     return chunk
 end

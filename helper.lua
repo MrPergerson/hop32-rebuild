@@ -171,8 +171,9 @@ function table_to_string(t)
             output = output.."{\n"
             for i = 1, #value do
                 local v = value[i]
+                output = output..sub("                ", 1, indent + 2).."["..i.."] = "
                 if type(v) == "table" then
-                    process(v, indent + 2)
+                    process(v, indent + 2, true)
                     if i < #value then
                         output = output..",\n"
                     else
@@ -180,9 +181,9 @@ function table_to_string(t)
                     end
                 else
                     if type(v) == "string" then
-                        output = output..sub("                ", 1, indent + 2)..'"'..v..'"'
+                        output = output..'"'..v..'"'
                     else
-                        output = output..sub("                ", 1, indent + 2)..tostr(v)
+                        output = output..tostr(v)
                     end
                     if i < #value then
                         output = output..",\n"

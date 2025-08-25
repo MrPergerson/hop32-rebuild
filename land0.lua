@@ -1,7 +1,7 @@
 level0 = {
   name = "",
   chunks = {
-    [0] = {
+    [1] = {
       pos_x = 0,
       surface_tiles = {
         {
@@ -183,7 +183,7 @@ level0 = {
       },
       pos_y = 0
     },
-    [1] = {
+    [2] = {
       pos_x = 128,
       surface_tiles = {
          {
@@ -197,3 +197,4 @@ level0 = {
   }
 }
 
+ 
