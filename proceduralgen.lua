@@ -48,63 +48,32 @@ local TILE = {
 
 groundlevel = 11 -- relative to tiles, not pixels
 
-function init_terrain_gen(yOffset)
-    TERRAIN_Y_OFFSET = yOffset
-    chunks = {}
+function initProceduralGen()
     set_biome_distances()
-    new_chunk_threshold = 128
-    chunk_start_unit = 0
-
-    -- generate initial terrain
-    add(chunks, generate_terrain_chunk(chunk_start_unit))
-    chunk_start_unit += chunk_x_size
-    add(chunks, generate_terrain_chunk(chunk_start_unit)) -- each chunk costs 20% cpu to draw!
-
 end
 
--- BUG chunks stop loading after death
-function update_terrain_chunks(generated_chunk_callback)
-    -- if camera passes threshold, then remove oldest chunk and generate a new one.
-    if camera_x >= new_chunk_threshold then
-        new_chunk_threshold += 128
-        chunk_start_unit += chunk_x_size
-        local new_chunk = generate_terrain_chunk(chunk_start_unit)
-        add(chunks, new_chunk)
+function generateChunk(x_offset)
 
-        local chunk_to_remove = new_chunk
-        for chunk in all(chunks) do
-            if chunk.x_offset_unit < chunk_to_remove.x_offset_unit then
-                chunk_to_remove = chunk
-            end
-        end
-
-        del(chunks, chunk_to_remove)
-        generated_chunk_callback(new_chunk)
-    end
-end
-
-function generate_terrain_chunk(x_offset_unit)
-
-    local chunk = {x_offset_unit = x_offset_unit, tiles = {}, surface_tiles = {}}
+    local chunk = {x = x_offset, y = 0,  tiles = {}, surface_tiles = {}}
 
     -- Fill all cells with ground
-    for x = x_offset_unit, x_offset_unit+chunk_x_size-1 do
+    for x = x_offset, x_offset+chunk_x_size-1 do
         chunk.tiles[x] = {}
         for y = 0, map_y_size-1 do -- this creates 31 tiles FYI   
             if x < BIOME_DIST_UNIT.GRASS then
-                chunk.tiles[x][y] = {x = x, y = y, tile = TILE.GROUND}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GROUND}
             elseif x < BIOME_DIST_UNIT.DESERT then
-                chunk.tiles[x][y] = {x = x, y = y, tile = TILE.SAND_1}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SAND_1}
             elseif x < BIOME_DIST_UNIT.MOUNTAIN then
-                chunk.tiles[x][y] = {x = x, y = y, tile = TILE.MOUNTAIN_2}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.MOUNTAIN_2}
             elseif x < BIOME_DIST_UNIT.SNOW then
-                chunk.tiles[x][y] = {x = x, y = y, tile = TILE.SNOW_2}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SNOW_2}
             elseif x < BIOME_DIST_UNIT.ORELAND then
-                chunk.tiles[x][y] = {x = x, y = y, tile = TILE.ORELAND_1}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.ORELAND_1}
             elseif x < BIOME_DIST_UNIT.HELL then
-                chunk.tiles[x][y] = {x = x, y = y, tile = TILE.HELL_2}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.HELL_2}
             else
-                chunk.tiles[x][y] = {x = x, y = y, tile = TILE.GROUND}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GROUND}
             end  
         end
     end
@@ -114,12 +83,12 @@ function generate_terrain_chunk(x_offset_unit)
 
     -- generate ground by removing ground tiles.
     -- Q: should I store the surface in an array? Then know which tiles I can spawn or modify on the surface.
-    for x = x_offset_unit, x_offset_unit+chunk_x_size-1 do
+    for x = x_offset, x_offset+chunk_x_size-1 do
         for y = 0, map_y_size-1 do      
             local h = get_cell_height_at_(x) + TERRAIN_Y_OFFSET -- Normalize x to [0, 1] (remember to explain why dividing by chunk_x_size fixes sin output)
             --h = 2 * sin( ((x-1) / chunk_x_size) * 2)
             if y - groundlevel < h then
-                chunk.tiles[x][y].tile = TILE.NONE
+                chunk.tiles[x][y].sprite = TILE.NONE
             end
             
         end
@@ -127,13 +96,13 @@ function generate_terrain_chunk(x_offset_unit)
     
     -- draw a holes randomly
     -- don't draw holes in the last two chunks
-    if x_offset_unit > 0 and x_offset_unit < (map_x_size-32) and rnd(1) >= 1-draw_hole_chance then
+    if x_offset > 0 and x_offset < (map_x_size-32) and rnd(1) >= 1-draw_hole_chance then
         local random_x_pos = flr(rnd(chunk_x_size-hole_width))
-        local hole_start = x_offset_unit + random_x_pos
+        local hole_start = x_offset + random_x_pos
 
         for x = hole_start , hole_start + hole_width, 1 do
             for y = 0, map_y_size-1, 1 do
-                chunk.tiles[x][y].tile = TILE.NONE   
+                chunk.tiles[x][y].sprite = TILE.NONE   
             end
             
         end
@@ -141,29 +110,29 @@ function generate_terrain_chunk(x_offset_unit)
 
 
     -- get all surface tiles. Update surface sprites if needed
-    for x = x_offset_unit, x_offset_unit+chunk_x_size-1 do
+    for x = x_offset, x_offset+chunk_x_size-1 do
         for y = 1, map_y_size-1 do 
 
             local above_tile = chunk.tiles[x][y-1]
             local target_tile = chunk.tiles[x][y]
 
-            if above_tile.tile == TILE.NONE and target_tile.tile ~= TILE.NONE then
+            if above_tile.sprite == TILE.NONE and target_tile.sprite ~= TILE.NONE then
                 add(chunk.surface_tiles, target_tile)
 
                 if x < BIOME_DIST_UNIT.GRASS then
-                    target_tile.tile = TILE.GRASS
+                    target_tile.sprite = TILE.GRASS
                 elseif x < BIOME_DIST_UNIT.DESERT then
-                    --target_tile.tile = TILE.GRASS
+                    --target_tile.sprite = TILE.GRASS
                 elseif x < BIOME_DIST_UNIT.MOUNTAIN then
-                    target_tile.tile = TILE.MOUNTAIN_1
+                    target_tile.sprite = TILE.MOUNTAIN_1
                 elseif x < BIOME_DIST_UNIT.SNOW then
-                    --target_tile.tile = TILE.GRASS
+                    --target_tile.sprite = TILE.GRASS
                 elseif x < BIOME_DIST_UNIT.ORELAND then
-                    --target_tile.tile = TILE.GRASS
+                    --target_tile.sprite = TILE.GRASS
                 elseif x < BIOME_DIST_UNIT.HELL then
-                    --target_tile.tile = TILE.GRASS
+                    --target_tile.sprite = TILE.GRASS
                 else
-                    --target_tile.tile = TILE.GRASS
+                    --target_tile.sprite = TILE.GRASS
                 end
             end
             
@@ -269,35 +238,6 @@ function draw_holes()
         end
     end
     ]]
-
-end
-
-function draw_terrain()
-    --local visibleTilesX = flr(camera_x) + 16
-    --local visibleTilesY = flr(camera_y) + 16
-
-    for chunk in all(chunks) do
-        for x = chunk.x_offset_unit, chunk.x_offset_unit+chunk_x_size-1 do
-            for y = 0, map_y_size-1 do     
-                local tile = get_tile(x,y).tile
-                if tile > 0 then -- no error was returned
-                    spr(tile, x * 8, y * 8)
-    
-                    --Debug
-                    if (debug_mode) then
-                        --print((y - 1) * 8, (x - 1) * 8, (y - 1) * 8)
-                        --print(y, (x - 1) * 8, (y - 1) * 8)
-                        rect(x * 8, y * 8, x * 8 + 8, y * 8 + 8, 9)
-                        
-                    end
-                else
-                    if (debug_mode) then
-                        rect(x * 8, y * 8, x * 8 + 8, y * 8 + 8, 2)
-                    end
-                end
-            end
-        end
-    end
 
 end
 

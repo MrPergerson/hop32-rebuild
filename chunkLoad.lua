@@ -7,18 +7,7 @@ local chunk_pos_y_size = chunk_y_size * 8
 local new_chunk_threshold = 0
 local chunk_x_offset = 0
 local chunk_y_offset = 0
-
 local land_progress = 0
-
-local LANDS = {
-    [1] = land1
-}
-
-local SECRET_ROOMS = {}
-
-local SECRET_AREAS = {}
-
-local CLOUD_KINGDOM = {}
 
 local TILE = {
     NONE = 0,
@@ -49,25 +38,32 @@ function initLevelLoad()
     chunk_x_offset = 0
     chunk_y_offset = 0
 
-    add(loaded_chunks, loadChunk(1, 1, chunk_x_offset, LANDS))
-    chunk_x_offset += chunk_x_size
-    add(loaded_chunks, loadChunk(1, 2, chunk_x_offset, LANDS))
-    chunk_x_offset += chunk_x_size
+    --add(loaded_chunks, loadChunk(1, 1, chunk_x_offset, LANDS))
+    --chunk_x_offset += chunk_x_size
+    --add(loaded_chunks, loadChunk(1, 2, chunk_x_offset, LANDS))
+    --chunk_x_offset += chunk_x_size
     --add(loaded_chunks, loadChunk(0, 0, chunk_x_offset, LANDS))
     --chunk_x_offset += 1 -- right?
 
+    add(loaded_chunks, generateChunk(chunk_x_offset))
+    chunk_x_offset += chunk_x_size
+    add(loaded_chunks, generateChunk(chunk_x_offset))
+    chunk_x_offset += chunk_x_size
+    add(loaded_chunks, generateChunk(chunk_x_offset))
+    chunk_x_offset += chunk_x_size
+
 end
 
-function updateChunks()
-    if camera_x >= new_chunk_threshold then
-        new_chunk_threshold += chunk_x_size * 8
-        local new_chunk = loadChunk(chunk_x_offset)
-        add(loaded_chunks, new_chunk)
+function updateChunks(game_progress_x)
+    if game_progress_x >= new_chunk_threshold then
+        local new_chunk = generateChunk(chunk_x_offset)
         chunk_x_offset += chunk_x_size
+        add(loaded_chunks, new_chunk)
+        new_chunk_threshold += chunk_x_size * 8
 
         local chunk_to_remove = new_chunk
         for chunk in all(loaded_chunks) do
-            if chunk.pos_x < chunk_to_remove.pos_x then
+            if chunk.x < chunk_to_remove.x then
                 chunk_to_remove = chunk
             end
         end
@@ -78,6 +74,7 @@ function updateChunks()
     end
 end
 
+-- no longer usable
 function loadChunk(index, chunk_index, x_offset, source)
 
     local chunk = {x = x_offset, y = 0, tiles = {}, surface_tiles = {}}
@@ -96,11 +93,7 @@ function loadChunk(index, chunk_index, x_offset, source)
                 local sprite = TILE.NONE
                 if surface_tile then
                     if y > surface_tile.y then
-                        sprite = TILE.GROUND
-
-                        
-                            printh(x .. " " .. y)
-                        
+                        sprite = TILE.GROUND                        
                     end
                 end
 
@@ -109,9 +102,6 @@ function loadChunk(index, chunk_index, x_offset, source)
             end
        
     end
-
-
-    printh("=====")
 
     return chunk
 end
@@ -124,14 +114,14 @@ function drawChunks()
 
                 local tile = chunk.tiles[x][y]
                 if tile.sprite > 0 then -- no error was returned
-                    spr(tile.sprite, tile.x, tile.y)
+                    spr(tile.sprite, tile.x * 8, tile.y * 8)
                     --Debug
                     if (debug_mode) then
-                        rect(tile.x, tile.y, tile.x + 8, tile.y + 8, 9)                      
+                        rect(tile.x * 8, tile.y * 8, tile.x * 8 + 8, tile.y * 8 + 8, 9)                      
                     end
                 else
                     if (debug_mode) then
-                        rect(tile.x, tile.y, tile.x + 8, tile.y + 8, 2)
+                        rect(tile.x * 8, tile.y * 8, tile.x * 8 + 8, tile.y * 8 + 8, 2)
                     end
                 end
             end

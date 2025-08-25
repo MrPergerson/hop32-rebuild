@@ -29,9 +29,9 @@ function _init()
     camera_x = game_progress_x
     camera_y = game_progress_y
 
+    initProceduralGen()
     initLevelLoad()
-    max_distance = 384
-
+    max_distance = map_x_size - 128
 end
 
 function restart()
@@ -72,7 +72,7 @@ function _update()
                 --gameState = gstate.complete
             end
 
-            
+            updateChunks(game_progress_x)
 
         end
 
