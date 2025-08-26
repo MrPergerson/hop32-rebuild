@@ -31,7 +31,7 @@ function _init()
 
     initProceduralGen()
     initLevelLoad()
-    max_distance = map_x_size - 128
+    max_distance = map_x_size * 8 - 128
 end
 
 function restart()
@@ -69,7 +69,7 @@ function _update()
             end
 
             if game_progress_x >= max_distance then
-                --gameState = gstate.complete
+                gameState = gstate.complete
             end
 
             updateChunks(game_progress_x)
