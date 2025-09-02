@@ -14,23 +14,26 @@ local camera_y = 0
 local timeUntilCameraMoves = 1.5
 local timeUntilRestart = 2
 local camera_speed = 15
-local game_progress_x = 0
-local game_progress_y = 0
+local chunk_progress_x = 0
+local chunk_progress_y = 0
+local new_chunk_threshold = 0
 local mouse_x = 0
 local mouse_y = 0
 
 
 
 function _init()
+    
     delta_time = 0
     last_time = 0
-    game_progress_x = 0
-    game_progress_y = 0
-    camera_x = game_progress_x
-    camera_y = game_progress_y
+    chunk_progress_x = 7
+    chunk_progress_y = 0
+    new_chunk_threshold = (chunk_progress_x + 1) * 128
+    camera_x = chunk_progress_x * 16 * 8
+    camera_y = chunk_progress_y * 16 * 8
 
     initProceduralGen()
-    initLevelLoad()
+    initLevelLoad(chunk_progress_x)
     max_distance = map_x_size * 8 - 128
 end
 
@@ -49,7 +52,7 @@ function _update()
         
     elseif gameState == gstate.playerSelect then
         
-        local complete = initPlayers(game_progress_x, game_progress_y, delta_time)
+        local complete = initPlayers(camera_x, camera_y, delta_time)
         if complete then
             gameState = gstate.game
         end
@@ -57,33 +60,41 @@ function _update()
     elseif gameState == gstate.game then
         if debug_mode then
             debug_controls()
-        else
-            camera_x = game_progress_x
-            camera_y = game_progress_y
 
+            if debug_fast_travel then
+                debugUpdateQuickTravel()
+            end
+
+        else
             if timeUntilCameraMoves > 0 then
                 timeUntilCameraMoves -= delta_time
             else 
-                game_progress_x = min(game_progress_x + camera_speed * delta_time, max_distance)
-
+                
+                camera_x = min(camera_x + camera_speed * delta_time, max_distance)
+                --printh(chunk_progress_x)
             end
 
-            if game_progress_x >= max_distance then
+            if chunk_progress_x >= max_distance then
                 gameState = gstate.complete
             end
 
-            updateChunks(game_progress_x)
-
+            update_players(camera_x, camera_y, delta_time)
         end
 
-        update_players(game_progress_x, game_progress_y, delta_time)
+        if camera_x >= new_chunk_threshold then
+            printh("update")
+            chunk_progress_x += 1
+            new_chunk_threshold += 128
+            updateChunks(chunk_progress_x)
+        end
+
 
         -- Process key input
         while stat(30) do
             keyInput = stat(31)
 
             if (keyInput == "れ") then
-                debug_mode = not(debug_mode)
+                toggleDebugMode()
             end
 
             bouncePlayer(keyInput)       
@@ -127,23 +138,34 @@ function _draw()
            
         end
 
-        print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
-        print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
-        print("frame rate: " .. stat(7), camera_x,camera_y+24,6)
+        --print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
+        --print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
+        --print("frame rate: " .. stat(7), camera_x,camera_y+24,6)
 
         if (debug_mode) then
             --print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
             --print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
             --print("frame rate: " .. stat(7), camera_x,camera_y+24,6)
 
-            rect(game_progress_x, game_progress_y, game_progress_x + 128, game_progress_y + 128, 7)
-            print(game_progress_x/8 .. "," .. game_progress_y/8, game_progress_x+4, game_progress_y+4)
-            print(game_progress_x/8+16 .. "," .. game_progress_y/8+16, game_progress_x + 128 + 4, game_progress_y + 128 + 4)
+            rect(camera_x, camera_y, camera_x + 127, camera_y + 127, 7)
+            print(camera_x/8 .. "," .. camera_y/8, camera_x+4, camera_y+4)
+            print(camera_x/8+16 .. "," .. camera_y/8+16, camera_x + 128 + 4, camera_y + 128 + 4)
 
             mouse_x = stat(32) + camera_x
             mouse_y = stat(33) + camera_y
             rect(mouse_x, mouse_y, mouse_x + 2, mouse_y + 2)
         end       
+end
+
+function toggleDebugMode()
+    debug_mode = not(debug_mode)
+
+    if debug_mode then
+        menuitem(1, "toggle fast travel", function() debugToggleQuickTravel() end)
+    else
+        menuitem(1)
+    end
+
 end
 
 function debug_controls()
@@ -154,7 +176,11 @@ function debug_controls()
     end
 
     if btn(1) then
-        camera_x += speed
+        if debug_fast_travel then
+            camera_x += speed
+        else
+            camera_x = min(camera_x + speed, new_chunk_threshold-1)
+        end
     end
 
     if btn(2) then
@@ -168,4 +194,27 @@ function debug_controls()
     if stat(34) == 1 then
         printh(flr(mouse_x/8) .. ", " .. flr(mouse_y/8))
     end
+end
+
+function debugToggleQuickTravel()
+
+    --debug_mode = true
+    debug_fast_travel = not(debug_fast_travel)
+
+
+end
+
+function debugUpdateQuickTravel()
+
+        
+    for key, player in pairs(players) do
+        if player.disabled == false then
+            player.x = camera_x + 56
+            player.y = camera_y + 8
+        end
+    end
+
+    --chunk_progress_x = camera_x 
+    --chunk_progress_y = camera_y
+
 end

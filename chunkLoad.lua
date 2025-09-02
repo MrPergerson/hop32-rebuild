@@ -4,7 +4,7 @@ local chunk_x_size = 16
 local chunk_y_size = 16
 local chunk_pos_x_size = chunk_x_size * 8
 local chunk_pos_y_size = chunk_y_size * 8
-local new_chunk_threshold = 0
+
 local chunk_x_offset = 0
 local chunk_y_offset = 0
 local land_progress = 0
@@ -31,11 +31,11 @@ local TILE = {
     HELL_3 = 107
 }
 
-function initLevelLoad()
+function initLevelLoad(chunk_progress_x)
 
     loaded_chunks = {}
-    new_chunk_threshold = chunk_x_size * 8
-    chunk_x_offset = 0
+    
+    chunk_x_offset = chunk_progress_x * 16 --initial
     chunk_y_offset = 0
 
     --add(loaded_chunks, loadChunk(1, 1, chunk_x_offset, LANDS))
@@ -54,12 +54,13 @@ function initLevelLoad()
 
 end
 
-function updateChunks(game_progress_x)
-    if game_progress_x >= new_chunk_threshold then
+function updateChunks(chunk_progress_x)
+    --printh(chunk_progress_x)
+
         local new_chunk = generateChunk(chunk_x_offset)
         chunk_x_offset += chunk_x_size
         add(loaded_chunks, new_chunk)
-        new_chunk_threshold += chunk_x_size * 8
+        new_chunk_threshold += 1
 
         local chunk_to_remove = new_chunk
         for chunk in all(loaded_chunks) do
@@ -68,10 +69,10 @@ function updateChunks(game_progress_x)
             end
         end
 
-        del(chunks, chunk_to_remove)
+        del(loaded_chunks, chunk_to_remove)
         -- call back?
 
-    end
+    
 end
 
 -- no longer usable
@@ -136,7 +137,7 @@ function getTile(x,y)
 
     if x < rearChunk.x or x >= forwardChunk.x + chunk_x_size or 
     y < rearChunk.y or y >= rearChunk.y + map_y_size then
-        printh("(" .. x .. "," .. y .. ") tile index is out of bounds")
+        --printh("(" .. x .. "," .. y .. ") tile index is out of bounds")
         -- for some reason, get_tile calls in out of bounds (x 298-303) spike when player reaches the end.
         return {tile = -1}
     else
@@ -155,7 +156,7 @@ function getTile(x,y)
         end
 
         if chunk.tile == -1 then
-            printh("(" .. x .. "," .. y .. ") tile not found")
+            --printh("(" .. x .. "," .. y .. ") tile not found")
             return chunk
         end
 

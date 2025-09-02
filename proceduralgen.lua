@@ -93,6 +93,21 @@ function generateChunk(x_offset)
             
         end
     end
+
+    -- remove bottom
+    --[[
+        for x = x_offset, x_offset+chunk_x_size-1 do
+            for y = 0, map_y_size-1 do      
+                local h = biome_desert_height_at_(x) + TERRAIN_Y_OFFSET + 4 -- Normalize x to [0, 1] (remember to explain why dividing by chunk_x_size fixes sin output)
+                --h = 2 * sin( ((x-1) / chunk_x_size) * 2)
+                if y - groundlevel > h then
+                    chunk.tiles[x][y].sprite = TILE.NONE
+                end
+                
+            end
+        end
+        ]]
+        
     
     -- draw a holes randomly
     -- don't draw holes in the last two chunks
