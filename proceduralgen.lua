@@ -111,7 +111,7 @@ function generateChunk(x_offset)
     
     -- draw a holes randomly
     -- don't draw holes in the last two chunks
-    if x_offset > 0 and x_offset < (map_x_size-32) and rnd(1) >= 1-draw_hole_chance then
+    if x_offset > 0 and x_offset < (map_x_size-biome_length) and rnd(1) >= 1-draw_hole_chance then
         local random_x_pos = flr(rnd(chunk_x_size-hole_width))
         local hole_start = x_offset + random_x_pos
 
@@ -156,6 +156,105 @@ function generateChunk(x_offset)
 
 
     return chunk
+end
+
+function generateVoidChunk(x_offset, y_offset)
+    local chunk = {x = x_offset, y = 0,  tiles = {}, surface_tiles = {}}
+
+    -- Fill all cells with NONE
+    for x = x_offset, x_offset+chunk_x_size-1 do
+        chunk.tiles[x] = {}
+        for y = 0, map_y_size-1 do -- this creates 31 tiles FYI   
+            chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.NONE}
+        end
+    end
+
+    local asteroidCount = 3
+    local next_asteroid_x = 2
+
+    for i = 1, asteroidCount do
+        local asteroidSize = 5
+
+        local x = next_asteroid_x
+        next_asteroid_x = next_asteroid_x + 4 + flr(rnd(2))
+
+        local y = flr(rnd(8)) + 7
+
+        for i = 1, asteroidSize do 
+
+            local rnd_offset_x = flr(rnd(2))
+            local rnd_offset_y = flr(rnd(2))
+
+            --createAsteroid(x_offset + x + rnd_offset_x , y + rnd_offset_y, chunk.tiles)
+            paintCircle(x_offset + x + rnd_offset_x , y + rnd_offset_y, x_offset, y_offset, chunk.tiles)
+
+        end
+    end
+
+    return chunk
+
+end
+
+function paintCircle(center_x,center_y, x_offset, y_offset, tiles)
+
+    -- clamp center values inside chunk
+    center_x = max(min(center_x, x_offset + 15), x_offset+1)
+    center_y = max(min(center_y, y_offset + 15), y_offset+1)
+
+    tiles[center_x][center_y].sprite = TILE.GROUND
+
+
+    if center_x > x_offset and center_x < x_offset + 16 and
+    center_y > y_offset and center_y < y_offset + 16
+    then
+        
+    end
+
+    if center_x + 1 < x_offset + 16 then
+        tiles[center_x + 1][center_y].sprite = TILE.GROUND
+    end
+
+    if center_x - 1 > x_offset then
+        tiles[center_x - 1][center_y].sprite = TILE.GROUND
+    end
+
+    if center_y + 1 < y_offset + 16 then
+        tiles[center_x][center_y + 1].sprite = TILE.GROUND
+    end
+
+    if center_y - 1 > y_offset then
+        tiles[center_x][center_y - 1].sprite = TILE.GROUND
+    end
+
+    
+    
+
+
+
+
+
+end
+
+function createAsteroid(center_x,center_y, tiles)
+
+    local radius = 1
+
+    for x = -radius, radius do
+        for y = -radius, radius do
+            if x*x + y*y <= radius*radius + radius*0.8 then
+                local grid_x = center_x + x
+                local grid_y = center_y + y
+
+                tiles[grid_x][grid_y].sprite = TILE.GROUND
+                if grid_x >= 0 and grid_x < 16 and grid_y >= 0 and grid_y < 16 then
+                    printh("hm")
+                end
+            end
+        end
+    end
+
+
+
 end
 
 function set_biome_distances()

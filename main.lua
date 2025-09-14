@@ -26,7 +26,7 @@ function _init()
     
     delta_time = 0
     last_time = 0
-    chunk_progress_x = 7
+    chunk_progress_x = 15
     chunk_progress_y = 0
     new_chunk_threshold = (chunk_progress_x + 1) * 128
     camera_x = chunk_progress_x * 16 * 8
