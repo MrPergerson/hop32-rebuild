@@ -46,23 +46,27 @@ function initLevelLoad(chunk_progress_x)
     --chunk_x_offset += 1 -- right?
 
     --add(loaded_chunks, generateChunk(chunk_x_offset))
-    add(loaded_chunks, generateVoidChunk(chunk_x_offset,0))
+    add(loaded_chunks, generateVoidChunk(chunk_x_offset,chunk_y_offset))
     chunk_x_offset += chunk_x_size
+    chunk_y_offset -= 2
+    setCameraYPos(chunk_y_offset * 8)
     --add(loaded_chunks, generateChunk(chunk_x_offset))
-    add(loaded_chunks, generateVoidChunk(chunk_x_offset,0))
-    chunk_x_offset += chunk_x_size
-    --add(loaded_chunks, generateChunk(chunk_x_offset))
-    add(loaded_chunks, generateVoidChunk(chunk_x_offset,0))
-    chunk_x_offset += chunk_x_size
+    add(loaded_chunks, generateVoidChunk(chunk_x_offset,chunk_y_offset))
 
 end
 
 function updateChunks(chunk_progress_x)
     --printh(chunk_progress_x)
 
-        --local new_chunk = generateChunk(chunk_x_offset)
-        local new_chunk = generateVoidChunk(chunk_x_offset,0)
         chunk_x_offset += chunk_x_size
+        -- if end
+        chunk_y_offset -= 2
+        setCameraYPos(chunk_y_offset * 8)
+
+        --local new_chunk = generateChunk(chunk_x_offset)
+        local new_chunk = generateVoidChunk(chunk_x_offset, chunk_y_offset)
+        
+        
         add(loaded_chunks, new_chunk)
         new_chunk_threshold += 1
 

@@ -10,3 +10,17 @@ gstate = {
     complete = 3
 }
 gameState = gstate.playerSelect
+
+--camera
+camera_x = 0
+camera_y = 0
+old_camera_y_pos = 0
+new_camera_y_pos = 0
+new_camera_y_lerp_t = 1
+new_camera_y_lerp_r = 0
+
+function setCameraYPos(y_pos)
+    old_camera_y_pos = camera_y
+    new_camera_y_pos = y_pos
+    new_camera_y_lerp_t = 0
+end

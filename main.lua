@@ -9,8 +9,7 @@ poke(0x5F2D, 0x1) -- enable keyboard input
 local delta_time
 local last_time
 
-local camera_x = 0
-local camera_y = 0
+
 local timeUntilCameraMoves = 1.5
 local timeUntilRestart = 2
 local camera_speed = 15
@@ -79,14 +78,23 @@ function _update()
             end
 
             update_players(camera_x, camera_y, delta_time)
+
+            -- cool but it looks like the asteroid are falling
+            if new_camera_y_lerp_t < 1 then
+                new_camera_y_lerp_t = (camera_x - (new_chunk_threshold - 128)) / 128
+                camera_y = lerp(old_camera_y_pos, new_camera_y_pos, min(new_camera_y_lerp_t, 1))
+            end
+
         end
 
         if camera_x >= new_chunk_threshold then
-            printh("update")
+            printh("update " .. new_chunk_threshold)
             chunk_progress_x += 1
             new_chunk_threshold += 128
             updateChunks(chunk_progress_x)
         end
+
+        
 
 
         -- Process key input
@@ -156,6 +164,8 @@ function _draw()
             rect(mouse_x, mouse_y, mouse_x + 2, mouse_y + 2)
         end       
 end
+
+
 
 function toggleDebugMode()
     debug_mode = not(debug_mode)

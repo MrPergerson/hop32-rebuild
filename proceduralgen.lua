@@ -159,12 +159,12 @@ function generateChunk(x_offset)
 end
 
 function generateVoidChunk(x_offset, y_offset)
-    local chunk = {x = x_offset, y = 0,  tiles = {}, surface_tiles = {}}
+    local chunk = {x = x_offset, y = y_offset,  tiles = {}, surface_tiles = {}}
 
     -- Fill all cells with NONE
-    for x = x_offset, x_offset+chunk_x_size-1 do
+    for x = x_offset, x_offset+15 do
         chunk.tiles[x] = {}
-        for y = 0, map_y_size-1 do -- this creates 31 tiles FYI   
+        for y = y_offset, y_offset+15 do -- this creates 31 tiles FYI   
             chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.NONE}
         end
     end
@@ -186,7 +186,7 @@ function generateVoidChunk(x_offset, y_offset)
             local rnd_offset_y = flr(rnd(2))
 
             --createAsteroid(x_offset + x + rnd_offset_x , y + rnd_offset_y, chunk.tiles)
-            paintCircle(x_offset + x + rnd_offset_x , y + rnd_offset_y, x_offset, y_offset, chunk.tiles)
+            paintCircle(x_offset + x + rnd_offset_x , y_offset + y + rnd_offset_y, x_offset, y_offset, chunk.tiles)
 
         end
     end
@@ -230,28 +230,6 @@ function paintCircle(center_x,center_y, x_offset, y_offset, tiles)
     
 
 
-
-
-
-end
-
-function createAsteroid(center_x,center_y, tiles)
-
-    local radius = 1
-
-    for x = -radius, radius do
-        for y = -radius, radius do
-            if x*x + y*y <= radius*radius + radius*0.8 then
-                local grid_x = center_x + x
-                local grid_y = center_y + y
-
-                tiles[grid_x][grid_y].sprite = TILE.GROUND
-                if grid_x >= 0 and grid_x < 16 and grid_y >= 0 and grid_y < 16 then
-                    printh("hm")
-                end
-            end
-        end
-    end
 
 
 
