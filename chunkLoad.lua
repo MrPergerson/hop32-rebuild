@@ -5,8 +5,8 @@ local chunk_y_size = 16
 local chunk_pos_x_size = chunk_x_size * 8
 local chunk_pos_y_size = chunk_y_size * 8
 
-local chunk_x_offset = 0
-local chunk_y_offset = 0
+local x_offset = 0
+local y_offset = 0
 local land_progress = 0
 
 local TILE = {
@@ -35,8 +35,8 @@ function initLevelLoad(chunk_progress_x)
 
     loaded_chunks = {}
     
-    chunk_x_offset = chunk_progress_x * 16 --initial
-    chunk_y_offset = 0
+    x_offset = chunk_progress_x * 16 --initial
+    y_offset = 0
 
     --add(loaded_chunks, loadChunk(1, 1, chunk_x_offset, LANDS))
     --chunk_x_offset += chunk_x_size
@@ -46,25 +46,32 @@ function initLevelLoad(chunk_progress_x)
     --chunk_x_offset += 1 -- right?
 
     --add(loaded_chunks, generateChunk(chunk_x_offset))
-    add(loaded_chunks, generateVoidChunk(chunk_x_offset,chunk_y_offset))
-    chunk_x_offset += chunk_x_size
-    chunk_y_offset -= 2
-    setCameraYPos(chunk_y_offset * 8)
+    add(loaded_chunks, generateVoidChunk(x_offset,y_offset))
+    --add(loaded_chunks, generateCloudChunk(x_offset, y_offset))
+    x_offset += chunk_x_size
+    --y_offset -= 2
+    --setCameraYPos(y_offset * 8)
     --add(loaded_chunks, generateChunk(chunk_x_offset))
-    add(loaded_chunks, generateVoidChunk(chunk_x_offset,chunk_y_offset))
+    add(loaded_chunks, generateVoidChunk(x_offset,y_offset))
+    --add(loaded_chunks, generateCloudChunk(x_offset, y_offset))
 
 end
 
 function updateChunks(chunk_progress_x)
     --printh(chunk_progress_x)
 
-        chunk_x_offset += chunk_x_size
+        x_offset += chunk_x_size
         -- if end
-        chunk_y_offset -= 2
-        setCameraYPos(chunk_y_offset * 8)
-
+        --y_offset -= 2
+        --setCameraYPos(y_offset * 8)
+        local new_chunk = {}
+        if current_area == AREA.CLOUD_KINGDOM then
+            new_chunk = generateCloudChunk(x_offset, y_offset)
+        else
+            new_chunk = generateVoidChunk(x_offset, y_offset)
+        end
+        --local new_chunk = generateVoidChunk(x_offset, y_offset)
         --local new_chunk = generateChunk(chunk_x_offset)
-        local new_chunk = generateVoidChunk(chunk_x_offset, chunk_y_offset)
         
         
         add(loaded_chunks, new_chunk)

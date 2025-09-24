@@ -24,3 +24,10 @@ function setCameraYPos(y_pos)
     new_camera_y_pos = y_pos
     new_camera_y_lerp_t = 0
 end
+
+-- progress
+local AREA = {
+    GREEN_LANDS = 0,
+    CLOUD_KINGDOM = 10
+}
+current_area = -1

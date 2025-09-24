@@ -69,12 +69,17 @@ function _update()
                 timeUntilCameraMoves -= delta_time
             else 
                 
-                camera_x = min(camera_x + camera_speed * delta_time, max_distance)
+                camera_x = min(camera_x + camera_speed * delta_time, max_distance+ 1000)
                 --printh(chunk_progress_x)
             end
 
-            if chunk_progress_x >= max_distance then
-                gameState = gstate.complete
+            if camera_x >= max_distance then
+                -- set current area to cloud kingdom
+                current_area = AREA.CLOUD_KINGDOM
+                printh("done") -- fix this so it's not calling repeatedly.
+                -- maybe use the special conditions function I was thinking about
+
+                --gameState = gstate.complete
             end
 
             update_players(camera_x, camera_y, delta_time)
@@ -88,7 +93,7 @@ function _update()
         end
 
         if camera_x >= new_chunk_threshold then
-            printh("update " .. new_chunk_threshold)
+            printh("update " .. new_chunk_threshold .. " >= " .. max_distance)
             chunk_progress_x += 1
             new_chunk_threshold += 128
             updateChunks(chunk_progress_x)

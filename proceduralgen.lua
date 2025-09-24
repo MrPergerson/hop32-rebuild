@@ -43,7 +43,11 @@ local TILE = {
     ORELAND_3 = 104,
     HELL_1 = 105,
     HELL_2 = 106,
-    HELL_3 = 107
+    HELL_3 = 107,
+    CLOUD_1 = 89,
+    CLOUD_2 = 90,
+    CLOUD_3 = 91,
+    CLOUD_4 = 92
 }
 
 groundlevel = 11 -- relative to tiles, not pixels
@@ -190,6 +194,34 @@ function generateVoidChunk(x_offset, y_offset)
 
         end
     end
+
+    return chunk
+
+end
+
+function generateCloudChunk(x_offset, y_offset)
+    local chunk = {x = x_offset, y = y_offset,  tiles = {}, surface_tiles = {}}
+
+    -- Fill all cells with NONE
+    for x = x_offset, x_offset+15 do
+        chunk.tiles[x] = {}
+        for y = y_offset, y_offset+15 do -- this creates 31 tiles FYI   
+            chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.CLOUD_1}
+        end
+    end
+
+    for x = x_offset, x_offset+15 do
+        for y = y_offset, y_offset+15 do      
+            if y < sin( ((x-1) / 8)) + 13 and y > sin( ((x-5) / 8)) + 2  then
+                chunk.tiles[x][y].sprite = TILE.NONE
+            end
+            
+        end
+    end
+
+
+    
+
 
     return chunk
 
@@ -433,3 +465,4 @@ function get_biome_at_unit(x)
         return "HELL"
     end  
 end
+
