@@ -34,6 +34,17 @@ local posy = 0
 local xOffset = 0
 local row = 1
 
+function initPlayers()
+    players = {}
+    playerCount = 0
+    playerWonCount = 0
+    init_respawn_birds()
+    disabledPlayerCount = 0
+    posx = 0
+    posy = 8
+    xOffset = 0
+    row = 1
+end
 
 function disablePlayer(player)
     player.disabled = true
@@ -53,7 +64,8 @@ function enablePlayer(player)
     disabledPlayerCount = disabledPlayerCount - 1
 end
 
-function initPlayers(startingCamPos_x, startingCamPos_y, dt)
+
+function addPlayers(startingCamPos_x, startingCamPos_y, dt)
     local sprites = {33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}
 
     if stat(30) then 
@@ -191,6 +203,14 @@ function update_players(game_progress_x, game_progress_y, dt)
             player.x = min(checked_position.x, game_progress_x+128-player.width)
             --player.x = checked_position.x
             player.y = checked_position.y
+
+            if player.x < camera_x-16 then
+                --player.disabled = true
+                disablePlayer(player)
+            elseif player.y >= camera_y + 128 then
+                --player.disabled = true
+                disablePlayer(player)
+            end
 
              -- Check for respawn bird collisions
              for _, respawn in ipairs(activeBirdList) do
@@ -358,17 +378,7 @@ function bouncePlayer(key)
     end
 end
 
-function resetPlayers()
-    players = {}
-    playerCount = 0
-    playerWonCount = 0
-    init_respawn_birds()
-    disabledPlayerCount = 0
-    posx = 0
-    posy = 8
-    xOffset = 0
-    row = 1
-end
+
 
 function DEBUG_updatePlayers()
     for key, player in pairs(players) do

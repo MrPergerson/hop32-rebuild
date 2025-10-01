@@ -38,7 +38,7 @@ function _update()
         cameraX = cameraX + .5
         camera(cameraX, cameraY)
     else -- character select screen
-        initPlayers()
+        addPlayers()
         keyInput = ""
     end
 end
@@ -129,7 +129,7 @@ function bouncePlayer(key)
 end
 
 -- spawn players
-function initPlayers()
+function addPlayers()
     if stat(30) then
         local keyInput = stat(31)
 

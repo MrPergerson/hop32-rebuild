@@ -33,7 +33,7 @@ function _update()
             bouncePlayer(keyInput)
         end
     else -- character select screen
-        initPlayers()
+        addPlayers()
 
         keyInput = ""
     end
@@ -78,7 +78,7 @@ function bouncePlayer(key)
 end
 
 -- spawn players
-function initPlayers()
+function addPlayers()
     if stat(30) then -- was a key pressed?
         local keyInput = stat(31) -- which key was pressed
 

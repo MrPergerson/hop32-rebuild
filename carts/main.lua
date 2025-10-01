@@ -62,7 +62,7 @@ function _update()
         end
         --nothing
     else -- character select screen
-        gameStarted = initPlayers()
+        gameStarted = addPlayers()
     end
 end
 

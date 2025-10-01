@@ -73,7 +73,7 @@ function _update()
         end
     else
         -- Handle character select screen
-        gameStarted = initPlayers()
+        gameStarted = addPlayers()
     end
 end
 
@@ -201,7 +201,7 @@ function restart()
     timeUntilCameraMoves = 1.5
     delta_time = 0
     cls()
-    resetPlayers()
+    initPlayers()
     last_time = time()
     start_time = time()
     win_order = {}

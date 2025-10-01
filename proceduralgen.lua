@@ -5,14 +5,7 @@ chunks = {} -- 2 or 3 chunk tables
 local TERRAIN_Y_OFFSET = 0
 
 biome_length = 48
-BIOME_DIST_UNIT = {
-    GRASS = 0,
-    DESERT = 0,
-    MOUNTAIN = 0,
-    SNOW = 0,
-    ORELAND = 0,
-    HELL = 0
-}
+
 
 map_x_size = 0
 map_y_size = 32
@@ -24,31 +17,7 @@ local draw_hole_chance = .5
 
 -- tile ids: air = 0; grass = 2; ground = 3; wall = 4; 
 
-local TILE = {
-    NONE = 0,
-    GRASS = 2,
-    GROUND = 3,
-    WALL = 4,
-    SAND_1 = 93,
-    SAND_2 = 94,
-    SAND_3 = 95,
-    MOUNTAIN_1 = 96,
-    MOUNTAIN_2 = 97,
-    MOUNTAIN_3 = 99,
-    SNOW_1 = 99,
-    SNOW_2 = 100,
-    SNOW_3 = 101,
-    ORELAND_1 = 102,
-    ORELAND_2 = 103,
-    ORELAND_3 = 104,
-    HELL_1 = 105,
-    HELL_2 = 106,
-    HELL_3 = 107,
-    CLOUD_1 = 89,
-    CLOUD_2 = 90,
-    CLOUD_3 = 91,
-    CLOUD_4 = 92
-}
+
 
 groundlevel = 11 -- relative to tiles, not pixels
 

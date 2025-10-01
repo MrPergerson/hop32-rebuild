@@ -12,6 +12,7 @@ local last_time
 
 local timeUntilCameraMoves = 1.5
 local timeUntilRestart = 2
+local timer_1 = 0
 local camera_speed = 15
 local chunk_progress_x = 0
 local chunk_progress_y = 0
@@ -25,15 +26,17 @@ function _init()
     
     delta_time = 0
     last_time = 0
-    chunk_progress_x = 15
+    timer_1 = 0
+    chunk_progress_x = 0 --14
     chunk_progress_y = 0
     new_chunk_threshold = (chunk_progress_x + 1) * 128
     camera_x = chunk_progress_x * 16 * 8
     camera_y = chunk_progress_y * 16 * 8
-
+    gameState = gstate.playerSelect
     initProceduralGen()
     initLevelLoad(chunk_progress_x)
     max_distance = map_x_size * 8 - 128
+    initPlayers()
 end
 
 function restart()
@@ -51,7 +54,7 @@ function _update()
         
     elseif gameState == gstate.playerSelect then
         
-        local complete = initPlayers(camera_x, camera_y, delta_time)
+        local complete = addPlayers(camera_x, camera_y, delta_time)
         if complete then
             gameState = gstate.game
         end
@@ -65,21 +68,24 @@ function _update()
             end
 
         else
-            if timeUntilCameraMoves > 0 then
-                timeUntilCameraMoves -= delta_time
+            if timer_1 < timeUntilCameraMoves then
+                timer_1 += delta_time
             else 
                 
-                camera_x = min(camera_x + camera_speed * delta_time, max_distance+ 1000)
+                camera_x = min(camera_x + camera_speed * delta_time, max_distance+ 384)
                 --printh(chunk_progress_x)
             end
 
             if camera_x >= max_distance then
                 -- set current area to cloud kingdom
                 current_area = AREA.CLOUD_KINGDOM
-                printh("done") -- fix this so it's not calling repeatedly.
+                --printh("done") -- fix this so it's not calling repeatedly.
                 -- maybe use the special conditions function I was thinking about
 
-                --gameState = gstate.complete
+                gameState = gstate.complete
+            elseif disabledPlayerCount == playerCount then
+                gameState = gstate.complete
+                timer_1 = 0
             end
 
             update_players(camera_x, camera_y, delta_time)
@@ -93,7 +99,7 @@ function _update()
         end
 
         if camera_x >= new_chunk_threshold then
-            printh("update " .. new_chunk_threshold .. " >= " .. max_distance)
+            --printh("update " .. new_chunk_threshold .. " >= " .. max_distance)
             chunk_progress_x += 1
             new_chunk_threshold += 128
             updateChunks(chunk_progress_x)
@@ -113,7 +119,14 @@ function _update()
             bouncePlayer(keyInput)       
         end
     elseif gameState == gstate.complete then
-        printh("complete")
+        --printh("complete")
+
+        if timer_1 < timeUntilRestart then
+            timer_1 += delta_time
+        else
+            restart()
+        end
+
     end
 
    

@@ -26,8 +26,44 @@ function setCameraYPos(y_pos)
 end
 
 -- progress
-local AREA = {
+AREA = {
     GREEN_LANDS = 0,
     CLOUD_KINGDOM = 10
 }
 current_area = -1
+
+
+TILE = {
+    NONE = 0,
+    GRASS = 2,
+    GROUND = 3,
+    WALL = 4,
+    SAND_1 = 93,
+    SAND_2 = 94,
+    SAND_3 = 95,
+    MOUNTAIN_1 = 96,
+    MOUNTAIN_2 = 97,
+    MOUNTAIN_3 = 99,
+    SNOW_1 = 99,
+    SNOW_2 = 100,
+    SNOW_3 = 101,
+    ORELAND_1 = 102,
+    ORELAND_2 = 103,
+    ORELAND_3 = 104,
+    HELL_1 = 105,
+    HELL_2 = 106,
+    HELL_3 = 107,
+    CLOUD_1 = 89,
+    CLOUD_2 = 90,
+    CLOUD_3 = 91,
+    CLOUD_4 = 92
+}
+
+BIOME_DIST_UNIT = {
+    GRASS = 0,
+    DESERT = 0,
+    MOUNTAIN = 0,
+    SNOW = 0,
+    ORELAND = 0,
+    HELL = 0
+}

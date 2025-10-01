@@ -9,28 +9,6 @@ local x_offset = 0
 local y_offset = 0
 local land_progress = 0
 
-local TILE = {
-    NONE = 0,
-    GRASS = 2,
-    GROUND = 3,
-    WALL = 4,
-    SAND_1 = 93,
-    SAND_2 = 94,
-    SAND_3 = 95,
-    MOUNTAIN_1 = 96,
-    MOUNTAIN_2 = 97,
-    MOUNTAIN_3 = 99,
-    SNOW_1 = 99,
-    SNOW_2 = 100,
-    SNOW_3 = 101,
-    ORELAND_1 = 102,
-    ORELAND_2 = 103,
-    ORELAND_3 = 104,
-    HELL_1 = 105,
-    HELL_2 = 106,
-    HELL_3 = 107
-}
-
 function initLevelLoad(chunk_progress_x)
 
     loaded_chunks = {}
@@ -38,41 +16,15 @@ function initLevelLoad(chunk_progress_x)
     x_offset = chunk_progress_x * 16 --initial
     y_offset = 0
 
-    --add(loaded_chunks, loadChunk(1, 1, chunk_x_offset, LANDS))
-    --chunk_x_offset += chunk_x_size
-    --add(loaded_chunks, loadChunk(1, 2, chunk_x_offset, LANDS))
-    --chunk_x_offset += chunk_x_size
-    --add(loaded_chunks, loadChunk(0, 0, chunk_x_offset, LANDS))
-    --chunk_x_offset += 1 -- right?
-
-    --add(loaded_chunks, generateChunk(chunk_x_offset))
-    add(loaded_chunks, generateVoidChunk(x_offset,y_offset))
-    --add(loaded_chunks, generateCloudChunk(x_offset, y_offset))
-    x_offset += chunk_x_size
-    --y_offset -= 2
-    --setCameraYPos(y_offset * 8)
-    --add(loaded_chunks, generateChunk(chunk_x_offset))
-    add(loaded_chunks, generateVoidChunk(x_offset,y_offset))
-    --add(loaded_chunks, generateCloudChunk(x_offset, y_offset))
+    loadChunk()
+    loadChunk()
+    loadChunk()
 
 end
 
 function updateChunks(chunk_progress_x)
-    --printh(chunk_progress_x)
-
-        x_offset += chunk_x_size
-        -- if end
-        --y_offset -= 2
-        --setCameraYPos(y_offset * 8)
-        local new_chunk = {}
-        if current_area == AREA.CLOUD_KINGDOM then
-            new_chunk = generateCloudChunk(x_offset, y_offset)
-        else
-            new_chunk = generateVoidChunk(x_offset, y_offset)
-        end
-        --local new_chunk = generateVoidChunk(x_offset, y_offset)
-        --local new_chunk = generateChunk(chunk_x_offset)
-        
+    --printh(chunk_progress_x)        
+        local new_chunk = loadChunk(x_offset, 0)
         
         add(loaded_chunks, new_chunk)
         new_chunk_threshold += 1
@@ -91,35 +43,25 @@ function updateChunks(chunk_progress_x)
 end
 
 -- no longer usable
-function loadChunk(index, chunk_index, x_offset, source)
-
-    local chunk = {x = x_offset, y = 0, tiles = {}, surface_tiles = {}}
-    chunk.surface_tiles = source[index].chunks[chunk_index].surface_tiles
-    local surface_tile_index = 0
-    
-    for x = x_offset, x_offset + chunk_x_size-1 do 
-        chunk.tiles[x] = {}
-        
-        local surface_tile = chunk.surface_tiles[surface_tile_index]
-        surface_tile_index += 1
-
-        
-            for y = 0, chunk_y_size-1 do
-                
-                local sprite = TILE.NONE
-                if surface_tile then
-                    if y > surface_tile.y then
-                        sprite = TILE.GROUND                        
-                    end
-                end
-
-                chunk.tiles[x][y] = {x = x * 8, y = y * 8, sprite = sprite}
-                
-            end
-       
+function loadChunk()
+    --printh(x_offset .. " >= " .. BIOME_DIST_UNIT.HELL)
+    local new_chunk = {}
+    -- if current_area == AREA.CLOUD_KINGDOM then
+    if x_offset >= BIOME_DIST_UNIT.HELL then
+        new_chunk = generateCloudChunk(x_offset, y_offset)
+    elseif x_offset >= BIOME_DIST_UNIT.ORELAND then
+        new_chunk = generateVoidChunk(x_offset,y_offset)
+    else
+        new_chunk = generateChunk(x_offset)
     end
+    
+    add(loaded_chunks, new_chunk)
+    x_offset += chunk_x_size
 
-    return chunk
+    --y_offset -= 2
+    --setCameraYPos(y_offset * 8)
+
+    return new_chunk
 end
 
 
@@ -191,18 +133,32 @@ function checkTileCollision(new_x, new_y, x,y)
 
     --printh(new_x)
     -- check X axis collisions
-    if getTile(new_x_unit, y_unit).sprite ~= TILE.NONE or getTile(new_x_unit, y_unit + 0.999).sprite ~= TILE.NONE then
+    local tile_x_1 = getTile(new_x_unit, y_unit)
+    local tile_x_2 = getTile(new_x_unit, y_unit + 0.999)
+    local tile_x_3 = getTile(new_x_unit + 1, y_unit)
+    local tile_x_4 = getTile(new_x_unit + 1, y_unit + 0.999)
+
+    if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
+    --if getTile(new_x_unit, y_unit).sprite ~= TILE.NONE or getTile(new_x_unit, y_unit + 0.999).sprite ~= TILE.NONE then
         new_x_unit = flr(new_x_unit) + 1
         hit_wall = true
-    elseif getTile(new_x_unit + 1, y_unit).sprite ~= TILE.NONE or getTile(new_x_unit + 1, y_unit + 0.999).sprite ~= TILE.NONE then
+    elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
+    --elseif getTile(new_x_unit + 1, y_unit).sprite ~= TILE.NONE or getTile(new_x_unit + 1, y_unit + 0.999).sprite ~= TILE.NONE then
         new_x_unit = flr(new_x_unit)
         hit_wall = true
     end
 
     -- check Y axis collisions
-    if getTile(x_unit, new_y_unit).sprite ~= TILE.NONE or getTile(x_unit+0.999, new_y_unit).sprite ~= TILE.NONE then
+    local tile_y_1 = getTile(x_unit, new_y_unit)
+    local tile_y_2 = getTile(x_unit + 0.999, new_y_unit)
+    local tile_y_3 = getTile(x_unit, new_y_unit + 1)
+    local tile_y_4 = getTile(x_unit + 0.999, new_y_unit + 1)
+
+    if (tile_y_1 ~= nil and tile_y_2 ~= nil) and (tile_y_1.sprite ~= TILE.NONE or tile_y_2.sprite ~= TILE.NONE) then
+    --if getTile(x_unit, new_y_unit).sprite ~= TILE.NONE or getTile(x_unit+0.999, new_y_unit).sprite ~= TILE.NONE then
         new_y_unit = flr(new_y_unit) + 1
-    elseif getTile(x_unit, new_y_unit + 1).sprite ~= TILE.NONE or getTile(x_unit+0.999, new_y_unit + 1).sprite ~= TILE.NONE then
+    elseif (tile_y_3 ~= nil and tile_y_4 ~= nil) and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then
+    --elseif getTile(x_unit, new_y_unit + 1).sprite ~= TILE.NONE or getTile(x_unit+0.999, new_y_unit + 1).sprite ~= TILE.NONE then
         new_y_unit = flr(new_y_unit)
         onGround = true
     end

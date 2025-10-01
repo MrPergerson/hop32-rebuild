@@ -11,7 +11,7 @@ poke(0x5F2D, 0x1)
 function _init()
     cls(1)
     
-    initPlayers()
+    addPlayers()
     print("Hop To Survive");
 end
 
@@ -63,7 +63,7 @@ function bouncePlayer(key)
     end
 end
 
-function initPlayers()
+function addPlayers()
     local keyInput
     playerCount = 0
     local posx = 8
