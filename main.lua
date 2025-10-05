@@ -27,7 +27,7 @@ function _init()
     delta_time = 0
     last_time = 0
     timer_1 = 0
-    chunk_progress_x = 0 --14
+    chunk_progress_x = 14
     chunk_progress_y = 0
     new_chunk_threshold = (chunk_progress_x + 1) * 128
     camera_x = chunk_progress_x * 16 * 8
@@ -66,23 +66,28 @@ function _update()
             if debug_fast_travel then
                 debugUpdateQuickTravel()
             end
-
         else
             if timer_1 < timeUntilCameraMoves then
                 timer_1 += delta_time
             else 
                 
-                camera_x = min(camera_x + camera_speed * delta_time, max_distance+ 384)
+                camera_x = min(camera_x + camera_speed * delta_time, max_distance)
                 --printh(chunk_progress_x)
             end
 
             if camera_x >= max_distance then
-                -- set current area to cloud kingdom
-                current_area = AREA.CLOUD_KINGDOM
-                --printh("done") -- fix this so it's not calling repeatedly.
-                -- maybe use the special conditions function I was thinking about
 
-                gameState = gstate.complete
+                -- set current area to cloud kingdom
+                -- maybe use the special conditions function I was thinking about
+                if current_area ~= AREA.CLOUD_KINGDOM then 
+                    current_area = AREA.CLOUD_KINGDOM
+                    max_distance += 384
+                else
+                    printh("done")
+                    gameState = gstate.complete
+
+                end
+
             elseif disabledPlayerCount == playerCount then
                 gameState = gstate.complete
                 timer_1 = 0

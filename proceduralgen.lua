@@ -131,7 +131,7 @@ function generateChunk(x_offset)
     return chunk
 end
 
-function generateVoidChunk(x_offset, y_offset)
+function generateVoidChunk(x_offset, y_offset, startingSize)
     local chunk = {x = x_offset, y = y_offset,  tiles = {}, surface_tiles = {}}
 
     -- Fill all cells with NONE
@@ -145,23 +145,23 @@ function generateVoidChunk(x_offset, y_offset)
     local asteroidCount = 3
     local next_asteroid_x = 2
 
+    local asteroidSize = startingSize
+
     for i = 1, asteroidCount do
-        local asteroidSize = 5
 
         local x = next_asteroid_x
         next_asteroid_x = next_asteroid_x + 4 + flr(rnd(2))
 
         local y = flr(rnd(8)) + 7
 
-        for i = 1, asteroidSize do 
-
-            local rnd_offset_x = flr(rnd(2))
-            local rnd_offset_y = flr(rnd(2))
-
-            --createAsteroid(x_offset + x + rnd_offset_x , y + rnd_offset_y, chunk.tiles)
-            paintCircle(x_offset + x + rnd_offset_x , y_offset + y + rnd_offset_y, x_offset, y_offset, chunk.tiles)
-
+        local rnd_offset_x = flr(rnd(2))
+        local rnd_offset_y = flr(rnd(2))
+        createAsteroid(asteroidSize, x_offset + x + rnd_offset_x , y_offset + y + rnd_offset_y, x_offset, y_offset, chunk.tiles)
+       
+        if i & 2 == 0 then
+            asteroidSize = max(1, asteroidSize - 1)
         end
+
     end
 
     return chunk
@@ -212,26 +212,34 @@ function paintCircle(center_x,center_y, x_offset, y_offset, tiles)
     end
 
     if center_x + 1 < x_offset + 16 then
-        tiles[center_x + 1][center_y].sprite = TILE.GROUND
+        --tiles[center_x + 1][center_y].sprite = TILE.GROUND
     end
 
     if center_x - 1 > x_offset then
-        tiles[center_x - 1][center_y].sprite = TILE.GROUND
+        --tiles[center_x - 1][center_y].sprite = TILE.GROUND
     end
 
     if center_y + 1 < y_offset + 16 then
-        tiles[center_x][center_y + 1].sprite = TILE.GROUND
+        --tiles[center_x][center_y + 1].sprite = TILE.GROUND
     end
 
     if center_y - 1 > y_offset then
-        tiles[center_x][center_y - 1].sprite = TILE.GROUND
+       -- tiles[center_x][center_y - 1].sprite = TILE.GROUND
     end
 
-    
-    
+end
+
+function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
+
+    origin_x = min(origin_x, (x_offset + 14) - size)
+    origin_y = min(origin_y, (y_offset + 14) - size+1)
 
 
-
+    for x = 0, size-1, 1 do
+        for y = 0, size, 1 do
+            tiles[origin_x + x][origin_y + y].sprite = TILE.GROUND
+        end
+    end
 
 
 end

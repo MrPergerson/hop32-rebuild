@@ -9,6 +9,8 @@ local x_offset = 0
 local y_offset = 0
 local land_progress = 0
 
+local startingAsteroidSize = 5
+
 function initLevelLoad(chunk_progress_x)
 
     loaded_chunks = {}
@@ -42,7 +44,7 @@ function updateChunks(chunk_progress_x)
     
 end
 
--- no longer usable
+-- using distance to check biome won't work for secret areas
 function loadChunk()
     --printh(x_offset .. " >= " .. BIOME_DIST_UNIT.HELL)
     local new_chunk = {}
@@ -50,7 +52,8 @@ function loadChunk()
     if x_offset >= BIOME_DIST_UNIT.HELL then
         new_chunk = generateCloudChunk(x_offset, y_offset)
     elseif x_offset >= BIOME_DIST_UNIT.ORELAND then
-        new_chunk = generateVoidChunk(x_offset,y_offset)
+        new_chunk = generateVoidChunk(x_offset,y_offset, startingAsteroidSize)
+        startingAsteroidSize -= 2
     else
         new_chunk = generateChunk(x_offset)
     end
