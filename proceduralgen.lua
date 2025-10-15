@@ -131,6 +131,60 @@ function generateChunk(x_offset)
     return chunk
 end
 
+function generateCityChunk(x_offset, y_offset)
+    local chunk = {x = x_offset, y = y_offset,  tiles = {}, surface_tiles = {}}
+
+        -- Fill all cells with NONE
+    for x = x_offset, x_offset+15 do
+        chunk.tiles[x] = {}
+        for y = y_offset, y_offset+15 do -- this creates 31 tiles FYI   
+            chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.NONE}
+        end
+    end
+
+    local buildingHeight = 10 -- higher is lower..
+    local buildingLength = 0
+    local buildingHeightVariance = 0
+    local signal = false
+    for x = x_offset, x_offset+15 do
+
+        if buildingLength == 4 then
+            signal = not(signal)
+            buildingLength = 0
+        end
+        buildingLength += 1 
+
+        buildingHeightVariance = flr(rnd(4))-2
+
+        for y = y_offset, y_offset+15 do
+        
+
+            if signal and y == buildingHeight + buildingHeightVariance then
+                chunk.tiles[x][y].sprite = TILE.ORELAND_3
+            elseif signal and y > buildingHeight-1 + buildingHeightVariance then
+                chunk.tiles[x][y].sprite = TILE.ORELAND_1
+            end
+
+            if y > 14 then
+                chunk.tiles[x][y].sprite = TILE.ORELAND_2
+            end
+            --[[
+                if y < sin( ((x-1) / 8)) + 13 and y > sin( ((x-5) / 8)) + 2  then
+                    chunk.tiles[x][y].sprite = TILE.NONE
+                end
+            ]]     
+            
+        end
+    end
+
+
+    
+
+
+    return chunk
+
+end
+
 function generateVoidChunk(x_offset, y_offset, startingSize)
     local chunk = {x = x_offset, y = y_offset,  tiles = {}, surface_tiles = {}}
 
