@@ -288,12 +288,25 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
     origin_x = min(origin_x, (x_offset + 14) - size)
     origin_y = min(origin_y, (y_offset + 14) - size+1)
 
+    -- create X points that fill the size on the X axis. 
+    -- Draw cells that intercept those lines
 
     for x = 0, size-1, 1 do
-        for y = 0, size, 1 do
+        for y = 0, size-1, 1 do
+            
+
             tiles[origin_x + x][origin_y + y].sprite = TILE.GROUND
         end
     end
+
+    --[[
+        if size > 2 then
+            tiles[origin_x + 0][origin_y + 0].sprite = TILE.NONE
+            tiles[origin_x + size-1][origin_y + 0].sprite = TILE.NONE
+            tiles[origin_x + 0][origin_y + size-1].sprite = TILE.NONE
+            tiles[origin_x + size-1][origin_y + size-1].sprite = TILE.NONE
+        end
+        ]]
 
 
 end

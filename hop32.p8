@@ -3,6 +3,7 @@ version 42
 __lua__
 #include globalvars.lua
 #include helper.lua
+#include vector.lua
 #include playerspriteindex.lua
 #include proceduralgen.lua
 #include chunkload.lua

@@ -21,12 +21,11 @@ local mouse_x = 0
 local mouse_y = 0
 
 
-
 function _init()
     delta_time = 0
     last_time = 0
     timer_1 = 0
-    chunk_progress_x = 12
+    chunk_progress_x = 15
     chunk_progress_y = 0
     new_chunk_threshold = (chunk_progress_x + 1) * 128
     camera_x = chunk_progress_x * 16 * 8
@@ -36,6 +35,9 @@ function _init()
     initLevelLoad(chunk_progress_x)
     max_distance = map_x_size * 8 - 128
     initPlayers()
+
+    rndPoly = generateSimplePolygon(camera_x + 40, camera_y + 40, 40,40)
+    
 end
 
 function restart()
@@ -147,6 +149,8 @@ function _draw()
         drawChunks()
         draw_players(gameStarted)
         
+        drawPolygon(rndPoly)
+
         -- UI
         if gameState == gstate.startMenu then
             -- menu functions
