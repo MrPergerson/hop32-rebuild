@@ -144,6 +144,7 @@ function _draw()
         map(0,0,0,camera_y,128,16) -- make this repeatable
         map(0,0,1024,camera_y,128,16) -- make this repeatable
         map(0,0,2048,camera_y,128,16) -- make this repeatable
+        map(0,0,3072,camera_y,128,16) -- make this repeatable
         drawChunks()
         draw_players(gameStarted)
     

@@ -1,5 +1,5 @@
 
--- Example: Triangle
+-- for testing
 local triangle = {
     {x = 2, y = 2},
     {x = 8, y = 2},

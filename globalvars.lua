@@ -59,11 +59,14 @@ TILE = {
     CLOUD_4 = 92
 }
 
+-- next time don't use cumulative distance. 
+-- these values should be the distance of each biome
 BIOME_DIST_UNIT = {
-    GRASS = 0,
-    DESERT = 0,
-    MOUNTAIN = 0,
-    SNOW = 0,
-    ORELAND = 0,
-    HELL = 0
+    GRASS = 48,
+    DESERT = 96,
+    MOUNTAIN = 144,
+    SNOW = 192,
+    CITY = 240,
+    VOID = 368,
+    KINGDOM = 416 
 }

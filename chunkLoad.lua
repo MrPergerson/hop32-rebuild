@@ -47,16 +47,13 @@ function updateChunks(chunk_progress_x)
     
 end
 
--- using distance to check biome won't work for secret areas
+-- Note: using distance to check biome won't work for secret areas
 function loadChunk()
-    --printh(x_offset .. " >= " .. BIOME_DIST_UNIT.HELL)
     local new_chunk = {}
-    -- if current_area == AREA.CLOUD_KINGDOM then
-    if x_offset >= BIOME_DIST_UNIT.HELL + 80 then -- HACK to increase void area
-                                                -- stop with the auto distance and set it manually
-                                                -- whoops I need to fix the done length now
+    
+    if x_offset >= BIOME_DIST_UNIT.VOID then
         new_chunk = generateCloudChunk(x_offset, y_offset)
-    elseif x_offset >= BIOME_DIST_UNIT.ORELAND then
+    elseif x_offset >= BIOME_DIST_UNIT.CITY then
         new_chunk = generateVoidChunk(x_offset,y_offset, startingAsteroidSize)
         startingAsteroidSize -= 2
     elseif x_offset >= BIOME_DIST_UNIT.SNOW then

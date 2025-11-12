@@ -1,0 +1,29 @@
+- Fix corner collision case
+- Fix upper bounds limit when jumping
+- Fix chunk gen so that left most chunk de-spawns at the correct offset
+- Fix death bug where players are still considered alive
+- Fix bug where game finishes mid game
+- Make terrain gen random
+- Add holes back
+- Add existing anomalies
+- Add respond helicopter
+- Design and add new anomalies
+- Finalize cloud kingdom
+- Create game over screen
+- Create victory screen
+- Create menu with game settings 
+
+
+Progression???
+
+snow storm
+- when particles start speeding up, don't jump or you'll be sweep away!
+
+Ravens
+- Fly diagonally down to the surface, then up
+- Spawn in the city
+
+UFO secret
+Ride the UFO!
+
+Kingdom?

@@ -22,7 +22,8 @@ debug_poly_render = {}
 groundlevel = 11 -- relative to tiles, not pixels
 
 function initProceduralGen()
-    set_biome_distances()
+    --set_biome_distances()
+    map_x_size = BIOME_DIST_UNIT.VOID
 end
 
 function generateChunk(x_offset)
@@ -41,9 +42,9 @@ function generateChunk(x_offset)
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.MOUNTAIN_2}
             elseif x < BIOME_DIST_UNIT.SNOW then
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SNOW_2}
-            elseif x < BIOME_DIST_UNIT.ORELAND then
+            elseif x < BIOME_DIST_UNIT.CITY then
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.ORELAND_1}
-            elseif x < BIOME_DIST_UNIT.HELL then
+            elseif x < BIOME_DIST_UNIT.VOID then
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.HELL_2}
             else
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GROUND}
@@ -115,9 +116,9 @@ function generateChunk(x_offset)
                     target_tile.sprite = TILE.MOUNTAIN_1
                 elseif x < BIOME_DIST_UNIT.SNOW then
                     --target_tile.sprite = TILE.GRASS
-                elseif x < BIOME_DIST_UNIT.ORELAND then
+                elseif x < BIOME_DIST_UNIT.CITY then
                     --target_tile.sprite = TILE.GRASS
-                elseif x < BIOME_DIST_UNIT.HELL then
+                elseif x < BIOME_DIST_UNIT.VOID then
                     --target_tile.sprite = TILE.GRASS
                 else
                     --target_tile.sprite = TILE.GRASS
@@ -345,12 +346,12 @@ function set_biome_distances()
     cumulative_dist = BIOME_DIST_UNIT.MOUNTAIN
     BIOME_DIST_UNIT.SNOW = biome_length + cumulative_dist
     cumulative_dist = BIOME_DIST_UNIT.SNOW
-    BIOME_DIST_UNIT.ORELAND = biome_length + cumulative_dist
-    cumulative_dist = BIOME_DIST_UNIT.ORELAND
-    BIOME_DIST_UNIT.HELL = biome_length + cumulative_dist
-    cumulative_dist = BIOME_DIST_UNIT.HELL
+    BIOME_DIST_UNIT.CITY = biome_length + cumulative_dist
+    cumulative_dist = BIOME_DIST_UNIT.CITY
+    BIOME_DIST_UNIT.VOID = biome_length + cumulative_dist
+    cumulative_dist = BIOME_DIST_UNIT.VOID
 
-    map_x_size = BIOME_DIST_UNIT.HELL
+    map_x_size = BIOME_DIST_UNIT.VOID
 end
 
 function get_cell_height_at_(x)
@@ -363,9 +364,9 @@ function get_cell_height_at_(x)
         return biome_mountain_height_at_(x)
     elseif x <= BIOME_DIST_UNIT.SNOW then
         return biome_grass_height_at_(x)
-    elseif x <= BIOME_DIST_UNIT.ORELAND then
+    elseif x <= BIOME_DIST_UNIT.CITY then
         return biome_oreland_height_at_(x)
-    elseif x <= BIOME_DIST_UNIT.HELL then
+    elseif x <= BIOME_DIST_UNIT.VOID then
         return biome_hell_height_at_(x)
     else
         return biome_grass_height_at_(x)
@@ -525,10 +526,12 @@ function get_biome_at_unit(x)
         return "MOUNTAIN"
     elseif x < BIOME_DIST_UNIT.SNOW then
         return "SNOW"
-    elseif x < BIOME_DIST_UNIT.ORELAND then
+    elseif x < BIOME_DIST_UNIT.CITY then
         return "ORELAND"
-    else
+    elseif x < BIOME_DIST_UNIT.VOID then
         return "HELL"
+    else
+        return "KINGDOM"
     end  
 end
 
