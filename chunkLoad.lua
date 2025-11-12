@@ -9,11 +9,14 @@ local x_offset = 0
 local y_offset = 0
 local land_progress = 0
 
-local startingAsteroidSize = 5
+local startingAsteroidSize = 8
 
 function initLevelLoad(chunk_progress_x)
 
     loaded_chunks = {}
+
+    startingAsteroidSize = 8
+    debug_poly_render = {}
     
     x_offset = chunk_progress_x * 16 --initial
     y_offset = 0
@@ -49,7 +52,9 @@ function loadChunk()
     --printh(x_offset .. " >= " .. BIOME_DIST_UNIT.HELL)
     local new_chunk = {}
     -- if current_area == AREA.CLOUD_KINGDOM then
-    if x_offset >= BIOME_DIST_UNIT.HELL then
+    if x_offset >= BIOME_DIST_UNIT.HELL + 80 then -- HACK to increase void area
+                                                -- stop with the auto distance and set it manually
+                                                -- whoops I need to fix the done length now
         new_chunk = generateCloudChunk(x_offset, y_offset)
     elseif x_offset >= BIOME_DIST_UNIT.ORELAND then
         new_chunk = generateVoidChunk(x_offset,y_offset, startingAsteroidSize)

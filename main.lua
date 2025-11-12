@@ -33,11 +33,9 @@ function _init()
     gameState = gstate.playerSelect
     initProceduralGen()
     initLevelLoad(chunk_progress_x)
-    max_distance = map_x_size * 8 - 128
+    max_distance = map_x_size * 8 - 128 + 80
     initPlayers()
 
-    rndPoly = generateSimplePolygon(camera_x + 40, camera_y + 40, 40,40)
-    
 end
 
 function restart()
@@ -148,8 +146,9 @@ function _draw()
         map(0,0,2048,camera_y,128,16) -- make this repeatable
         drawChunks()
         draw_players(gameStarted)
-        
-        drawPolygon(rndPoly)
+    
+
+        debug_draw_asteroid_polys()
 
         -- UI
         if gameState == gstate.startMenu then

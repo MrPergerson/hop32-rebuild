@@ -17,7 +17,7 @@ local draw_hole_chance = .5
 
 -- tile ids: air = 0; grass = 2; ground = 3; wall = 4; 
 
-
+debug_poly_render = {}
 
 groundlevel = 11 -- relative to tiles, not pixels
 
@@ -197,8 +197,7 @@ function generateVoidChunk(x_offset, y_offset, startingSize)
     end
 
     local asteroidCount = 3
-    local next_asteroid_x = 2
-
+    local next_asteroid_x = 0
     local asteroidSize = startingSize
 
     for i = 1, asteroidCount do
@@ -213,7 +212,7 @@ function generateVoidChunk(x_offset, y_offset, startingSize)
         createAsteroid(asteroidSize, x_offset + x + rnd_offset_x , y_offset + y + rnd_offset_y, x_offset, y_offset, chunk.tiles)
        
         if i & 2 == 0 then
-            asteroidSize = max(1, asteroidSize - 1)
+            asteroidSize = max(3, asteroidSize - 1)
         end
 
     end
@@ -288,25 +287,48 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
     origin_x = min(origin_x, (x_offset + 14) - size)
     origin_y = min(origin_y, (y_offset + 14) - size+1)
 
-    -- create X points that fill the size on the X axis. 
-    -- Draw cells that intercept those lines
+    local asteroidPoly = generateSimplePolygon(origin_x * 8, origin_y * 8, size * 8, size * 8)
+    add(debug_poly_render, asteroidPoly)
+
+    local tileCount = 0
 
     for x = 0, size-1, 1 do
         for y = 0, size-1, 1 do
-            
 
-            tiles[origin_x + x][origin_y + y].sprite = TILE.GROUND
+            local tile_x = origin_x + x
+            local tile_y = origin_y + y
+
+            local inPolyCount = 0
+
+            if isInsidePolygon(asteroidPoly, tile_x * 8, tile_y * 8) then
+                inPolyCount += 1
+            end
+
+            if isInsidePolygon(asteroidPoly, (tile_x + 1) * 8, tile_y * 8) then
+                inPolyCount += 1
+            end
+
+            if isInsidePolygon(asteroidPoly, (tile_x + 1) * 8, (tile_y + 1) * 8) then
+                inPolyCount += 1
+            end
+
+            if isInsidePolygon(asteroidPoly, tile_x * 8, (tile_y + 1)  * 8) then
+                inPolyCount += 1
+            end
+
+            if inPolyCount >= 2 then
+                tiles[tile_x][tile_y].sprite = TILE.GROUND
+                tileCount += 1
+            end
+
         end
     end
 
-    --[[
-        if size > 2 then
-            tiles[origin_x + 0][origin_y + 0].sprite = TILE.NONE
-            tiles[origin_x + size-1][origin_y + 0].sprite = TILE.NONE
-            tiles[origin_x + 0][origin_y + size-1].sprite = TILE.NONE
-            tiles[origin_x + size-1][origin_y + size-1].sprite = TILE.NONE
-        end
-        ]]
+
+    if tileCount == 0 then
+       tiles[origin_x][origin_y].sprite = TILE.GROUND
+    end
+
 
 
 end
@@ -510,3 +532,11 @@ function get_biome_at_unit(x)
     end  
 end
 
+function debug_draw_asteroid_polys()
+
+    for index, poly in ipairs(debug_poly_render) do
+        drawPolygon(poly)
+        
+    end
+
+end

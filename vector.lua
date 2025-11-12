@@ -12,7 +12,7 @@ local triangle = {
 -- edges: tabble of edges to check
 -- xp: x point we want to check
 -- yp: y point we want to check
-function isInsidePolygon(edges, xp, yp)
+function isInsidePolygon(vertices, xp, yp)
     -- checks the right side
     -- count == odd, inside, count == even, outside
 
@@ -22,8 +22,20 @@ function isInsidePolygon(edges, xp, yp)
 
     local count = 0
 
-    -- need to implement the polygon table
+    for p = 1, #vertices do
 
+        local p2 = p+1
+        if p2 > #vertices then
+            p2 = 1
+        end
+
+        if ((yp < vertices[p].y) ~= (yp < vertices[p2].y)) and 
+        (xp < vertices[p].x + ((yp-vertices[p].y)/(vertices[p2].y-vertices[p].y)) * (vertices[p2].x-vertices[p].x)) then
+            count += 1
+        end
+    end
+
+    return not(count%2 == 0)
 end
 
 -- creates polygon with 4 vertices that expand to the max height and width
@@ -47,10 +59,18 @@ function generateRandomPolygon(vertices, x,y, width, height)
     -- not necessary right now
 end
 
+-- for debug purposes
 function drawPolygon(polygon)
     line()
     for i = 1, #polygon do 
-        line(polygon[i].x, polygon[i].y, 8)
+        line(polygon[i].x, polygon[i].y, 11)
     end
-    line(polygon[1].x, polygon[1].y, 8)
+    line(polygon[1].x, polygon[1].y, 11)
+end
+
+function drawRayCast(point, direction, color)
+
+    line()
+    line(point.x, point.y, point.x + direction.x * 100, point.y + direction.y * 100, color)
+
 end
