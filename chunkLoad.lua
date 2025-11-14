@@ -145,30 +145,35 @@ function checkTileCollision(new_x, new_y, x,y)
     local tile_x_3 = getTile(new_x_unit + 1, y_unit)
     local tile_x_4 = getTile(new_x_unit + 1, y_unit + 0.999)
 
-    if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
-    --if getTile(new_x_unit, y_unit).sprite ~= TILE.NONE or getTile(new_x_unit, y_unit + 0.999).sprite ~= TILE.NONE then
-        new_x_unit = flr(new_x_unit) + 1
-        hit_wall = true
-    elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
-    --elseif getTile(new_x_unit + 1, y_unit).sprite ~= TILE.NONE or getTile(new_x_unit + 1, y_unit + 0.999).sprite ~= TILE.NONE then
-        new_x_unit = flr(new_x_unit)
-        hit_wall = true
-    end
-
     -- check Y axis collisions
     local tile_y_1 = getTile(x_unit, new_y_unit)
     local tile_y_2 = getTile(x_unit + 0.999, new_y_unit)
     local tile_y_3 = getTile(x_unit, new_y_unit + 1)
     local tile_y_4 = getTile(x_unit + 0.999, new_y_unit + 1)
 
+    -- X
+    if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
+        --new_x_unit = flr(new_x_unit) + 1 -- HACK, this stops collisions in beyond the grid in the -y direction
+        hit_wall = true
+    elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
+        new_x_unit = flr(new_x_unit)
+        hit_wall = true
+    end
+
+    -- Y
     if (tile_y_1 ~= nil and tile_y_2 ~= nil) and (tile_y_1.sprite ~= TILE.NONE or tile_y_2.sprite ~= TILE.NONE) then
-    --if getTile(x_unit, new_y_unit).sprite ~= TILE.NONE or getTile(x_unit+0.999, new_y_unit).sprite ~= TILE.NONE then
-        new_y_unit = flr(new_y_unit) + 1
+        if new_y > 0 then -- -- HACK, this stops collisions in beyond the grid in the -y direction
+            new_y_unit = flr(new_y_unit) + 1
+        end
     elseif (tile_y_3 ~= nil and tile_y_4 ~= nil) and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then
-    --elseif getTile(x_unit, new_y_unit + 1).sprite ~= TILE.NONE or getTile(x_unit+0.999, new_y_unit + 1).sprite ~= TILE.NONE then
         new_y_unit = flr(new_y_unit)
         onGround = true
     end
+
+    -- NOTE on HACK: it seems that ignoring tile collisions in the -Y and -X direction allows the player to jump beyond the 
+    -- camera position in the -Y direction. I had to add a condition to check if the y position is greater than zero 
+    -- so that players would collide with the cloud kingdom roof. If I decide to modify generation to have different heights,
+    -- then this check will need to account for that.
 
     -- convert grid positions to world positions
     new_x = new_x_unit * 8

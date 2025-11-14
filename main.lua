@@ -14,6 +14,7 @@ local timeUntilCameraMoves = 1.5
 local timeUntilRestart = 2
 local timer_1 = 0
 local camera_speed = 15
+--local camera_pos_y_offset = 128
 local chunk_progress_x = 0
 local chunk_progress_y = 0
 local new_chunk_threshold = 0
@@ -25,22 +26,33 @@ function _init()
     delta_time = 0
     last_time = 0
     timer_1 = 0
-    chunk_progress_x = 15
-    chunk_progress_y = 0
-    new_chunk_threshold = (chunk_progress_x + 1) * 128
-    camera_x = chunk_progress_x * 16 * 8
-    camera_y = chunk_progress_y * 16 * 8
-    gameState = gstate.playerSelect
-    initProceduralGen()
-    initLevelLoad(chunk_progress_x)
-    max_distance = map_x_size * 8 - 128 + 80
-    initPlayers()
+    switchGameState(gstate.playerSelect)
 
 end
 
 function restart()
     cls()
     _init()
+end
+
+function switchGameState(state)
+
+    if state == gstate.debug_pcannon then
+        
+    elseif state == gstate.playerSelect then
+        chunk_progress_x = 15
+        chunk_progress_y = 0
+        new_chunk_threshold = (chunk_progress_x + 1) * 128
+        camera_x = chunk_progress_x * 16 * 8
+        camera_y = chunk_progress_y * 16 * 8
+        initProceduralGen()
+        initLevelLoad(chunk_progress_x)
+        max_distance = map_x_size * 8 - 128 + 80
+        initPlayers()
+    end
+
+
+    gameState = state
 end
 
 function _update()
@@ -130,6 +142,7 @@ function _update()
         else
             restart()
         end
+    elseif gameState == gstate.debug_pcannon then
 
     end
 
@@ -148,8 +161,10 @@ function _draw()
         drawChunks()
         draw_players(gameStarted)
     
-
-        debug_draw_asteroid_polys()
+        if debug_mode then
+            debug_draw_asteroid_polys()
+            
+        end
 
         -- UI
         if gameState == gstate.startMenu then
@@ -190,6 +205,8 @@ function _draw()
             rect(mouse_x, mouse_y, mouse_x + 2, mouse_y + 2)
         end       
 end
+
+
 
 
 

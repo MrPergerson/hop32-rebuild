@@ -7,9 +7,10 @@ local TERRAIN_Y_OFFSET = 0
 biome_length = 48
 
 
+chunk_x_size = 16
 map_x_size = 0
 map_y_size = 32
-chunk_x_size = 16
+local map_y_offset = -16
 local hole_width = 2
 local new_chunk_threshold = 128
 local chunk_start_unit = 0

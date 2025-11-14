@@ -1,5 +1,5 @@
 - Fix corner collision case
-- Fix upper bounds limit when jumping
+- [COMPLETE](fixed by hack) Fix upper bounds limit when jumping
 - Fix chunk gen so that left most chunk de-spawns at the correct offset
 - Fix death bug where players are still considered alive
 - Fix bug where game finishes mid game
