@@ -15,6 +15,7 @@ local hole_width = 2
 local new_chunk_threshold = 128
 local chunk_start_unit = 0
 local draw_hole_chance = .5
+local rnd_terrain_seed = 0
 
 -- tile ids: air = 0; grass = 2; ground = 3; wall = 4; 
 
@@ -25,6 +26,7 @@ groundlevel = 11 -- relative to tiles, not pixels
 function initProceduralGen()
     --set_biome_distances()
     map_x_size = BIOME_DIST_UNIT.VOID
+    rnd_terrain_seed = flr(rnd(128))
 end
 
 function generateChunk(x_offset)
@@ -53,11 +55,6 @@ function generateChunk(x_offset)
         end
     end
 
-    --printh(#chunk.tiles[x_offset_unit])
-    --printh(chunk.x_offset_unit)
-
-    -- generate ground by removing ground tiles.
-    -- Q: should I store the surface in an array? Then know which tiles I can spawn or modify on the surface.
     for x = x_offset, x_offset+chunk_x_size-1 do
         for y = 0, map_y_size-1 do      
             local h = get_cell_height_at_(x) + TERRAIN_Y_OFFSET -- Normalize x to [0, 1] (remember to explain why dividing by chunk_x_size fixes sin output)
@@ -69,21 +66,6 @@ function generateChunk(x_offset)
         end
     end
 
-    -- remove bottom
-    --[[
-        for x = x_offset, x_offset+chunk_x_size-1 do
-            for y = 0, map_y_size-1 do      
-                local h = biome_desert_height_at_(x) + TERRAIN_Y_OFFSET + 4 -- Normalize x to [0, 1] (remember to explain why dividing by chunk_x_size fixes sin output)
-                --h = 2 * sin( ((x-1) / chunk_x_size) * 2)
-                if y - groundlevel > h then
-                    chunk.tiles[x][y].sprite = TILE.NONE
-                end
-                
-            end
-        end
-        ]]
-        
-    
     -- draw a holes randomly
     -- don't draw holes in the last two chunks
     if x_offset > 0 and x_offset < (map_x_size-biome_length) and rnd(1) >= 1-draw_hole_chance then
@@ -97,7 +79,6 @@ function generateChunk(x_offset)
             
         end
     end
-
 
     -- get all surface tiles. Update surface sprites if needed
     for x = x_offset, x_offset+chunk_x_size-1 do
@@ -170,18 +151,22 @@ function generateCityChunk(x_offset, y_offset)
             if y > 14 then
                 chunk.tiles[x][y].sprite = TILE.ORELAND_2
             end
-            --[[
-                if y < sin( ((x-1) / 8)) + 13 and y > sin( ((x-5) / 8)) + 2  then
-                    chunk.tiles[x][y].sprite = TILE.NONE
-                end
-            ]]     
             
         end
     end
 
+    for x = x_offset, x_offset+15 do
+        for y = y_offset+1, y_offset+15 do
 
-    
+            local above_tile = chunk.tiles[x][y-1]
+            local target_tile = chunk.tiles[x][y]
 
+            if above_tile.sprite == TILE.NONE and target_tile.sprite ~= TILE.NONE then
+                add(chunk.surface_tiles, target_tile)
+            end
+            
+        end
+    end
 
     return chunk
 
@@ -219,6 +204,8 @@ function generateVoidChunk(x_offset, y_offset, startingSize)
 
     end
 
+    getSurfaceTiles(chunk, x_offset, y_offset, 88)
+
     return chunk
 
 end
@@ -244,7 +231,7 @@ function generateCloudChunk(x_offset, y_offset)
     end
 
 
-    
+    getSurfaceTiles(chunk, x_offset, y_offset, -1)
 
 
     return chunk
@@ -319,7 +306,7 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
             end
 
             if inPolyCount >= 2 then
-                tiles[tile_x][tile_y].sprite = TILE.GROUND
+                tiles[tile_x][tile_y].sprite = 88
                 tileCount += 1
             end
 
@@ -328,31 +315,11 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
 
 
     if tileCount == 0 then
-       tiles[origin_x][origin_y].sprite = TILE.GROUND
+       tiles[origin_x][origin_y].sprite = 88
     end
 
 
 
-end
-
-function set_biome_distances()
-
-    local cumulative_dist = 0
-
-    BIOME_DIST_UNIT.GRASS = biome_length + cumulative_dist
-    cumulative_dist = BIOME_DIST_UNIT.GRASS
-    BIOME_DIST_UNIT.DESERT = biome_length + cumulative_dist
-    cumulative_dist = BIOME_DIST_UNIT.DESERT
-    BIOME_DIST_UNIT.MOUNTAIN = biome_length + cumulative_dist
-    cumulative_dist = BIOME_DIST_UNIT.MOUNTAIN
-    BIOME_DIST_UNIT.SNOW = biome_length + cumulative_dist
-    cumulative_dist = BIOME_DIST_UNIT.SNOW
-    BIOME_DIST_UNIT.CITY = biome_length + cumulative_dist
-    cumulative_dist = BIOME_DIST_UNIT.CITY
-    BIOME_DIST_UNIT.VOID = biome_length + cumulative_dist
-    cumulative_dist = BIOME_DIST_UNIT.VOID
-
-    map_x_size = BIOME_DIST_UNIT.VOID
 end
 
 function get_cell_height_at_(x)
@@ -376,23 +343,23 @@ function get_cell_height_at_(x)
 end
 
 function biome_grass_height_at_(x) -- lower ground level
-    return sin( ((x-1) / 16))
+    return sin( ((x-1 + rnd_terrain_seed) / 16)) 
 end
 
 function biome_desert_height_at_(x)
-    return sin( ((x-1) / 8))
+    return sin( ((x-1 + rnd_terrain_seed) / 8))
 end
 
 function biome_mountain_height_at_(x) -- raise ground level?
-    return sin( ((x-1) / 16)) + 4 * sin( ((x-1) / 16) * 1.5)
+    return sin( ((x-1 + rnd_terrain_seed) / 16)) + 4 * sin( ((x-1 + rnd_terrain_seed) / 16) * 1.5)
 end
 
 function biome_oreland_height_at_(x)
-    return sin( ((x-1) / 16)) + 2 * sin( ((x-1) / 20) * 3.5)
+    return sin( ((x-1 + rnd_terrain_seed) / 16)) + 2 * sin( ((x-1 + rnd_terrain_seed) / 20) * 3.5)
 end
 
 function biome_hell_height_at_(x)
-    return sin( ((x-1) / 8)) + 1.2 * sin( ((x-1) / 16) * 6.5)
+    return sin( ((x-1 + rnd_terrain_seed) / 8)) + 1.2 * sin( ((x-1 + rnd_terrain_seed) / 16) * 6.5)
 end
 
 
@@ -407,30 +374,29 @@ function draw_holes()
             end
         end
     end
+end
 
+function getSurfaceTiles(chunk, x_offset, y_offset, surface_sprite)
+    -- get all surface tiles. Update surface sprites if needed
+    for x = x_offset, x_offset+15 do
+        for y = y_offset+1, y_offset+15 do
 
-    --[[
-     -- every X tiles.
-    local hole_distance = 5
-    local last_hole_pos = 0
-    for i = 0, (map_x_size-1)-hole_width, 1 do
-        if i > last_hole_pos + hole_width + hole_distance then
+            local above_tile = chunk.tiles[x][y-1]
+            local target_tile = chunk.tiles[x][y]
 
-            for x = i, i + hole_width, 1 do
-                for y = 0, map_y_size-1, 1 do
-                    printh( x .. " " .. y)
-                    levelgen[x][y].tile = TILE.NONE   
+            if above_tile.sprite == TILE.NONE and target_tile.sprite ~= TILE.NONE then
+                if surface_sprite > 0 then
+                    target_tile.sprite = surface_sprite               
                 end
-                
+                add(chunk.surface_tiles, target_tile)
             end
-
-            last_hole_pos = i
-            i += hole_width
-
+            
         end
     end
-    ]]
+end
 
+function getRndSurfaceTile(tiles)
+    return tiles[flr(rnd(#tiles))+1]
 end
 
 function get_tile(x, y)
@@ -463,9 +429,6 @@ function get_tile(x, y)
     end
 end
 
-function get_tile_at_pos(x, y)   
-    return get_tile(flr(x / 8) , flr(y / 8))
-end
 
 function get_surface_tile_at_pos(x_pos)
     local x = x_pos / 8
@@ -514,26 +477,6 @@ function check_collision(new_x, new_y, x,y, hit_wall_callback)
     new_y = new_y_unit * 8
 
     return {x = new_x, y = new_y, onGround = onGround, hit_wall = hit_wall} -- this is returning nil for some reason
-end
-
-function get_biome_at_unit(x)
-    --x = x / 8
-
-    if x < BIOME_DIST_UNIT.GRASS then
-        return "GRASS"
-    elseif x < BIOME_DIST_UNIT.DESERT then
-        return "DESERT"
-    elseif x < BIOME_DIST_UNIT.MOUNTAIN then
-        return "MOUNTAIN"
-    elseif x < BIOME_DIST_UNIT.SNOW then
-        return "SNOW"
-    elseif x < BIOME_DIST_UNIT.CITY then
-        return "ORELAND"
-    elseif x < BIOME_DIST_UNIT.VOID then
-        return "HELL"
-    else
-        return "KINGDOM"
-    end  
 end
 
 function debug_draw_asteroid_polys()

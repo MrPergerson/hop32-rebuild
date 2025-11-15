@@ -60,6 +60,11 @@ function loadChunk()
         new_chunk = generateCityChunk(x_offset, y_offset)
     else
         new_chunk = generateChunk(x_offset)
+
+        local rnd_surface_tile = getRndSurfaceTile(new_chunk.surface_tiles)
+        printh("zombie " .. rnd_surface_tile.x .. ", " .. rnd_surface_tile.y)
+
+        spawn_zombie(rnd_surface_tile.x, rnd_surface_tile.y-1)
     end
     
     add(loaded_chunks, new_chunk)
@@ -180,4 +185,15 @@ function checkTileCollision(new_x, new_y, x,y)
     new_y = new_y_unit * 8
 
     return {x = new_x, y = new_y, onGround = onGround, hit_wall = hit_wall} -- this is returning nil for some reason
+end
+
+
+function debugFlagTile(x,y, color)
+    add(debug_tile_flags, {x = x, y = y, c = color})
+end
+
+function isFlaggedTile(x,y)
+
+    
+    return {f = false, c = 1}
 end

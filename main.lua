@@ -1,15 +1,6 @@
--- TODO
--- add debug visual to separate chunks
--- add visual for zombie spawn point (or turn off ai and gravity?)
-
-
 poke(0x5F2D, 0x1) -- enable keyboard input
---poke(0x5F2D, 0x2) 
-
 local delta_time
 local last_time
-
-
 local timeUntilCameraMoves = 1.5
 local timeUntilRestart = 2
 local timer_1 = 0
@@ -21,13 +12,13 @@ local new_chunk_threshold = 0
 local mouse_x = 0
 local mouse_y = 0
 
+local debug_tile_flags = {}
 
 function _init()
     delta_time = 0
     last_time = 0
     timer_1 = 0
     switchGameState(gstate.playerSelect)
-
 end
 
 function restart()
@@ -40,7 +31,7 @@ function switchGameState(state)
     if state == gstate.debug_pcannon then
         
     elseif state == gstate.playerSelect then
-        chunk_progress_x = 15
+        chunk_progress_x = 9
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
@@ -49,6 +40,8 @@ function switchGameState(state)
         initLevelLoad(chunk_progress_x)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
+        load_zombie_pool(5)
+    
     end
 
 
@@ -105,6 +98,7 @@ function _update()
             end
 
             update_players(camera_x, camera_y, delta_time)
+            update_zombies(delta_time)
 
             -- cool but it looks like the asteroid are falling
             if new_camera_y_lerp_t < 1 then
@@ -145,11 +139,7 @@ function _update()
     elseif gameState == gstate.debug_pcannon then
 
     end
-
-   
 end
-
-
 
 function _draw()
         cls()
@@ -160,6 +150,7 @@ function _draw()
         map(0,0,3072,camera_y,128,16) -- make this repeatable
         drawChunks()
         draw_players(gameStarted)
+        draw_zombies()
     
         if debug_mode then
             debug_draw_asteroid_polys()
@@ -187,10 +178,6 @@ function _draw()
            
         end
 
-        --print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
-        --print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
-        --print("frame rate: " .. stat(7), camera_x,camera_y+24,6)
-
         if (debug_mode) then
             --print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
             --print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
@@ -205,10 +192,6 @@ function _draw()
             rect(mouse_x, mouse_y, mouse_x + 2, mouse_y + 2)
         end       
 end
-
-
-
-
 
 function toggleDebugMode()
     debug_mode = not(debug_mode)
@@ -250,11 +233,8 @@ function debug_controls()
 end
 
 function debugToggleQuickTravel()
-
     --debug_mode = true
     debug_fast_travel = not(debug_fast_travel)
-
-
 end
 
 function debugUpdateQuickTravel()
@@ -266,8 +246,5 @@ function debugUpdateQuickTravel()
             player.y = camera_y + 8
         end
     end
-
-    --chunk_progress_x = camera_x 
-    --chunk_progress_y = camera_y
-
 end
+
