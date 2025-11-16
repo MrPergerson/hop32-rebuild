@@ -31,16 +31,17 @@ function switchGameState(state)
     if state == gstate.debug_pcannon then
         
     elseif state == gstate.playerSelect then
-        chunk_progress_x = 9
+        chunk_progress_x = 0
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
+        initZombiePool(5)
         initProceduralGen()
         initLevelLoad(chunk_progress_x)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
-        load_zombie_pool(5)
+        
     
     end
 

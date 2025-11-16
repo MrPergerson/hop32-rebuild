@@ -23,7 +23,7 @@ function initLevelLoad(chunk_progress_x)
 
     loadChunk()
     loadChunk()
-    loadChunk()
+    --loadChunk()
 
 end
 
@@ -61,10 +61,11 @@ function loadChunk()
     else
         new_chunk = generateChunk(x_offset)
 
-        local rnd_surface_tile = getRndSurfaceTile(new_chunk.surface_tiles)
-        printh("zombie " .. rnd_surface_tile.x .. ", " .. rnd_surface_tile.y)
+        if new_chunk.x > 0 then
+            local zombie_spawn_point = getRndSurfaceTile(new_chunk.surface_tiles)
+            spawn_zombie(zombie_spawn_point.x, zombie_spawn_point.y-1)
+        end
 
-        spawn_zombie(rnd_surface_tile.x, rnd_surface_tile.y-1)
     end
     
     add(loaded_chunks, new_chunk)
@@ -134,7 +135,7 @@ function getTile(x,y)
     end
 end
 
-function checkTileCollision(new_x, new_y, x,y)
+function checkTileCollision(new_x, new_y, x,y, is_player)
     -- convert world positions to grid positions
     local new_x_unit = new_x / 8
     local new_y_unit = new_y / 8
@@ -158,7 +159,9 @@ function checkTileCollision(new_x, new_y, x,y)
 
     -- X
     if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
-        --new_x_unit = flr(new_x_unit) + 1 -- HACK, this stops collisions in beyond the grid in the -y direction
+        if is_player == false then -- HACK, for players this stops collisions in beyond the grid in the -y direction
+            new_x_unit = flr(new_x_unit) + 1 
+        end 
         hit_wall = true
     elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
         new_x_unit = flr(new_x_unit)
@@ -167,7 +170,7 @@ function checkTileCollision(new_x, new_y, x,y)
 
     -- Y
     if (tile_y_1 ~= nil and tile_y_2 ~= nil) and (tile_y_1.sprite ~= TILE.NONE or tile_y_2.sprite ~= TILE.NONE) then
-        if new_y > 0 then -- -- HACK, this stops collisions in beyond the grid in the -y direction
+        if new_y > 0 or is_player == false then -- HACK, this stops collisions in beyond the grid in the -y direction
             new_y_unit = flr(new_y_unit) + 1
         end
     elseif (tile_y_3 ~= nil and tile_y_4 ~= nil) and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then

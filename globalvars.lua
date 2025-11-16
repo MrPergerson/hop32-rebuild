@@ -57,7 +57,8 @@ TILE = {
     CLOUD_1 = 89,
     CLOUD_2 = 90,
     CLOUD_3 = 91,
-    CLOUD_4 = 92
+    CLOUD_4 = 92,
+    GLITCH = 88
 }
 
 -- next time don't use cumulative distance. 

@@ -69,14 +69,13 @@ function generateChunk(x_offset)
     -- draw a holes randomly
     -- don't draw holes in the last two chunks
     if x_offset > 0 and x_offset < (map_x_size-biome_length) and rnd(1) >= 1-draw_hole_chance then
-        local random_x_pos = flr(rnd(chunk_x_size-hole_width))
-        local hole_start = x_offset + random_x_pos
+        local random_x_pos = flr(rnd(chunk_x_size-hole_width-1))
+        local hole_start = x_offset + random_x_pos + 1
 
         for x = hole_start , hole_start + hole_width, 1 do
             for y = 0, map_y_size-1, 1 do
                 chunk.tiles[x][y].sprite = TILE.NONE   
             end
-            
         end
     end
 
@@ -89,7 +88,7 @@ function generateChunk(x_offset)
 
             if above_tile.sprite == TILE.NONE and target_tile.sprite ~= TILE.NONE then
                 add(chunk.surface_tiles, target_tile)
-
+                
                 if x < BIOME_DIST_UNIT.GRASS then
                     target_tile.sprite = TILE.GRASS
                 elseif x < BIOME_DIST_UNIT.DESERT then
@@ -97,14 +96,8 @@ function generateChunk(x_offset)
                 elseif x < BIOME_DIST_UNIT.MOUNTAIN then
                     target_tile.sprite = TILE.MOUNTAIN_1
                 elseif x < BIOME_DIST_UNIT.SNOW then
-                    --target_tile.sprite = TILE.GRASS
-                elseif x < BIOME_DIST_UNIT.CITY then
-                    --target_tile.sprite = TILE.GRASS
-                elseif x < BIOME_DIST_UNIT.VOID then
-                    --target_tile.sprite = TILE.GRASS
-                else
-                    --target_tile.sprite = TILE.GRASS
-                end
+                    --do nothing
+                end                    
             end
             
         end

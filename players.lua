@@ -185,7 +185,7 @@ function update_players(game_progress_x, game_progress_y, dt)
 
 
             -- Check new positions for collisions
-            local checked_position = checkTileCollision(player_new_x, player_new_y, player.x, player.y)
+            local checked_position = checkTileCollision(player_new_x, player_new_y, player.x, player.y, true)
             player.onGround = checked_position.onGround
 
             if player.onGround then
