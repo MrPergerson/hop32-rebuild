@@ -26,6 +26,12 @@ function setCameraYPos(y_pos)
     new_camera_y_lerp_t = 0
 end
 
+-- timers
+start_timer = 5.9
+
+-- players
+
+
 -- progress
 AREA = {
     GREEN_LANDS = 0,

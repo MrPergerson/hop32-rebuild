@@ -37,12 +37,15 @@ function switchGameState(state)
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
         initZombiePool(5)
+        init_respawn_birds()
         initProceduralGen()
         initLevelLoad(chunk_progress_x)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
-        
-    
+    elseif state == gstate.game then
+        local timeDelay = lerp(10,1,get_player_count()/32)
+        respawnTimer = timer(timeDelay)
+        -- seems like only one respawn heli can appear at one time
     end
 
 
@@ -60,8 +63,16 @@ function _update()
     elseif gameState == gstate.playerSelect then
         
         local complete = addPlayers(camera_x, camera_y, delta_time)
+
+        if get_player_count() > 0 then 
+            start_timer = max(0, start_timer - delta_time)
+            if start_timer == 0 then
+                complete = true
+            end
+        end
+
         if complete then
-            gameState = gstate.game
+            switchGameState(gstate.game)
         end
     
     elseif gameState == gstate.game then
@@ -100,6 +111,7 @@ function _update()
 
             update_players(camera_x, camera_y, delta_time)
             update_zombies(delta_time)
+            update_respawns()
 
             -- cool but it looks like the asteroid are falling
             if new_camera_y_lerp_t < 1 then
@@ -150,8 +162,10 @@ function _draw()
         map(0,0,2048,camera_y,128,16) -- make this repeatable
         map(0,0,3072,camera_y,128,16) -- make this repeatable
         drawChunks()
+        draw_respawn_birds()
         draw_players(gameStarted)
         draw_zombies()
+        
     
         if debug_mode then
             debug_draw_asteroid_polys()
@@ -163,15 +177,13 @@ function _draw()
             -- menu functions
         elseif gameState == gstate.playerSelect then
 
-            if playerCount > 0 then
-                if startTimerVisible then 
-                    print("starting in " .. flr(start_timer), camera_x + 70, camera_y, 7)
-                end
-                --print("ready: " .. votesToStart .. "/" .. playerCount, camera_x + 4, camera_y, 7)
-            end
-
             rectfill(camera_x, 0, camera_x + 128, camera_y + 5, camera_y)
+
             print("press any button to join", camera_x + 4, camera_y, 7)
+
+            if get_player_count() > 0 then 
+                print("starting in " .. flr(start_timer), camera_x + 4, camera_y+8, 7)
+            end
 
             print("\^w\^thop" .. get_player_count(), camera_x + 46,camera_y + 56)
 

@@ -62,6 +62,7 @@ end
 function enablePlayer(player)
     player.disabled = false
     disabledPlayerCount = disabledPlayerCount - 1
+    player.bounce_charge = 0 -- may want to change this, but adding charge introduces bug
 end
 
 
@@ -81,8 +82,7 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt)
         if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and currentPlayerCount <= 32 then 
 
             if not players[keyInput] then
-                start_timer = 6 -- plus one so the players see "5"
-
+                start_timer = 5.9 -- plus one so the players see "5"
                 --local sprite = sprites[playerCount % #sprites + 1]
                 local sprite = player_sprite_index[keyInput]
                 players[keyInput] = {
@@ -138,9 +138,7 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt)
         
 
         -- exit player selection and start the game
-        if (keyInput == "\32" and get_player_count() > 0) then 
-            local timeDelay = min(10, 2 + ((1-(playerCount/32)) * 10))
-            respawnTimer = timer(timeDelay)
+        if (keyInput == "\32" and get_player_count() > 0) then            
             return true
         end  
 
@@ -305,34 +303,11 @@ function update_players_testmode(dt)
     
 end
 
--- WIP
-function update_player_obj_collisions()
-    for key, player in pairs(players) do
-        if player.disabled == false then
-
-            -- Check for respawn bird collisions
-            for _, respawn in ipairs(activeBirdList) do
-                if check_object_collision(player, respawn.bird) then
-                    respawnPlayer(respawn)
-                end
-            end   
-            
-            -- Check for zombie collisions
-            for _, zombie in ipairs(zombies) do
-                if check_object_collision(player, zombie) then
-                    disablePlayer(player)
-                end
-            end
-        end
-    end
-end
-
 -- look up key associated with player and bounce them
 function bouncePlayer(key)
     local player = players[key]
     if not (player == nil) then
         if player.onGround and not(player.won) then
-            
             local jump_dist_p1 = player.jump_distance * .6
             local jump_dist_p2 = player.jump_distance * .4
             local jump_velocity = (-2 * player.jump_height * jump_x_velocity) / jump_dist_p1
@@ -344,37 +319,6 @@ function bouncePlayer(key)
             sfx(0)
             d_last_time = time()
         end
-        --[[
-    else
-        local sprite = player_sprite_index[key]
-        players[key] = {
-            x = 8 + posx + start_position, 
-            y = 8 + posy + game_pos_y, 
-            startPosition = 8 + posy + game_pos_y,
-            width = 8, 
-            height = 8, 
-            boundsOffsetX = 0, 
-            boundsOffsetY = 0, 
-            vx = 0, 
-            vy = 0, 
-            onGround = false, 
-            bounce_force = minBounceForce, 
-            key=key, 
-            sprite = sprite, 
-            disabled = false,
-            disabledCount = 0,
-            totalTimeEnabled = 0,
-            won = false,
-        }
-        playerCount = playerCount + 1
-
-        local timeDelay = min(10, 2 + ((1-(playerCount/32)) * 10))
-        respawnTimer = timer(timeDelay)
-
-        disablePlayer(players[key])
-
-        new_player_added_timer = 1
-        ]]
     end
 end
 

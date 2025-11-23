@@ -19,7 +19,7 @@ function addRespawnBird()
     local player = players[respawn.playerKey]
     local bird = respawn.bird
     local initXPos = camera_x + 128
-    local initYPos = camera_y + 24
+    local initYPos = camera_y + 20 + flr(rnd(10))
     bird.x = initXPos
     bird.y = initYPos
     player.x = initXPos
