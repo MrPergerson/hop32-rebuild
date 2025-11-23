@@ -16,6 +16,7 @@
 
 sidequest
 -- images of the complete landscape
+-- export player sprites???
 
 Progression???
 
