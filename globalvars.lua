@@ -31,6 +31,10 @@ start_timer = 5.9
 
 -- players
 
+-- ufo
+ufos = {}
+
+
 
 -- progress
 AREA = {

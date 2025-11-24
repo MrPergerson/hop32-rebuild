@@ -66,6 +66,10 @@ function loadChunk()
             spawn_zombie(zombie_spawn_point.x, zombie_spawn_point.y-1)
         end
 
+        if x_offset == 64 then
+            ufos[1]:enable(64 * 8,2)
+        end
+
     end
     
     add(loaded_chunks, new_chunk)

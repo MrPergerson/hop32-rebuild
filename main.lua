@@ -12,6 +12,8 @@ local new_chunk_threshold = 0
 local mouse_x = 0
 local mouse_y = 0
 
+
+
 local debug_tile_flags = {}
 
 function _init()
@@ -31,12 +33,13 @@ function switchGameState(state)
     if state == gstate.debug_pcannon then
         
     elseif state == gstate.playerSelect then
-        chunk_progress_x = 0
+        chunk_progress_x = 4
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
         initZombiePool(5)
+        ufos[1] = UFO:new()
         init_respawn_birds()
         initProceduralGen()
         initLevelLoad(chunk_progress_x)
@@ -109,6 +112,7 @@ function _update()
                 timer_1 = 0
             end
 
+            ufos[1]:update(delta_time)
             update_players(camera_x, camera_y, delta_time)
             update_zombies(delta_time)
             update_respawns()
@@ -162,6 +166,7 @@ function _draw()
         map(0,0,2048,camera_y,128,16) -- make this repeatable
         map(0,0,3072,camera_y,128,16) -- make this repeatable
         drawChunks()
+        ufos[1]:draw()
         draw_respawn_birds()
         draw_players(gameStarted)
         draw_zombies()

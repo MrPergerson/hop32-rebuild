@@ -120,6 +120,7 @@ function UFO:update(dt)
 
         elseif self.state == 2 then
             local tile = get_surface_tile_at_pos(self.x)
+            printh(tile.tile)
             if (tile) then
                 
                 
