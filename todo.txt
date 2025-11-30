@@ -1,4 +1,3 @@
-- Fix corner collision case
 - Fix death bug where players are still considered alive
 - Fix bug where game finishes mid game
 - Add UFOs
@@ -8,6 +7,7 @@
 - Create victory screen
 - Create menu with game settings 
 - Credits in game and public sites
+- [COMPLETE] Fix corner collision case
 - [COMPLETE] Add respawn helicopter
 - [COMPLETE] Add zombies
 - [COMPLETE] Make terrain gen random

@@ -1,5 +1,6 @@
 debug_mode = false
 debug_fast_travel = false
+debug_player_cannon = false
 debug_camera_x = 0 --??
 debug_camera_y = 0
 keyboard_input = true

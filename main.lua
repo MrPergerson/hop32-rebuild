@@ -21,6 +21,8 @@ function _init()
     last_time = 0
     timer_1 = 0
     switchGameState(gstate.playerSelect)
+
+    ufos[1] = UFO:new() -- should reprogram this like the zombies
 end
 
 function restart()
@@ -30,16 +32,14 @@ end
 
 function switchGameState(state)
 
-    if state == gstate.debug_pcannon then
-        
-    elseif state == gstate.playerSelect then
+    if state == gstate.playerSelect then
         chunk_progress_x = 4
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
+        ufos[1] = UFO:new() -- should reprogram this like the zombies
         initZombiePool(5)
-        ufos[1] = UFO:new()
         init_respawn_birds()
         initProceduralGen()
         initLevelLoad(chunk_progress_x)
@@ -84,6 +84,8 @@ function _update()
 
             if debug_fast_travel then
                 debugUpdateQuickTravel()
+            elseif debug_player_cannon then
+                debugUpdatePlayerCannon()
             end
         else
             if timer_1 < timeUntilCameraMoves then
@@ -153,8 +155,6 @@ function _update()
         else
             restart()
         end
-    elseif gameState == gstate.debug_pcannon then
-
     end
 end
 
@@ -216,6 +216,7 @@ function toggleDebugMode()
 
     if debug_mode then
         menuitem(1, "toggle fast travel", function() debugToggleQuickTravel() end)
+        menuitem(2, "toggle pcannon", function() debugTogglePlayerCannon() end)
     else
         menuitem(1)
     end
@@ -256,8 +257,6 @@ function debugToggleQuickTravel()
 end
 
 function debugUpdateQuickTravel()
-
-        
     for key, player in pairs(players) do
         if player.disabled == false then
             player.x = camera_x + 56
@@ -266,3 +265,25 @@ function debugUpdateQuickTravel()
     end
 end
 
+function debugTogglePlayerCannon()
+    debug_player_cannon = not(debug_player_cannon)
+end
+
+function debugUpdatePlayerCannon()
+
+    if stat(34) == 1 then
+        --printh(flr(mouse_x/8) .. ", " .. flr(mouse_y/8))
+
+        local p = players[keys[key_index]]
+        if p.disabled then enablePlayer(p) end
+        p.x = flr(mouse_x)
+        p.y = flr(mouse_y)
+
+        p.vx = 100
+        p.vy = 100
+
+    end
+    
+    update_players(camera_x, camera_y, delta_time)
+
+end

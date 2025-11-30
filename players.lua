@@ -6,6 +6,8 @@ poke(0x5F2D, 0x1) -- enable keyboard input
 local GRAVITY = 15  -- Gravity value
 local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
 players = {}
+keys = {}
+key_index = 1 -- used for sorting through keys
 playerCount = 0
 local playerWonCount = 0
 local maxPlayers = 32
@@ -85,29 +87,8 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt)
                 start_timer = 5.9 -- plus one so the players see "5"
                 --local sprite = sprites[playerCount % #sprites + 1]
                 local sprite = player_sprite_index[keyInput]
-                players[keyInput] = {
-                    x = 8 + posx + startingCamPos_x, 
-                    y = 8 + posy + startingCamPos_y, 
-                    startPosition = 8 + posy + startingCamPos_y,
-                    width = 8, 
-                    height = 8, 
-                    boundsOffsetX = 0, 
-                    boundsOffsetY = 0, 
-                    vx = 0, 
-                    vy = 0, 
-                    onGround = false, 
-                    bounce_charge = 0,
-                    jump_height = min_jump_height,
-                    jump_distance = min_jump_distance,
-                    jump_gravity = 0,
-                    fall_gravity = 50,
-                    key=keyInput, 
-                    sprite = sprite, 
-                    disabled = false,
-                    disabledCount = 0,
-                    totalTimeEnabled = 0,
-                    won = false
-                }
+                players[keyInput] = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput, sprite)
+                add(keys, keyInput)
                 playerCount = playerCount + 1
 
 
@@ -301,6 +282,32 @@ function update_players_testmode(dt)
         end
     end
     
+end
+
+function createPlayer(posx,posy, keyInput, sprite)
+    return {
+        x = 8 + posx, 
+        y = 8 + posy, 
+        startPosition = posy,
+        width = 8, 
+        height = 8, 
+        boundsOffsetX = 0, 
+        boundsOffsetY = 0, 
+        vx = 0, 
+        vy = 0, 
+        onGround = false, 
+        bounce_charge = 0,
+        jump_height = min_jump_height,
+        jump_distance = min_jump_distance,
+        jump_gravity = 0,
+        fall_gravity = 50,
+        key=keyInput, 
+        sprite = sprite, 
+        disabled = false,
+        disabledCount = 0,
+        totalTimeEnabled = 0,
+        won = false
+    }
 end
 
 -- look up key associated with player and bounce them

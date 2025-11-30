@@ -161,6 +161,8 @@ function checkTileCollision(new_x, new_y, x,y, is_player)
     local tile_y_3 = getTile(x_unit, new_y_unit + 1)
     local tile_y_4 = getTile(x_unit + 0.999, new_y_unit + 1)
 
+    local cornerCount = 0
+
     -- X
     if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
         if is_player == false then -- HACK, for players this stops collisions in beyond the grid in the -y direction
@@ -169,6 +171,7 @@ function checkTileCollision(new_x, new_y, x,y, is_player)
         hit_wall = true
     elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
         new_x_unit = flr(new_x_unit)
+        cornerCount += 1
         hit_wall = true
     end
 
@@ -177,9 +180,18 @@ function checkTileCollision(new_x, new_y, x,y, is_player)
         if new_y > 0 or is_player == false then -- HACK, this stops collisions in beyond the grid in the -y direction
             new_y_unit = flr(new_y_unit) + 1
         end
+        cornerCount += 1
     elseif (tile_y_3 ~= nil and tile_y_4 ~= nil) and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then
         new_y_unit = flr(new_y_unit)
+        
         onGround = true
+    end
+
+    if cornerCount == 2 then -- yay this fixes the corner bug
+        if new_y > y then -- going down
+            new_y_unit = new_y_unit - 1
+        end
+
     end
 
     -- NOTE on HACK: it seems that ignoring tile collisions in the -Y and -X direction allows the player to jump beyond the 

@@ -11,7 +11,6 @@ __lua__
 #include ufo.lua
 #include respawnbirds.lua
 #include players.lua
-
 --#include testingmain.lua
 #include main.lua
 
