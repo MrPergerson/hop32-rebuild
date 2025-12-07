@@ -43,7 +43,7 @@ function initPlayers()
     init_respawn_birds()
     disabledPlayerCount = 0
     posx = 0
-    posy = 8
+    posy = 16
     xOffset = 0
     row = 1
 end
