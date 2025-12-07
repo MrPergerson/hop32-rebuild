@@ -119,8 +119,8 @@ function UFO:update(dt)
            
 
         elseif self.state == 2 then
-            local tile = get_surface_tile_at_pos(self.x)
-            printh(tile.tile)
+            local tile = getSurfaceTileAtXPos(self.x)
+            --printh(tile)
             if (tile) then
                 
                 
@@ -160,7 +160,7 @@ function UFO:update(dt)
             if self.y+8 <= camera_y then 
                 self:disable()
             end           
-            
+            --printh("UFO done")
             
         end
 

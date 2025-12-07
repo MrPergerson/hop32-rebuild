@@ -130,7 +130,7 @@ function getTile(x,y)
         end
 
         if chunk.tile == -1 then
-            --printh("(" .. x .. "," .. y .. ") tile not found")
+            printh("(" .. x .. "," .. y .. ") tile not found")
             return chunk
         end
 
@@ -138,6 +138,33 @@ function getTile(x,y)
         return chunk.tiles[x][y]
     end
 end
+
+function getSurfaceTileAtXPos(x_pos)
+
+    local chunk = {tile = -1}
+
+    local x = flr(x_pos/8)
+
+    -- 1. Identify which chunk to search for
+    printh(#loaded_chunks)
+    for c in all(loaded_chunks) do
+        if x >= c.x and x < c.x + chunk_x_size then
+            chunk = c
+            break;
+        end
+    end
+
+    local st = chunk.surface_tiles
+    printh(st)
+    for index, surface_tile in ipairs(st) do
+        printh(surface_tile.x .. " looking for " .. x)
+        if surface_tile.x == x then
+            return surface_tile
+        end
+    end
+
+end
+
 
 function checkTileCollision(new_x, new_y, x,y, is_player)
     -- convert world positions to grid positions

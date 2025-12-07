@@ -392,45 +392,14 @@ function getRndSurfaceTile(tiles)
     return tiles[flr(rnd(#tiles))+1]
 end
 
-function get_tile(x, y)
-    if x < 0 or x >= map_x_size or y < 0 or y >= map_y_size then
-        printh("(" .. x .. "," .. y .. ") tile index is out of bounds")
-        -- for some reason, get_tile calls in out of bounds (x 298-303) spike when player reaches the end.
-        return {tile = -1}
-    else
-
-        local chunk = {tile = -1}
-
-        x = flr(x)
-        y = flr(y)
-
-        -- 1. Identify which chunk to search for
-        for c in all(chunks) do
-            if x >= c.x_offset_unit and x < c.x_offset_unit + chunk_x_size then
-                chunk = c
-                break;
-            end
-        end
-
-        if chunk.tile == -1 then
-            --printh("(" .. x .. "," .. y .. ") tile not found")
-            return chunk
-        end
-
-        -- 2. Return tile from the correct chunk
-        return chunk.tiles[x][y]
-    end
-end
-
-
 function get_surface_tile_at_pos(x_pos)
     local x = flr(x_pos / 8)
     for y = 1, 15 do 
 
-        local above_tile = get_tile(x,y-1)
-        local target_tile = get_tile(x,y)
+        local above_tile = getTile(x,y-1)
+        local target_tile = getTile(x,y)
 
-        printh(target_tile.tile)
+        --printh("get surface " + target_tile.tile)
 
         if above_tile.tile == TILE.NONE and target_tile.tile ~= TILE.NONE then
             return target_tile
@@ -438,40 +407,6 @@ function get_surface_tile_at_pos(x_pos)
         
     end
 
-end
-
-function check_collision(new_x, new_y, x,y, hit_wall_callback)
-    -- convert world positions to grid positions
-    local new_x_unit = new_x / 8
-    local new_y_unit = new_y / 8
-    local x_unit = x / 8
-    local y_unit = y / 8
-    local onGround = false
-    local hit_wall = false
-
-    --printh(new_x)
-    -- check X axis collisions
-    if get_tile(new_x_unit, y_unit).tile ~= TILE.NONE or get_tile(new_x_unit, y_unit + 0.999).tile ~= TILE.NONE then
-        new_x_unit = flr(new_x_unit) + 1
-        hit_wall = true
-    elseif get_tile(new_x_unit + 1, y_unit).tile ~= TILE.NONE or get_tile(new_x_unit + 1, y_unit + 0.999).tile ~= TILE.NONE then
-        new_x_unit = flr(new_x_unit)
-        hit_wall = true
-    end
-
-    -- check Y axis collisions
-    if get_tile(x_unit, new_y_unit).tile ~= TILE.NONE or get_tile(x_unit+0.999, new_y_unit).tile ~= TILE.NONE then
-        new_y_unit = flr(new_y_unit) + 1
-    elseif get_tile(x_unit, new_y_unit + 1).tile ~= TILE.NONE or get_tile(x_unit+0.999, new_y_unit + 1).tile ~= TILE.NONE then
-        new_y_unit = flr(new_y_unit)
-        onGround = true
-    end
-
-    -- convert grid positions to world positions
-    new_x = new_x_unit * 8
-    new_y = new_y_unit * 8
-
-    return {x = new_x, y = new_y, onGround = onGround, hit_wall = hit_wall} -- this is returning nil for some reason
 end
 
 function debug_draw_asteroid_polys()
