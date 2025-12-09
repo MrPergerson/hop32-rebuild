@@ -1,12 +1,13 @@
 MAIN TASKS
 - Fix death bug where players are still considered alive
 - Fix bug where game finishes mid game
-- Design and add new anomalies
+- Design and add vulture
 - Finalize cloud kingdom
 - Create game over screen
 - Create victory screen
 - Create menu with game settings 
 - Credits in game and public sites
+- Finalize player art
 - [COMPLETE] Add UFOs
 - [COMPLETE] Fix corner collision case
 - [COMPLETE] Add respawn helicopter
@@ -18,9 +19,11 @@ MAIN TASKS
 SIDEQUESTS
 - images of the complete landscape
 - export player sprites???
+- UFO animation
+- zombie animation
 
 NOTES
-Progression???
+Progression??? -- maybe start location advances over time. Not great but something
 
 zombies
 consider adding different sprites for each area

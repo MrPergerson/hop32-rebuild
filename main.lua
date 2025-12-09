@@ -4,6 +4,7 @@ local last_time
 local timeUntilCameraMoves = 1.5
 local timeUntilRestart = 2
 local timer_1 = 0
+local timer_2 = 0 -- input delay when player select starts
 local camera_speed = 15
 --local camera_pos_y_offset = 128
 local chunk_progress_x = 0
@@ -20,8 +21,12 @@ function _init()
     delta_time = 0
     last_time = 0
     timer_1 = 0
-    switchGameState(gstate.playerSelect)
-
+    if gameState == gstate.complete then
+        gameState = gstate.playerSelect
+    else
+        gameState = gstate.mainMenu
+    end
+    switchGameState(gameState)
     ufos[1] = UFO:new() -- should reprogram this like the zombies
 end
 
@@ -32,8 +37,14 @@ end
 
 function switchGameState(state)
 
-    if state == gstate.playerSelect then
-        chunk_progress_x = 2
+    gameState = state
+
+    if gameState == gstate.mainMenu then
+        camera_x = 0
+        camera_y = 0
+        initMenu(startGameFromMainMenu)
+    elseif gameState == gstate.playerSelect then
+        chunk_progress_x = 12
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
@@ -45,14 +56,19 @@ function switchGameState(state)
         initLevelLoad(chunk_progress_x)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
-    elseif state == gstate.game then
+        timer_2 = .4
+    elseif gameState == gstate.game then
         local timeDelay = lerp(10,1,get_player_count()/32)
         respawnTimer = timer(timeDelay)
         -- seems like only one respawn heli can appear at one time
     end
 
 
-    gameState = state
+    
+end
+
+startGameFromMainMenu = function ()
+    switchGameState(gstate.playerSelect)
 end
 
 function _update()
@@ -60,13 +76,18 @@ function _update()
     delta_time = current_time - last_time  -- Calculate delta time
     last_time = current_time  
 
-    if gameState == gstate.startMenu then
-        -- todo
-        
+    if gameState == gstate.mainMenu then
+        updateMenu()
     elseif gameState == gstate.playerSelect then
-        
-        local complete = addPlayers(camera_x, camera_y, delta_time)
+        local complete = false
 
+        complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
+
+        if timer_2 > 0 then
+            stat(31)
+        end
+        timer_2 = max(0, timer_2 - delta_time)        
+        
         if get_player_count() > 0 then 
             start_timer = max(0, start_timer - delta_time)
             if start_timer == 0 then
@@ -178,8 +199,9 @@ function _draw()
         end
 
         -- UI
-        if gameState == gstate.startMenu then
-            -- menu functions
+        if gameState == gstate.mainMenu then
+            drawMenu()
+
         elseif gameState == gstate.playerSelect then
 
             rectfill(camera_x, 0, camera_x + 128, camera_y + 5, camera_y)

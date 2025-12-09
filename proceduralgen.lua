@@ -121,7 +121,8 @@ function generateCityChunk(x_offset, y_offset)
     local buildingHeight = 10 -- higher is lower..
     local buildingLength = 0
     local buildingHeightVariance = 0
-    local signal = false
+    local signal = true
+
     for x = x_offset, x_offset+15 do
 
         if buildingLength == 4 then
@@ -147,6 +148,24 @@ function generateCityChunk(x_offset, y_offset)
             
         end
     end
+
+    --[[
+        -- snow biome transition
+        local x_offset_increment = 0
+        if x_offset == BIOME_DIST_UNIT.SNOW then
+            
+            for y = y_offset+11, y_offset+14 do
+                
+                x_offset_increment = min(3, x_offset_increment + 1)
+                
+                for x = x_offset, x_offset+x_offset_increment do
+                    chunk.tiles[x][y].sprite = TILE.SNOW_2
+                    
+                    
+                end
+            end
+        end
+        ]]
 
     for x = x_offset, x_offset+15 do
         for y = y_offset+1, y_offset+15 do

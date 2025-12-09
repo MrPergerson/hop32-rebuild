@@ -73,25 +73,14 @@ end
 
 function UFO:update(dt)
 
-
-
-
     if self.active and self.ai_enabled then
-
-        -- move left and right for 5 seconds
-        -- determine attack positions
-        -- drop down and grab players in the air
-        -- rise up, and fly away
-
-        -- jumping on self acts like a platform (or bounces them off?)
-        -- and releases one player
 
         if self.x + 8 < camera_x 
         or self.x > camera_x + 200 
         or self.y < camera_y  
         or self.y > camera_y + 200 then
             --self:disable()
-            --printh("ufo out of bounds!") -- to handle this, it should travel to inbounds
+            printh("ufo out of bounds!") -- to handle this, it should travel to inbounds
         end
 
         if self.state == 1 then
@@ -120,10 +109,7 @@ function UFO:update(dt)
 
         elseif self.state == 2 then
             local tile = getSurfaceTileAtXPos(self.x)
-            --printh(tile)
             if (tile) then
-                
-                
                 if self.y < (tile.y - 4) * 8 then
                     self.vy = HOVER_DOWN_SPEED
                 else
@@ -137,7 +123,6 @@ function UFO:update(dt)
         elseif self.state == 3 then
             
             self.capture_timer = max(self.capture_timer - dt, 0)
-
             self.tracker_beam.x = self.x
             self.tracker_beam.y = self.y
 
@@ -159,16 +144,11 @@ function UFO:update(dt)
             self.y -= MAX_SPEED * dt
             if self.y+8 <= camera_y then 
                 self:disable()
-            end           
-            --printh("UFO done")
-            
+            end                      
         end
-
         
         local self_new_x = self.x + self.vx * dt
         local self_new_y = self.y + self.vy * dt
-
-        -- no need for collision checks
         
         self.x = self_new_x
         self.y = self_new_y

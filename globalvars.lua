@@ -8,10 +8,9 @@ gstate = {
     mainMenu = 0,
     playerSelect = 1,
     game = 2,
-    complete = 3,
-    debug_pcannon = 4
+    complete = 3
 }
-gameState = gstate.playerSelect
+gameState = gstate.mainMenu
 
 --camera
 camera_x = 0

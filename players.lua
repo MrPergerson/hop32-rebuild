@@ -68,10 +68,10 @@ function enablePlayer(player)
 end
 
 
-function addPlayers(startingCamPos_x, startingCamPos_y, dt)
+function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
     local sprites = {33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}
 
-    if stat(30) then 
+    if ready and stat(30) then 
         local keyInput = stat(31)
         
         local currentPlayerCount = 1
@@ -79,7 +79,6 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt)
             currentPlayerCount = currentPlayerCount + 1
         end
 
-        
 
         if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and currentPlayerCount <= 32 then 
 
