@@ -12,6 +12,12 @@ gstate = {
 }
 gameState = gstate.mainMenu
 
+gMode = {
+    tournament = 0,
+    freeplay = 1
+}
+gameMode = gMode.tournament
+
 --camera
 camera_x = 0
 camera_y = 0
@@ -28,6 +34,7 @@ end
 
 -- timers
 start_timer = 5.9
+gamemode_timer = 0
 
 -- players
 

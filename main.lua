@@ -57,10 +57,11 @@ function switchGameState(state)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
         timer_2 = .4
+        menuitem(2, "set gamemode", function ()
+            changeGameMode()
+        end)
     elseif gameState == gstate.game then
-        local timeDelay = lerp(10,1,get_player_count()/32)
-        respawnTimer = timer(timeDelay)
-        -- seems like only one respawn heli can appear at one time
+        setRespawnTimer()
     end
 
 
@@ -77,7 +78,7 @@ function _update()
     last_time = current_time  
 
     if gameState == gstate.mainMenu then
-        updateMenu()
+        updateMenu(delta_time)
     elseif gameState == gstate.playerSelect then
         local complete = false
 
@@ -218,6 +219,14 @@ function _draw()
            
         end
 
+        if gameState == gstate.game or gameState == gstate.playerSelect then
+            if gamemode_timer > 0 then
+                rectfill(camera_x, 0, camera_x + 128, camera_y + 5, camera_y)
+                print("set gamemode to " .. showGameModeText().title, camera_x + 16, camera_y, 7)
+                gamemode_timer = max(0, gamemode_timer - delta_time)
+            end
+        end
+
         if (debug_mode) then
             --print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
             --print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
@@ -237,10 +246,11 @@ function toggleDebugMode()
     debug_mode = not(debug_mode)
 
     if debug_mode then
-        menuitem(1, "toggle fast travel", function() debugToggleQuickTravel() end)
-        menuitem(2, "toggle pcannon", function() debugTogglePlayerCannon() end)
+        menuitem(2, "toggle fast travel", function() debugToggleQuickTravel() end)
+        menuitem(3, "toggle pcannon", function() debugTogglePlayerCannon() end)
     else
-        menuitem(1)
+        menuitem(2)
+        menuitem(3)
     end
 
 end

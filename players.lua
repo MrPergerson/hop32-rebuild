@@ -83,12 +83,9 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
         if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and currentPlayerCount <= 32 then 
 
             if not players[keyInput] then
-                start_timer = 5.9 -- plus one so the players see "5"
-                --local sprite = sprites[playerCount % #sprites + 1]
-                local sprite = player_sprite_index[keyInput]
-                players[keyInput] = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput, sprite)
-                add(keys, keyInput)
-                playerCount = playerCount + 1
+                start_timer = 5.9 -- plus .9 so the players see "5"
+
+                addPlayerInToGame(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)
 
 
                 posx = posx + 9
@@ -282,29 +279,39 @@ function update_players_testmode(dt)
 end
 
 function createPlayer(posx,posy, keyInput, sprite)
-    return {
-        x = 8 + posx, 
-        y = 8 + posy, 
-        startPosition = posy,
-        width = 8, 
-        height = 8, 
-        boundsOffsetX = 0, 
-        boundsOffsetY = 0, 
-        vx = 0, 
-        vy = 0, 
-        onGround = false, 
-        bounce_charge = 0,
-        jump_height = min_jump_height,
-        jump_distance = min_jump_distance,
-        jump_gravity = 0,
-        fall_gravity = 50,
-        key=keyInput, 
-        sprite = sprite, 
-        disabled = false,
-        disabledCount = 0,
-        totalTimeEnabled = 0,
-        won = false
-    }
+    return 
+end
+
+function addPlayerInToGame(posx, posy, keyInput)
+
+        local sprite = player_sprite_index[keyInput]
+        players[keyInput] = {
+            x = 8 + posx, 
+            y = 8 + posy, 
+            startPosition = posy,
+            width = 8, 
+            height = 8, 
+            boundsOffsetX = 0, 
+            boundsOffsetY = 0, 
+            vx = 0, 
+            vy = 0, 
+            onGround = false, 
+            bounce_charge = 0,
+            jump_height = min_jump_height,
+            jump_distance = min_jump_distance,
+            jump_gravity = 0,
+            fall_gravity = 50,
+            key=keyInput, 
+            sprite = sprite, 
+            disabled = false,
+            disabledCount = 0,
+            totalTimeEnabled = 0,
+            won = false
+            }
+        add(keys, keyInput)
+        playerCount = playerCount + 1
+
+
 end
 
 -- look up key associated with player and bounce them
@@ -323,10 +330,17 @@ function bouncePlayer(key)
             sfx(0)
             d_last_time = time()
         end
+    elseif gameMode == gMode.freeplay then
+        addPlayerInToGame(camera_x + 64, camera_y, key)
+
+        setRespawnTimer()
+
+        --disablePlayer(players[key]) -- new mode?
     end
+
+
+
 end
-
-
 
 function DEBUG_updatePlayers()
     for key, player in pairs(players) do
@@ -412,3 +426,8 @@ function get_edges(obj)
     }
 end
 
+function setRespawnTimer()
+        local timeDelay = lerp(10,1,get_player_count()/32)
+        respawnTimer = timer(timeDelay)
+
+end

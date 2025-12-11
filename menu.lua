@@ -1,4 +1,5 @@
 
+
 local menu_option = {
     main = 1,
     settings = 2,
@@ -14,7 +15,7 @@ local menus = {
     },
     [menu_option.settings] = { 
         [1] = {text = "play", active = false, color = 6, action = function() startGameFunction() end},
-        [2] = {text = "gamemode", active = false, color = 6, action = function() end},
+        [2] = {text = "gamemode", active = false, color = 6, action = function() changeGameMode() end},
         [3] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end}
     },
     [menu_option.credits] = { 
@@ -35,7 +36,7 @@ function initMenu(startGameCallback)
     --startGameFunction()
 end
 
-function updateMenu()
+function updateMenu(dt)
     
     if btnp(5) then
         menus[active_menu][active_option].action()
@@ -56,6 +57,11 @@ function updateMenu()
         end
         changeOption(option)
      end
+
+     if gamemode_timer > 0 then
+        print(showGameModeText().title, camera_x + 32)
+        gamemode_timer = max(0, gamemode_timer - dt)
+     end
 end
 
 function drawMenu()
@@ -69,8 +75,9 @@ function drawMenu()
         --print("\^w\^tsettings", 46,16, 6)
         x_pos = 16
         
-        print("tournament", x_pos + 40 ,y_pos + 10, 6)
-        print("players cannot \njoin once the game \nhas started.", x_pos + 40 ,y_pos + 20, 6)
+        gmodetext = showGameModeText()
+        print(gmodetext.title, x_pos + 40 ,y_pos + 10, 6)
+        print(gmodetext.description, x_pos + 40 ,y_pos + 20, 6)
         
     elseif active_menu == menu_option.credits then
 
@@ -117,3 +124,25 @@ function changeMenu(menu)
 
     changeOption(1, previous_menu)
 end
+
+function changeGameMode()
+    local nextMode = gameMode + 1
+    if nextMode > 1 then
+        nextMode = 0
+    end
+
+    gameMode = nextMode
+
+    if gameMode == gstate.playerSelect or gameMode == gstate.game then
+        gamemode_timer = 3
+    end
+end
+
+function showGameModeText()
+    if gameMode == gMode.tournament then
+        return {title = "tournament" , description = "players cannot \njoin once the game \nhas started."}
+    elseif gameMode == gMode.freeplay then
+        return  {title = "freeplay" , description = "players are free \nto join after the game \nhas started."}
+    end
+end
+
