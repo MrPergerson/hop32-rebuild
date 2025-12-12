@@ -146,3 +146,33 @@ function showGameModeText()
     end
 end
 
+function drawCompleteMenu()
+
+    draw_winners(camera_x, camera_y)
+
+
+end
+
+function draw_winners(x, y)
+    local indent = ""
+    local line_height = 10
+    local current_y = y
+    
+    print("\t\t\tplayers\n", x, current_y, 10)
+    current_y = current_y + line_height
+    leftCounter = 0
+    for i = 1, #win_order do
+        xOffset = leftCounter * 32
+        spr(win_order[i][1], x + 12 + xOffset, current_y)
+        print(tostr(i)..indent.."\n", x + 4 + xOffset, current_y, 10)
+        if leftCounter == 3 then
+            current_y = current_y + line_height
+        end
+        leftCounter = (leftCounter + 1) % 4
+        --end
+    end
+
+    rectfill(camera_x, camera_y + 116, camera_x + 128, camera_y + 128, 0)
+    print("\t\t\tcontinue in " .. flr(score_timer) .. "\n", x, y + 120, 10)
+end
+

@@ -7,8 +7,6 @@ local timer_1 = 0
 local timer_2 = 0 -- input delay when player select starts
 local camera_speed = 15
 --local camera_pos_y_offset = 128
-local chunk_progress_x = 0
-local chunk_progress_y = 0
 local new_chunk_threshold = 0
 local mouse_x = 0
 local mouse_y = 0
@@ -21,7 +19,7 @@ function _init()
     delta_time = 0
     last_time = 0
     timer_1 = 0
-    if gameState == gstate.complete then
+    if gameState == gstate.complete or gameState == gstate.gameover then
         gameState = gstate.playerSelect
     else
         gameState = gstate.mainMenu
@@ -44,7 +42,7 @@ function switchGameState(state)
         camera_y = 0
         initMenu(startGameFromMainMenu)
     elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 12
+        chunk_progress_x = 11
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
@@ -56,12 +54,22 @@ function switchGameState(state)
         initLevelLoad(chunk_progress_x)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
+        win_order = {}
         timer_2 = .4
         menuitem(2, "set gamemode", function ()
             changeGameMode()
         end)
+        score_timer = 15
     elseif gameState == gstate.game then
         setRespawnTimer()
+    elseif gameState == gstate.complete or gameState == gstate.gameover then
+        for key, player in pairs(players) do
+            if player.disabled == false then
+                add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
+            end
+        end
+
+        appendLosersToWinOrder()
     end
 
 
@@ -126,13 +134,14 @@ function _update()
                     current_area = AREA.CLOUD_KINGDOM
                     max_distance += 384
                 else
-                    printh("done")
-                    gameState = gstate.complete
+
+                    switchGameState(gstate.complete)
+    
 
                 end
 
             elseif disabledPlayerCount == playerCount then
-                gameState = gstate.complete
+                switchGameState(gstate.gameover)
                 timer_1 = 0
             end
 
@@ -169,13 +178,18 @@ function _update()
 
             bouncePlayer(keyInput)       
         end
-    elseif gameState == gstate.complete then
-        --printh("complete")
+    elseif gameState == gstate.complete or gameState == gstate.gameover then
 
         if timer_1 < timeUntilRestart then
-            timer_1 += delta_time
+            timer_1 += delta_time     
         else
-            restart()
+            score_timer -= delta_time
+
+            if score_timer <= 0 then
+                restart()
+            elseif stat(30) and stat(31) == "\32" then
+                    restart()
+            end
         end
     end
 end
@@ -216,7 +230,9 @@ function _draw()
             print("\^w\^thop" .. get_player_count(), camera_x + 46,camera_y + 56)
 
         elseif gameState == gstate.game then
-           
+
+        elseif gameState == gstate.complete or gameState == gstate.gameover then
+           drawCompleteMenu()
         end
 
         if gameState == gstate.game or gameState == gstate.playerSelect then
@@ -319,3 +335,38 @@ function debugUpdatePlayerCannon()
     update_players(camera_x, camera_y, delta_time)
 
 end
+
+function appendLosersToWinOrder()
+    local lose_order = {}
+
+    -- add disabled players to lose_order
+    for key, player in pairs(players) do
+        if player.disabled then
+            add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
+        end
+    end
+
+    -- sort lost_order
+    local n = #lose_order
+    for i = 1, n - 1 do
+        for j = 1, n - i do
+            local a = lose_order[j]
+            local b = lose_order[j + 1]
+            -- Compare by disabledCount (ascending)
+            -- If disabledCount is the same, compare by totalTimeEnabled (descending)
+            if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
+                -- Swap elements if necessary
+                lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
+            end
+            
+        end
+    end
+
+    -- append lose order to win_order
+    for i = 1, #lose_order do 
+        add(win_order, lose_order[i])
+        -- for debug printh("Player " .. lose_order[i][1] .. " | Disabled count: " .. lose_order[i][2] .. " | TotalTimeEnabled: " .. lose_order[i][3])
+    end
+
+end
+

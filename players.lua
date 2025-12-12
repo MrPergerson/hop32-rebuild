@@ -1,5 +1,3 @@
---https://www.algorithm-archive.org/contents/verlet_integration/verlet_integration.html
-
 poke(0x5F2D, 0x1) -- enable keyboard input
 
 -- game variables
@@ -109,17 +107,12 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
 
             players[keyInput].px = players[keyInput].x
             players[keyInput].py = players[keyInput].y - GRAVITY
-  
-
         end
-        
-
+    
         -- exit player selection and start the game
         if (keyInput == "\32" and get_player_count() > 0) then            
             return true
         end  
-
-
         
     end
 
@@ -231,56 +224,6 @@ function update_players(game_progress_x, game_progress_y, dt)
     end
 end
 
-function update_players_testmode(dt)
-    for key, player in pairs(players) do
-        if player.disabled == false then
-
-            game_pos_x = player.x - 56
-            --game_pos_y = player.y + 64
-
-            player.vx = 0
-            player.vy = 0
-
-            local speed = 10
-
-            if btn(0) then
-                player.vx -= speed
-            end
-            
-            if btn(1) then
-                player.vx += speed
-            end
-            
-            if btn(2) then
-                player.vy -= speed
-            end
-            
-            if btn(3) then
-                player.vy += speed
-            end
-
-            while stat(30) do
-                keyInput = stat(31)
-                if keyInput == "t" then
-                    testmode = false
-                end        
-            end
-
-            local player_new_x = player.x + player.vx
-            local player_new_y = player.y + player.vy
-
-            checked_position = check_collision(player_new_x, player_new_y, player.x, player.y)
-
-            player.x = checked_position.x
-            player.y = checked_position.y
-        end
-    end
-    
-end
-
-function createPlayer(posx,posy, keyInput, sprite)
-    return 
-end
 
 function addPlayerInToGame(posx, posy, keyInput)
 
@@ -340,16 +283,6 @@ function bouncePlayer(key)
 
 
 
-end
-
-function DEBUG_updatePlayers()
-    for key, player in pairs(players) do
-        if player.disabled == false then
-            
-            -- do debug stuff
-            
-        end
-    end
 end
 
 function respawnPlayer(respawn)

@@ -61,7 +61,10 @@ function loadChunk()
     else
         new_chunk = generateChunk(x_offset)
 
-        if new_chunk.x > 0 then
+        if new_chunk.x == chunk_progress_x * 16 and gameState == gstate.playerSelect then
+
+        else 
+            
             local zombie_spawn_point = getRndSurfaceTile(new_chunk.surface_tiles)
             spawn_zombie(zombie_spawn_point.x, zombie_spawn_point.y-1)
         end
@@ -231,15 +234,4 @@ function checkTileCollision(new_x, new_y, x,y, is_player)
     new_y = new_y_unit * 8
 
     return {x = new_x, y = new_y, onGround = onGround, hit_wall = hit_wall} -- this is returning nil for some reason
-end
-
-
-function debugFlagTile(x,y, color)
-    add(debug_tile_flags, {x = x, y = y, c = color})
-end
-
-function isFlaggedTile(x,y)
-
-    
-    return {f = false, c = 1}
 end

@@ -8,7 +8,8 @@ gstate = {
     mainMenu = 0,
     playerSelect = 1,
     game = 2,
-    complete = 3
+    gameover = 3,
+    complete = 4
 }
 gameState = gstate.mainMenu
 
@@ -35,8 +36,10 @@ end
 -- timers
 start_timer = 5.9
 gamemode_timer = 0
+score_timer = 15
 
 -- players
+win_order = {}
 
 -- ufo
 ufos = {}
@@ -49,7 +52,8 @@ AREA = {
     CLOUD_KINGDOM = 10
 }
 current_area = -1
-
+chunk_progress_x = 0
+chunk_progress_y = 0
 
 TILE = {
     NONE = 0,

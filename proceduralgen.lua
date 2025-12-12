@@ -66,15 +66,20 @@ function generateChunk(x_offset)
         end
     end
 
-    -- draw a holes randomly
-    -- don't draw holes in the last two chunks
-    if x_offset > 0 and x_offset < (map_x_size-biome_length) and rnd(1) >= 1-draw_hole_chance then
-        local random_x_pos = flr(rnd(chunk_x_size-hole_width-1))
-        local hole_start = x_offset + random_x_pos + 1
+    --printh(x_offset)
+    if x_offset == chunk_progress_x * 16 and gameState == gstate.playerSelect then
+            -- do nothing 
+    else 
+        -- draw a holes randomly
+        -- don't draw holes in the last two chunks
+        if x_offset > 0 and x_offset < (map_x_size-biome_length) and rnd(1) >= 1-draw_hole_chance then
+            local random_x_pos = flr(rnd(chunk_x_size-hole_width-1))
+            local hole_start = x_offset + random_x_pos + 1
 
-        for x = hole_start , hole_start + hole_width, 1 do
-            for y = 0, map_y_size-1, 1 do
-                chunk.tiles[x][y].sprite = TILE.NONE   
+            for x = hole_start , hole_start + hole_width, 1 do
+                for y = 0, map_y_size-1, 1 do
+                    chunk.tiles[x][y].sprite = TILE.NONE   
+                end
             end
         end
     end
@@ -148,24 +153,6 @@ function generateCityChunk(x_offset, y_offset)
             
         end
     end
-
-    --[[
-        -- snow biome transition
-        local x_offset_increment = 0
-        if x_offset == BIOME_DIST_UNIT.SNOW then
-            
-            for y = y_offset+11, y_offset+14 do
-                
-                x_offset_increment = min(3, x_offset_increment + 1)
-                
-                for x = x_offset, x_offset+x_offset_increment do
-                    chunk.tiles[x][y].sprite = TILE.SNOW_2
-                    
-                    
-                end
-            end
-        end
-        ]]
 
     for x = x_offset, x_offset+15 do
         for y = y_offset+1, y_offset+15 do
@@ -247,39 +234,6 @@ function generateCloudChunk(x_offset, y_offset)
 
 
     return chunk
-
-end
-
-function paintCircle(center_x,center_y, x_offset, y_offset, tiles)
-
-    -- clamp center values inside chunk
-    center_x = max(min(center_x, x_offset + 15), x_offset+1)
-    center_y = max(min(center_y, y_offset + 15), y_offset+1)
-
-    tiles[center_x][center_y].sprite = TILE.GROUND
-
-
-    if center_x > x_offset and center_x < x_offset + 16 and
-    center_y > y_offset and center_y < y_offset + 16
-    then
-        
-    end
-
-    if center_x + 1 < x_offset + 16 then
-        --tiles[center_x + 1][center_y].sprite = TILE.GROUND
-    end
-
-    if center_x - 1 > x_offset then
-        --tiles[center_x - 1][center_y].sprite = TILE.GROUND
-    end
-
-    if center_y + 1 < y_offset + 16 then
-        --tiles[center_x][center_y + 1].sprite = TILE.GROUND
-    end
-
-    if center_y - 1 > y_offset then
-       -- tiles[center_x][center_y - 1].sprite = TILE.GROUND
-    end
 
 end
 
