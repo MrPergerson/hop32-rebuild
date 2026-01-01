@@ -7,6 +7,7 @@ __lua__
 #include playerspriteindex.lua
 #include proceduralgen.lua
 #include chunkload.lua
+#include actor.lua
 #include zombies.lua
 #include ufo.lua
 #include respawnbirds.lua

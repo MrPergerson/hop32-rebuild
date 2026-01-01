@@ -1,11 +1,13 @@
 MAIN TASKS
+- Redesign UFO class to be modular
+- Redesign Zombie class to be modular
 - Fix death bug where players are still considered alive (still repos!!)
 - Fix bug where game finishes mid game
-- Design and add vulture
-- Finalize cloud kingdom
-- Create game over screen
 - Create victory screen
 - Finalize player art
+- [BLOCKED] Design and add vulture
+- [BLOCKED] Finalize cloud kingdom
+- [COMPLETE] Create game over screen
 - [COMPLETE] Create menu with game settings 
 - [COMPLETE] Credits in game
 - [COMPLETE] Add UFOs

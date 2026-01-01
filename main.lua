@@ -97,7 +97,7 @@ function _update()
         end
         timer_2 = max(0, timer_2 - delta_time)        
         
-        if get_player_count() > 0 then 
+        if playerCount > 0 then 
             start_timer = max(0, start_timer - delta_time)
             if start_timer == 0 then
                 complete = true
@@ -223,11 +223,11 @@ function _draw()
 
             print("press any button to join", camera_x + 4, camera_y, 7)
 
-            if get_player_count() > 0 then 
+            if playerCount > 0 then 
                 print("starting in " .. flr(start_timer), camera_x + 4, camera_y+8, 7)
             end
 
-            print("\^w\^thop" .. get_player_count(), camera_x + 46,camera_y + 56)
+            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56)
 
         elseif gameState == gstate.game then
 

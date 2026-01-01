@@ -44,25 +44,19 @@ function initPlayers()
     posy = 16
     xOffset = 0
     row = 1
+    initActorPool(32, players, {sprite = 0, sprite2 = 0})
 end
 
 function disablePlayer(player)
-    player.disabled = true
-    player.disabledCount = player.disabledCount + 1
-    player.totalTimeEnabled = player.totalTimeEnabled + (time() - player.totalTimeEnabled)
-    player.x = -8
-    player.y = -8
-    player.vx = 0
-    player.vy = 0
+    disableActor(player)
     disabledPlayerCount = disabledPlayerCount + 1
     queue_respawn_bird(player.key)
     
 end
 
 function enablePlayer(player)
-    player.disabled = false
+    enableActor(players, player.key, 0,0) -- I already have the player ref??
     disabledPlayerCount = disabledPlayerCount - 1
-    player.bounce_charge = 0 -- may want to change this, but adding charge introduces bug
 end
 
 
@@ -72,19 +66,23 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
     if ready and stat(30) then 
         local keyInput = stat(31)
         
-        local currentPlayerCount = 1
-        for _ in pairs(players) do
-            currentPlayerCount = currentPlayerCount + 1
-        end
-
-
-        if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and currentPlayerCount <= 32 then 
+        if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount <= 32 then 
 
             if not players[keyInput] then
                 start_timer = 5.9 -- plus .9 so the players see "5"
 
-                addPlayerInToGame(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)
+                playerCount = playerCount + 1
+                local p = players[playerCount]
+                p.sprite = player_sprite_index[keyInput]
+                p.xpos = 8 + posx + camera_x
+                p.ypos = 8 + posy + camera_y
+                p.startPosition = posy
+                players[playerCount] = nil
+                players[keyInput] = p     
 
+                enableActor(players, keyInput, posx + startingCamPos_x, posy + startingCamPos_y)
+                add(keys, keyInput)
+                
 
                 posx = posx + 9
                 if (posx >= 100) then
@@ -100,26 +98,23 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
                     posy = posy + 9
                 end
             end
-
-            --printh("bounce")
             
-            players[keyInput].y = players[keyInput].startPosition - 2
-
-            players[keyInput].px = players[keyInput].x
-            players[keyInput].py = players[keyInput].y - GRAVITY
+            players[keyInput].ypos = players[keyInput].startPosition - 2
         end
     
         -- exit player selection and start the game
-        if (keyInput == "\32" and get_player_count() > 0) then            
+        if (keyInput == "\32" and playerCount > 0) then            
             return true
         end  
         
     end
 
+
+
     -- bounce affect 
     for key, player in pairs(players) do
-            if player.y < player.startPosition then
-                player.y = min(player.startPosition, player.y + (20 * dt))
+            if player.ypos < player.startPosition then
+                player.ypos = min(player.startPosition, player.ypos + (20 * dt))
             end
     end
 
@@ -130,8 +125,7 @@ end
 
 function update_players(game_progress_x, game_progress_y, dt)  
     for key, player in pairs(players) do
-        if player.disabled == false then
-            
+        if player.enabled then
             if not(player.vx == 0) then
                 jump_acceleration_x = 0
             else
@@ -145,15 +139,15 @@ function update_players(game_progress_x, game_progress_y, dt)
 
             end
 
-            player_new_x = player.x + player.vx * dt + 0.5 * jump_acceleration_x * dt * dt
-            player_new_y = player.y + player.vy * dt + 0.5 * jump_acceleration_y * dt * dt
+            player_new_x = player.xpos + player.vx * dt + 0.5 * jump_acceleration_x * dt * dt
+            player_new_y = player.ypos + player.vy * dt + 0.5 * jump_acceleration_y * dt * dt
             player.vx += jump_acceleration_x * dt
             player.vy += jump_acceleration_y * dt
             player.vy = min(player.vy, maxFallVelocity)
 
 
             -- Check new positions for collisions
-            local checked_position = checkTileCollision(player_new_x, player_new_y, player.x, player.y, true)
+            local checked_position = checkTileCollision(player_new_x, player_new_y, player.xpos, player.ypos, true)
             player.onGround = checked_position.onGround
 
             if player.onGround then
@@ -168,22 +162,21 @@ function update_players(game_progress_x, game_progress_y, dt)
 
 
             -- Apply final position updates, if any
-            player.x = min(checked_position.x, game_progress_x+128-player.width)
+            player.xpos = min(checked_position.x, game_progress_x+128-player.width)
             --player.x = checked_position.x
-            player.y = checked_position.y
+            player.ypos = checked_position.y
 
-            if player.x < camera_x-16 then
-                --player.disabled = true
+            if player.xpos < camera_x-16 then
                 disablePlayer(player)
-            elseif player.y >= camera_y + 128 then
-                --player.disabled = true
+            elseif player.ypos >= camera_y + 128 then
                 disablePlayer(player)
             end
 
              -- Check for respawn bird collisions
              for _, respawn in ipairs(activeBirdList) do
                 if check_object_collision(player, respawn.bird) then
-                    respawnPlayer(respawn)
+                    enableActor(players, respawn.playerKey, player.xpos, player.ypos) -- update this
+                    del(activeBirdList, respawn)
                 end
             end   
             
@@ -207,7 +200,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                         ufo:addToIgnoreList(player.key)
                         sfx(2)
                         
-                        player.y = ufo.y-8  -- best way to guarantee this code runs once
+                        player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
                         player.vy = -100
                     end       
                 end
@@ -224,82 +217,24 @@ function update_players(game_progress_x, game_progress_y, dt)
     end
 end
 
-
-function addPlayerInToGame(posx, posy, keyInput)
-
-        local sprite = player_sprite_index[keyInput]
-        players[keyInput] = {
-            x = 8 + posx, 
-            y = 8 + posy, 
-            startPosition = posy,
-            width = 8, 
-            height = 8, 
-            boundsOffsetX = 0, 
-            boundsOffsetY = 0, 
-            vx = 0, 
-            vy = 0, 
-            onGround = false, 
-            bounce_charge = 0,
-            jump_height = min_jump_height,
-            jump_distance = min_jump_distance,
-            jump_gravity = 0,
-            fall_gravity = 50,
-            key=keyInput, 
-            sprite = sprite, 
-            disabled = false,
-            disabledCount = 0,
-            totalTimeEnabled = 0,
-            won = false
-            }
-        add(keys, keyInput)
-        playerCount = playerCount + 1
-
-
-end
-
 -- look up key associated with player and bounce them
 function bouncePlayer(key)
     local player = players[key]
     if not (player == nil) then
-        if player.onGround and not(player.won) then
-            local jump_dist_p1 = player.jump_distance * .6
-            local jump_dist_p2 = player.jump_distance * .4
-            local jump_velocity = (-2 * player.jump_height * jump_x_velocity) / jump_dist_p1
-            player.jump_gravity = (2 * player.jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p1 * jump_dist_p1)
-            player.fall_gravity = (2 * player.jump_height * jump_x_velocity * jump_x_velocity)  / (jump_dist_p2 * jump_dist_p2)
-            player.vx = jump_x_velocity  * 8
-            player.vy = jump_velocity  * 8
-            player.bounce_charge = 0
-            sfx(0)
-            d_last_time = time()
-        end
+        bounceActor(player)
     elseif gameMode == gMode.freeplay then
-        addPlayerInToGame(camera_x + 64, camera_y, key)
-
+        createActor(camera_x + 64, camera_y, key)
         setRespawnTimer()
-
         --disablePlayer(players[key]) -- new mode?
     end
-
-
-
 end
 
-function respawnPlayer(respawn)
-    local p = players[respawn.playerKey]
-    enablePlayer(p)
-    del(activeBirdList, respawn)
-end
 
 function draw_players()
     for key, player in pairs(players) do
-        spr(player.sprite, player.x, player.y)
+        spr(player.sprite, player.xpos, player.ypos)
     end
 
-end
-
-function get_player_count()
-    return playerCount
 end
 
 function get_disabled_count()
@@ -308,10 +243,10 @@ end
 
 function checkForOutOfBounds(leftBounds)    
     for key, player in pairs(players) do
-        if not(player.disabled) then 
-            if player.y >= (map_y_size - 1) * 8 then
+        if player.enabled then 
+            if player.ypos >= (map_y_size - 1) * 8 then
                 disablePlayer(player)
-            elseif player.x < leftBounds then
+            elseif player.xpos < leftBounds then
                 disablePlayer(player)
             end
         end
@@ -339,14 +274,14 @@ function check_object_collision_on_top(a, b)
     
 
      -- super janky here. I should figure out how to properly do this
-     return a_edges.bottom > b_edges.top and a.y < b.y and a.vy > 0
+     return a_edges.bottom > b_edges.top and a.ypos < b.ypos and a.vy > 0
         
 end
 
 function get_edges(obj)
     -- Calculate reference point
-    local center_x = obj.x + obj.boundsOffsetX
-    local center_y = obj.y + obj.boundsOffsetY
+    local center_x = obj.xpos + obj.boundsOffsetX
+    local center_y = obj.ypos + obj.boundsOffsetY
     
     local half_w = obj.width / 2
     local half_h = obj.height / 2
@@ -360,7 +295,7 @@ function get_edges(obj)
 end
 
 function setRespawnTimer()
-        local timeDelay = lerp(10,1,get_player_count()/32)
+        local timeDelay = lerp(10,1,playerCount/32)
         respawnTimer = timer(timeDelay)
 
 end

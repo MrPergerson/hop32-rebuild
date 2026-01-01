@@ -20,8 +20,8 @@ function initZombiePool(max_zombies)
     for i = 0, max_zombies, 1 do
         add(zombies, {
             id = i,
-            x = 0,
-            y = 0,
+            xpos = 0,
+            ypos = 0,
             vx = 0,
             vy = 0,
             width = 1,
@@ -34,7 +34,7 @@ function initZombiePool(max_zombies)
             jump_gravity = 0,
             fall_gravity = 50,
             sprite = 108,
-            active = false,
+            enabled = false,
             ai_enabled = false,
             move_dir = -1
         })
@@ -44,7 +44,7 @@ end
 function spawn_zombie(x,y)
     local zombie = nil
     for index, z in ipairs(zombies) do
-        if z.active == false then
+        if z.enabled == false then
             zombie = z
             break; -- does this work?
         end
@@ -55,9 +55,9 @@ function spawn_zombie(x,y)
         return
     end
 
-    zombie.active = true
-    zombie.x = x * 8
-    zombie.y = y * 8
+    zombie.enabled = true
+    zombie.xpos = x * 8
+    zombie.ypos = y * 8
 
     
     -- spawn zombie over X seconds
@@ -69,25 +69,25 @@ function spawn_zombie(x,y)
 end
 
 function disable_zombie(zombie)
-    zombie.x = 0
-    zombie.y = 0
-    zombie.active = false
+    zombie.xpos = 0
+    zombie.ypos = 0
+    zombie.enabled = false
     zombie.ai_enabled = false
 end
 
 function update_zombies(dt)
     for index, zombie in ipairs(zombies) do
 
-        if zombie.x + 8 < camera_x 
-        or zombie.x > camera_x + 200 
-        or zombie.y < camera_y  
-        or zombie.y > camera_y + 200 then
+        if zombie.xpos + 8 < camera_x 
+        or zombie.xpos > camera_x + 200 
+        or zombie.ypos < camera_y  
+        or zombie.ypos > camera_y + 200 then
             disable_zombie(zombie)
             break
         end
 
 
-        if zombie.active and zombie.ai_enabled then
+        if zombie.enabled and zombie.ai_enabled then
         
             zombie.vx = zombie.move_dir * SPEED
 
@@ -98,15 +98,15 @@ function update_zombies(dt)
 
             end
 
-            zombie_new_x = zombie.x + zombie.vx * dt + 0.5 * jump_acceleration_x * dt * dt
-            zombie_new_y = zombie.y + zombie.vy * dt + 0.5 * jump_acceleration_y * dt * dt
+            zombie_new_x = zombie.xpos + zombie.vx * dt + 0.5 * jump_acceleration_x * dt * dt
+            zombie_new_y = zombie.ypos + zombie.vy * dt + 0.5 * jump_acceleration_y * dt * dt
             zombie.vx += jump_acceleration_x * dt
             zombie.vy += jump_acceleration_y * dt
             zombie.vy = min(zombie.vy, maxFallVelocity)
 
 
             -- Check new positions for collisions
-            local checked_position = checkTileCollision(zombie_new_x, zombie_new_y, zombie.x, zombie.y, false)
+            local checked_position = checkTileCollision(zombie_new_x, zombie_new_y, zombie.xpos, zombie.ypos, false)
             zombie.onGround = checked_position.onGround
 
             if zombie.onGround then
@@ -132,9 +132,9 @@ function update_zombies(dt)
 
 
             -- Apply final position updates, if any
-            zombie.x = checked_position.x
+            zombie.xpos = checked_position.x
             --zombie.x = checked_position.x
-            zombie.y = checked_position.y
+            zombie.ypos = checked_position.y
                 
         end
     end
@@ -142,8 +142,8 @@ end
 
 function draw_zombies()
     for index, zombie in ipairs(zombies) do
-        if zombie.active then
-            spr(zombie.sprite, zombie.x, zombie.y)
+        if zombie.enabled then
+            spr(zombie.sprite, zombie.xpos, zombie.ypos)
         end
     end
 end

@@ -7,12 +7,12 @@ local HOVER_DOWN_SPEED = 30
 local debug = false
 local players_can_release_others = false
 
-function UFO:new() -- there can only be one
+function UFO:new( ) -- there can only be one
 
     local instance = {
         id = i,
-        x = 0,
-        y = 0,
+        xpos = 0,
+        ypos = 0,
         vx = 0,
         vy = 0,
         width = 8,
@@ -35,11 +35,8 @@ function UFO:new() -- there can only be one
             height = 32,
             boundsOffsetX = 4,
             boundsOffsetY = 28
-        },
-        ignoreList = {}
+        }
     }
-
-    
 
     setmetatable(instance, { __index = self })
 
@@ -47,8 +44,8 @@ function UFO:new() -- there can only be one
 end
 
 function UFO:enable(x,y)
-    self.x = x * 8
-    self.y = y * 8
+    self.xpos = x * 8
+    self.ypos = y * 8
     self.vx = 0
     self.vy = 0
     self.state = 1
@@ -59,29 +56,15 @@ function UFO:enable(x,y)
 end
 
 function UFO:disable()
-    self.x = 0
-    self.y = 0
+    self.xpos = 0
+    self.ypos = 0
     self.active = false
     self.ai_enabled = false
-
-    for index, value in ipairs(self.capture_tracker) do
-        self.releasePlayer()
-    end
-
-    self.ignoreList = {}
 end
 
 function UFO:update(dt)
 
     if self.active and self.ai_enabled then
-
-        if self.x + 8 < camera_x 
-        or self.x > camera_x + 200 
-        or self.y < camera_y  
-        or self.y > camera_y + 200 then
-            --self:disable()
-            printh("ufo out of bounds!") -- to handle this, it should travel to inbounds
-        end
 
         if self.state == 1 then
             
@@ -91,26 +74,26 @@ function UFO:update(dt)
                 self.vx = self.move_dir * MIN_SPEED
             end
 
-            if self.x < camera_x + 8 then
+            if self.xpos < camera_x + 8 then
                 self.move_dir = abs(self.move_dir)
-                self.x = camera_x + 8
-            elseif self.x > camera_x + 110 then
+                self.xpos = camera_x + 8
+            elseif self.xpos > camera_x + 110 then
                 self.move_dir = -abs(self.move_dir)
-                self.x = camera_x + 110
+                self.xpos = camera_x + 110
             end
 
             self.search_timer = max(self.search_timer - dt, 0)
 
-            if self.search_timer == 0 and self.x > camera_x + 70 then
+            if self.search_timer == 0 and self.xpos > camera_x + 70 then
                 self.vx = 0
                 self.state = 2
             end
            
 
         elseif self.state == 2 then
-            local tile = getSurfaceTileAtXPos(self.x)
+            local tile = getSurfaceTileAtXPos(self.xpos)
             if (tile) then
-                if self.y < (tile.y - 4) * 8 then
+                if self.ypos < (tile.y - 4) * 8 then
                     self.vy = HOVER_DOWN_SPEED
                 else
                     self.vy = 0
@@ -123,8 +106,8 @@ function UFO:update(dt)
         elseif self.state == 3 then
             
             self.capture_timer = max(self.capture_timer - dt, 0)
-            self.tracker_beam.x = self.x
-            self.tracker_beam.y = self.y
+            self.tracker_beam.xpos = self.xpos
+            self.tracker_beam.ypos = self.ypos
 
             if self.capture_timer == 0 then
                 for key, captured in pairs(self.capture_tracker) do
@@ -135,23 +118,21 @@ function UFO:update(dt)
                         captured.player.disabled = false
                     end
                 end
-
-                self.ignoreList = {}
                 self.state = 4
             end
            
         elseif self.state == 4 then
-            self.y -= MAX_SPEED * dt
-            if self.y+8 <= camera_y then 
+            self.ypos -= MAX_SPEED * dt
+            if self.ypos+8 <= camera_y then 
                 self:disable()
             end                      
         end
         
-        local self_new_x = self.x + self.vx * dt
-        local self_new_y = self.y + self.vy * dt
+        local self_new_x = self.xpos + self.vx * dt
+        local self_new_y = self.ypos + self.vy * dt
         
-        self.x = self_new_x
-        self.y = self_new_y
+        self.xpos = self_new_x
+        self.ypos = self_new_y
 
         
 
@@ -160,9 +141,7 @@ function UFO:update(dt)
 end
 
 function UFO:attractPlayer(player, dt)
-    if contains(self.ignoreList, player.key) then
-        -- ignore this player
-    elseif self.capture_tracker[player.key] == nil then
+    if self.capture_tracker[player.key] == nil then
        
         self.capture_tracker[player.key] = {
             player = player,
@@ -174,8 +153,8 @@ function UFO:attractPlayer(player, dt)
         local captured = self.capture_tracker[player.key] 
 
 
-        player.x = player.x + (self.x - player.x) * min(captured.t,1)
-        player.y = player.y + ((self.y+8) - player.y) * min(captured.t,1)
+        player.xpos = player.xpos + (self.xpos - player.xpos) * min(captured.t,1)
+        player.ypos = player.ypos + ((self.ypos+8) - player.ypos) * min(captured.t,1)
 
         captured.t += .1 * dt 
         -- t will increase past 1 but never in calculations
@@ -183,36 +162,7 @@ function UFO:attractPlayer(player, dt)
 
     end
     
-
-
     
-end
-
-function UFO:addToIgnoreList(player_key)
-    add(self.ignoreList, player_key)
-end
-
-function UFO:releasePlayer()
-    local t = -1
-    local key_to_release = ""
-
-    for key, captured in pairs(self.capture_tracker) do
-        if captured.t > t then
-            key_to_release = key
-            t = captured.t
-        end
-    end
-
-    if t > -1 then 
-        add(self.ignoreList, key_to_release)
-        
-        local player = self.capture_tracker[key_to_release].player
-        player.disabled = false
-        player.vx = 0
-        player.vy = 0
-        
-        self.capture_tracker[key_to_release] = nil
-    end
 end
 
 function UFO:draw()
@@ -220,10 +170,10 @@ function UFO:draw()
         
 
         if self.state == 3 or self.state == 4 then
-            spr(self.sprite2, self.x, self.y+6)
+            spr(self.sprite2, self.xpos, self.ypos+6)
         end
 
-        spr(self.sprite, self.x, self.y)
+        spr(self.sprite, self.xpos, self.ypos)
 
         if debug then
 
