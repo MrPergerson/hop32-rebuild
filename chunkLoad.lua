@@ -53,11 +53,28 @@ function loadChunk()
     
     if x_offset >= BIOME_DIST_UNIT.VOID then
         new_chunk = generateCloudChunk(x_offset, y_offset)
+
+        if x_offset == 384 then
+            printh("final boss")
+
+            initKing()
+            enableUFO(376 * 8, 40)
+            finalBossEnabled = true
+        end
+
     elseif x_offset >= BIOME_DIST_UNIT.CITY then
         new_chunk = generateVoidChunk(x_offset,y_offset, startingAsteroidSize)
         startingAsteroidSize -= 2
+
     elseif x_offset >= BIOME_DIST_UNIT.SNOW then
         new_chunk = generateCityChunk(x_offset, y_offset)
+
+        if x_offset == BIOME_DIST_UNIT.SNOW + 16 then
+            initVulture()
+            enableUFO((BIOME_DIST_UNIT.SNOW + 16) * 8, 8)
+        end
+
+
     else
         new_chunk = generateChunk(x_offset)
 
@@ -66,11 +83,13 @@ function loadChunk()
         else 
             
             local zombie_spawn_point = getRndSurfaceTile(new_chunk.surface_tiles)
-            spawn_zombie(zombie_spawn_point.x, zombie_spawn_point.y-1)
+            enableActor(zombies, -1, zombie_spawn_point.x * 8, (zombie_spawn_point.y-1) * 8)
         end
 
         if x_offset == 64 then
-            ufos[1]:enable(64 * 8,2)
+            printh(#ufos)
+            local ufo = enableUFO(64 * 8, 2 * 8)
+            printh(ufo.xpos)
         end
 
     end

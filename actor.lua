@@ -43,19 +43,19 @@ function createActor(actor_data, id)
     --local sprite = player_sprite_index[actor_data.id]
     local actor = {
         id=id, 
+        type = actor_data.type,
         enabled = false,
+        inputDisabled = false,
         xpos = 0, 
         ypos = 0, 
         startPosition = 0,
-        width = 8, 
-        height = 8, 
         boundsOffsetX = 0, 
         boundsOffsetY = 0, 
         vx = 0, 
         vy = 0, 
         move_dir = -1,
-        width = 1,
-        height = 1,
+        width = actor_data.width,
+        height = actor_data.height,
         boundsOffsetX = 0,
         boundsOffsetY = 0,
         onGround = false, 
@@ -75,13 +75,14 @@ function createActor(actor_data, id)
         capture_tracker = {},
         capture_timer = 5,
         tracker_beam = {
-            x = 0,
-            y = 0,
+            xpos = 0,
+            ypos = 0,
             width = 16,
             height = 32,
             boundsOffsetX = 4,
             boundsOffsetY = 28
-        }
+        },
+        update = nil
         }
     --add(keys, keyInput)
     --playerCount = playerCount + 1
@@ -94,7 +95,7 @@ function enableActor(actor_table, id, xpos, ypos)
     local actor = nil
 
     if id == -1 then -- if id -1, then enable first available inactive
-        for index, a in ipairs(actor_table) do
+        for key, a in pairs(actor_table) do
             if a.enabled == false then
                 actor = a
                 break;
@@ -116,12 +117,13 @@ function enableActor(actor_table, id, xpos, ypos)
 
     actor.enabled = true
     actor.ai_enabled = true
+    actor.inputDisabled = false
     actor.state = 1
     actor.search_timer = 5 + flr(rnd(5)) -- ufo
-    actor.y = ypos
-    actor.x = xpos
+    actor.ypos = ypos
+    actor.xpos = xpos
     actor.bounce_charge = 0-- may want to change this, but adding charge introduces bug
-    
+    return actor
 end
 
 function disableActor(actor)
@@ -135,6 +137,30 @@ function disableActor(actor)
     actor.vy = 0
     --disabledPlayerCount = disabledPlayerCount + 1
     --queue_respawn_bird(player.key)
+end
+
+function updateActors(dt)
+    for i, actor_table in ipairs(actors) do
+        
+    end
+    
+end
+
+function getNewActorPosition(zombie, dt)
+    if zombie.vy >= 0 then
+        jump_acceleration_y = zombie.fall_gravity * 8
+    else
+        jump_acceleration_y = zombie.jump_gravity * 8
+
+    end
+
+    local zombie_new_x = zombie.xpos + zombie.vx * dt + 0.5 * jump_acceleration_x * dt * dt
+    local zombie_new_y = zombie.ypos + zombie.vy * dt + 0.5 * jump_acceleration_y * dt * dt
+    zombie.vx += jump_acceleration_x * dt
+    zombie.vy += jump_acceleration_y * dt
+    zombie.vy = min(zombie.vy, maxFallVelocity)
+
+    return {xpos = zombie_new_x, ypos = zombie_new_y}
 end
 
 function bounceActor(actor) -- or actor?
@@ -155,6 +181,65 @@ end
 -- timer()
 -- moveActorTo()
 -- autoMoveLeftRight()
--- bounceActor()
--- advancedBounceActor()
 -- attractActors(thisActor)
+
+function checkActorOutOfBounds(actor)
+    if actor.xpos + 8 < camera_x - 16
+    --or actor.xpos > camera_x + 200 -- we don't care about right bounds
+    --or actor.ypos < camera_y  
+    or actor.ypos > camera_y + 200 then
+        --printh(actor.type .. " " .. actor.id .. " out of bounds")
+        return true
+    end
+
+    return false
+end
+
+function drawActors(actor_table)
+    for key, actor in pairs(actor_table) do
+        if actor.enabled then
+            spr(actor.sprite, actor.xpos, actor.ypos)
+        end 
+    end
+end
+
+-- actor collision
+function check_object_collision(a, b)
+    local a_edges = get_edges(a)
+    local b_edges = get_edges(b)
+    
+    -- can we return the edge that collides?
+    -- ufo would also have to be ignored after it bounces...
+
+    return a_edges.left < b_edges.right and
+           a_edges.right > b_edges.left and
+           a_edges.top < b_edges.bottom and
+           a_edges.bottom > b_edges.top
+end
+
+-- actor collision
+function check_object_collision_on_top(a, b)
+    local a_edges = get_edges(a)
+    local b_edges = get_edges(b)
+    
+
+     -- super janky here. I should figure out how to properly do this
+     return a_edges.bottom > b_edges.top and a.ypos < b.ypos and a.vy > 0
+        
+end
+
+function get_edges(obj)
+    -- Calculate reference point
+    local center_x = obj.xpos + obj.boundsOffsetX
+    local center_y = obj.ypos + obj.boundsOffsetY
+    
+    local half_w = obj.width / 2
+    local half_h = obj.height / 2
+    
+    return {
+        left = center_x - half_w,
+        right = center_x + half_w,
+        top = center_y - half_h,
+        bottom = center_y + half_h
+    }
+end

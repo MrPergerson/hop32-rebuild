@@ -1,12 +1,13 @@
 MAIN TASKS
-- Redesign UFO class to be modular
-- Redesign Zombie class to be modular
+- Fix refactor bugs 
 - Fix death bug where players are still considered alive (still repos!!)
 - Fix bug where game finishes mid game
 - Create victory screen
 - Finalize player art
-- [BLOCKED] Design and add vulture
-- [BLOCKED] Finalize cloud kingdom
+- Design and add vulture
+- Finalize cloud kingdom
+- [COMPLETE] Redesign UFO class to be modular
+- [COMPLETE] Redesign Zombie class to be modular
 - [COMPLETE] Create game over screen
 - [COMPLETE] Create menu with game settings 
 - [COMPLETE] Credits in game
@@ -36,6 +37,8 @@ snow storm
 Ravens
 - Fly diagonally down to the surface, then up
 - Spawn in the city
+- like the UFO but the don't stop moving left/right when they come down to attract.
+The attract at the roof of buildings.
 
 UFO secret
 Ride the UFO!

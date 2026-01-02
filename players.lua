@@ -3,7 +3,7 @@ poke(0x5F2D, 0x1) -- enable keyboard input
 -- game variables
 local GRAVITY = 15  -- Gravity value
 local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
-players = {}
+
 keys = {}
 key_index = 1 -- used for sorting through keys
 playerCount = 0
@@ -44,7 +44,7 @@ function initPlayers()
     posy = 16
     xOffset = 0
     row = 1
-    initActorPool(32, players, {sprite = 0, sprite2 = 0})
+    initActorPool(32, players, {type = "player", width = 8, height = 8, sprite = 0, sprite2 = 0})
 end
 
 function disablePlayer(player)
@@ -125,29 +125,17 @@ end
 
 function update_players(game_progress_x, game_progress_y, dt)  
     for key, player in pairs(players) do
-        if player.enabled then
+        if player.enabled and not(player.inputDisabled) then
             if not(player.vx == 0) then
                 jump_acceleration_x = 0
             else
                 jump_acceleration_x = 0 -- what's this for ?? 
             end
 
-            if player.vy >= 0 then
-                jump_acceleration_y = player.fall_gravity * 8
-            else
-                jump_acceleration_y = player.jump_gravity * 8
-
-            end
-
-            player_new_x = player.xpos + player.vx * dt + 0.5 * jump_acceleration_x * dt * dt
-            player_new_y = player.ypos + player.vy * dt + 0.5 * jump_acceleration_y * dt * dt
-            player.vx += jump_acceleration_x * dt
-            player.vy += jump_acceleration_y * dt
-            player.vy = min(player.vy, maxFallVelocity)
-
+            local player_new_pos = getNewActorPosition(player, dt)
 
             -- Check new positions for collisions
-            local checked_position = checkTileCollision(player_new_x, player_new_y, player.xpos, player.ypos, true)
+            local checked_position = checkTileCollision(player_new_pos.xpos, player_new_pos.ypos, player.xpos, player.ypos, true)
             player.onGround = checked_position.onGround
 
             if player.onGround then
@@ -166,9 +154,7 @@ function update_players(game_progress_x, game_progress_y, dt)
             --player.x = checked_position.x
             player.ypos = checked_position.y
 
-            if player.xpos < camera_x-16 then
-                disablePlayer(player)
-            elseif player.ypos >= camera_y + 128 then
+            if checkActorOutOfBounds(player) then
                 disablePlayer(player)
             end
 
@@ -192,12 +178,6 @@ function update_players(game_progress_x, game_progress_y, dt)
                 if check_object_collision(player, ufo) then
                     // if colliding with top of ufo, bounce
                     if check_object_collision_on_top(player, ufo) then
-                        
-                        if players_can_release_others then
-                            ufo:releasePlayer()
-                        end
-                        
-                        ufo:addToIgnoreList(player.key)
                         sfx(2)
                         
                         player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
@@ -211,7 +191,7 @@ function update_players(game_progress_x, game_progress_y, dt)
         -- Check for ufo collisions
         for _, ufo in ipairs(ufos) do
             if ufo.state == 3 and check_object_collision(player, ufo.tracker_beam) then
-                ufo:attractPlayer(player, dt)
+                attractPlayer(player, dt)
             end
         end
     end
@@ -219,79 +199,16 @@ end
 
 -- look up key associated with player and bounce them
 function bouncePlayer(key)
+    
     local player = players[key]
-    if not (player == nil) then
+
+    if not (player == nil) and not(player.inputDisabled) then
         bounceActor(player)
     elseif gameMode == gMode.freeplay then
         createActor(camera_x + 64, camera_y, key)
         setRespawnTimer()
         --disablePlayer(players[key]) -- new mode?
     end
-end
-
-
-function draw_players()
-    for key, player in pairs(players) do
-        spr(player.sprite, player.xpos, player.ypos)
-    end
-
-end
-
-function get_disabled_count()
-    return disabledPlayerCount
-end
-
-function checkForOutOfBounds(leftBounds)    
-    for key, player in pairs(players) do
-        if player.enabled then 
-            if player.ypos >= (map_y_size - 1) * 8 then
-                disablePlayer(player)
-            elseif player.xpos < leftBounds then
-                disablePlayer(player)
-            end
-        end
-    end
-end
-
--- actor collision
-function check_object_collision(a, b)
-    local a_edges = get_edges(a)
-    local b_edges = get_edges(b)
-    
-    -- can we return the edge that collides?
-    -- ufo would also have to be ignored after it bounces...
-
-    return a_edges.left < b_edges.right and
-           a_edges.right > b_edges.left and
-           a_edges.top < b_edges.bottom and
-           a_edges.bottom > b_edges.top
-end
-
--- actor collision
-function check_object_collision_on_top(a, b)
-    local a_edges = get_edges(a)
-    local b_edges = get_edges(b)
-    
-
-     -- super janky here. I should figure out how to properly do this
-     return a_edges.bottom > b_edges.top and a.ypos < b.ypos and a.vy > 0
-        
-end
-
-function get_edges(obj)
-    -- Calculate reference point
-    local center_x = obj.xpos + obj.boundsOffsetX
-    local center_y = obj.ypos + obj.boundsOffsetY
-    
-    local half_w = obj.width / 2
-    local half_h = obj.height / 2
-    
-    return {
-        left = center_x - half_w,
-        right = center_x + half_w,
-        top = center_y - half_h,
-        bottom = center_y + half_h
-    }
 end
 
 function setRespawnTimer()

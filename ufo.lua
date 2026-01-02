@@ -1,4 +1,3 @@
-UFO = {}
 
 local SPEED = 500
 local MIN_SPEED = 50
@@ -7,110 +6,88 @@ local HOVER_DOWN_SPEED = 30
 local debug = false
 local players_can_release_others = false
 
-function UFO:new( ) -- there can only be one
+function initUFOPool()
+    ufos = {}
 
-    local instance = {
-        id = i,
-        xpos = 0,
-        ypos = 0,
-        vx = 0,
-        vy = 0,
-        width = 8,
-        height = 8,
-        boundsOffsetX = 4,
-        boundsOffsetY = 4,
-        sprite = 109,
-        sprite2 = 110,
-        active = false,
-        ai_enabled = false,
-        move_dir = -1,
-        state = 1,
-        search_timer = 5,
-        capture_tracker = {},
-        capture_timer = 5,
-        tracker_beam = {
-            x = 0,
-            y = 0,
-            width = 16,
-            height = 32,
-            boundsOffsetX = 4,
-            boundsOffsetY = 28
-        }
-    }
-
-    setmetatable(instance, { __index = self })
-
-    return instance
+    initActorPool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 109, sprite2 = 110})
 end
 
-function UFO:enable(x,y)
-    self.xpos = x * 8
-    self.ypos = y * 8
-    self.vx = 0
-    self.vy = 0
-    self.state = 1
-    self.active = true
-    self.ai_enabled = true
-    self.search_timer = 5 + flr(rnd(5))
+function initKing()
+    ufos = {}
+
+    initActorPool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
+end
+
+function initVulture()
+    ufos = {}
+
+    initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 122})
+end
+
+
+function enableUFO(xpos, ypos)
+
+    local ufo = enableActor(ufos, 1, xpos, ypos)
+    ufo.boundsOffsetX = 4
+    ufo.boundsOffsetY = 4
+    ufo.search_timer = 5 + flr(rnd(5))
+
+    return ufo
 
 end
 
-function UFO:disable()
-    self.xpos = 0
-    self.ypos = 0
-    self.active = false
-    self.ai_enabled = false
-end
 
-function UFO:update(dt)
+function updateUFO(dt)
 
-    if self.active and self.ai_enabled then
+    local ufo = ufos[1]
 
-        if self.state == 1 then
+    if ufo.enabled and ufo.ai_enabled then
+
+        if ufo.state == 1 then
             
-            if self.move_dir > 0 then
-                self.vx = self.move_dir * MAX_SPEED
+            if ufo.move_dir > 0 then
+                ufo.vx = ufo.move_dir * MAX_SPEED
             else
-                self.vx = self.move_dir * MIN_SPEED
+                ufo.vx = ufo.move_dir * MIN_SPEED
             end
 
-            if self.xpos < camera_x + 8 then
-                self.move_dir = abs(self.move_dir)
-                self.xpos = camera_x + 8
-            elseif self.xpos > camera_x + 110 then
-                self.move_dir = -abs(self.move_dir)
-                self.xpos = camera_x + 110
+            if ufo.xpos < camera_x + 8 then
+                ufo.move_dir = abs(ufo.move_dir)
+                ufo.xpos = camera_x + 8
+            elseif ufo.xpos > camera_x + 110 then
+                ufo.move_dir = -abs(ufo.move_dir)
+                ufo.xpos = camera_x + 110
             end
 
-            self.search_timer = max(self.search_timer - dt, 0)
+            ufo.search_timer = max(ufo.search_timer - dt, 0)
 
-            if self.search_timer == 0 and self.xpos > camera_x + 70 then
-                self.vx = 0
-                self.state = 2
+            if ufo.search_timer == 0 and ufo.xpos > camera_x + 70 then
+                ufo.vx = 0
+                ufo.state = 2
             end
            
 
-        elseif self.state == 2 then
-            local tile = getSurfaceTileAtXPos(self.xpos)
+        elseif ufo.state == 2 then
+            local tile = getSurfaceTileAtXPos(ufo.xpos)
             if (tile) then
-                if self.ypos < (tile.y - 4) * 8 then
-                    self.vy = HOVER_DOWN_SPEED
+                if ufo.ypos < (tile.y - 4) * 8 then
+                    ufo.vy = HOVER_DOWN_SPEED
                 else
-                    self.vy = 0
-                    self.state = 3
-                    self.capture_timer = 5
+                    ufo.vy = 0
+                    ufo.state = 3
+                    ufo.capture_timer = 5
                     sfx(3,1)
                 end
             end
         
-        elseif self.state == 3 then
+        elseif ufo.state == 3 then
             
-            self.capture_timer = max(self.capture_timer - dt, 0)
-            self.tracker_beam.xpos = self.xpos
-            self.tracker_beam.ypos = self.ypos
+            ufo.capture_timer = max(ufo.capture_timer - dt, 0)
+            ufo.tracker_beam.xpos = ufo.xpos
+            ufo.tracker_beam.ypos = ufo.ypos
 
-            if self.capture_timer == 0 then
-                for key, captured in pairs(self.capture_tracker) do
+            if ufo.capture_timer == 0 then
+                for key, captured in pairs(ufo.capture_tracker) do
                     
                     if (captured.t > .2) then
                         disablePlayer(captured.player)
@@ -118,21 +95,21 @@ function UFO:update(dt)
                         captured.player.disabled = false
                     end
                 end
-                self.state = 4
+                ufo.state = 4
             end
            
-        elseif self.state == 4 then
-            self.ypos -= MAX_SPEED * dt
-            if self.ypos+8 <= camera_y then 
-                self:disable()
+        elseif ufo.state == 4 then
+            ufo.ypos -= MAX_SPEED * dt
+            if ufo.ypos+8 <= camera_y then 
+                disableActor(ufo)
             end                      
         end
         
-        local self_new_x = self.xpos + self.vx * dt
-        local self_new_y = self.ypos + self.vy * dt
+        local self_new_x = ufo.xpos + ufo.vx * dt
+        local self_new_y = ufo.ypos + ufo.vy * dt
         
-        self.xpos = self_new_x
-        self.ypos = self_new_y
+        ufo.xpos = self_new_x
+        ufo.ypos = self_new_y
 
         
 
@@ -140,21 +117,24 @@ function UFO:update(dt)
     
 end
 
-function UFO:attractPlayer(player, dt)
-    if self.capture_tracker[player.key] == nil then
+function attractPlayer(player, dt)
+
+    local ufo = ufos[1]
+
+    if ufo.capture_tracker[player.id] == nil then
        
-        self.capture_tracker[player.key] = {
+        ufo.capture_tracker[player.id] = {
             player = player,
             t = 0
         }
 
-        self.capture_tracker[player.key].player.disabled = true
+        ufo.capture_tracker[player.id].player.inputDisabled = true
     else
-        local captured = self.capture_tracker[player.key] 
+        local captured = ufo.capture_tracker[player.id] 
 
 
-        player.xpos = player.xpos + (self.xpos - player.xpos) * min(captured.t,1)
-        player.ypos = player.ypos + ((self.ypos+8) - player.ypos) * min(captured.t,1)
+        player.xpos = player.xpos + (ufo.xpos - player.xpos) * min(captured.t,1)
+        player.ypos = player.ypos + ((ufo.ypos+8) - player.ypos) * min(captured.t,1)
 
         captured.t += .1 * dt 
         -- t will increase past 1 but never in calculations
@@ -165,15 +145,18 @@ function UFO:attractPlayer(player, dt)
     
 end
 
-function UFO:draw()
-    if self.active then
+function drawUFO()
+
+    local ufo = ufos[1]
+
+    if ufo.enabled then
         
 
-        if self.state == 3 or self.state == 4 then
-            spr(self.sprite2, self.xpos, self.ypos+6)
+        if ufo.state == 3 or ufo.state == 4 then
+            spr(ufo.sprite2, ufo.xpos, ufo.ypos+6)
         end
 
-        spr(self.sprite, self.xpos, self.ypos)
+        spr(ufo.sprite, ufo.xpos, ufo.ypos)
 
         if debug then
 
@@ -181,8 +164,8 @@ function UFO:draw()
 
             rect(ufo_bounds.left, ufo_bounds.top, ufo_bounds.right, ufo_bounds.bottom, 8)
 
-            if self.state == 3 then
-                local beam_bounds = get_edges(self.tracker_beam)
+            if ufo.state == 3 then
+                local beam_bounds = get_edges(ufo.tracker_beam)
 
                 rect(beam_bounds.left, beam_bounds.top, beam_bounds.right, beam_bounds.bottom, 8)
             end

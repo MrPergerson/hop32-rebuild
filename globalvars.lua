@@ -41,10 +41,11 @@ score_timer = 15
 -- players
 win_order = {}
 
--- ufo
+-- actors
 ufos = {}
-
-
+zombies = {}
+players = {}
+actors = {}
 
 -- progress
 AREA = {
@@ -54,6 +55,7 @@ AREA = {
 current_area = -1
 chunk_progress_x = 0
 chunk_progress_y = 0
+finalBossEnabled = false
 
 TILE = {
     NONE = 0,
