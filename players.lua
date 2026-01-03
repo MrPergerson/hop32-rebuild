@@ -190,7 +190,7 @@ function update_players(game_progress_x, game_progress_y, dt)
 
         -- Check for ufo collisions
         for _, ufo in ipairs(ufos) do
-            if ufo.state == 3 and check_object_collision(player, ufo.tracker_beam) then
+            if (ufo.state == 3 or (ufo.type == "vulture" and ufo.state == 2)) and check_object_collision(player, ufo.tracker_beam) then
                 attractPlayer(player, dt)
             end
         end

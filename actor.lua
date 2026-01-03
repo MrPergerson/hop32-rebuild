@@ -71,9 +71,8 @@ function createActor(actor_data, id)
         state = 1,
         totalTimeEnabled = 0,
         won = false,
-        search_timer = 5, -- ufo
+        timer_1 = 0,
         capture_tracker = {},
-        capture_timer = 5,
         tracker_beam = {
             xpos = 0,
             ypos = 0,
@@ -182,6 +181,28 @@ end
 -- moveActorTo()
 -- autoMoveLeftRight()
 -- attractActors(thisActor)
+
+function processTimer(time, dt)
+    return max(time - dt, 0)
+end
+
+function moveLeftRight(actor)
+
+    if actor.move_dir > 0 then
+        actor.vx = actor.move_dir * MAX_SPEED
+    else
+        actor.vx = actor.move_dir * MIN_SPEED
+    end
+
+    if actor.xpos < camera_x + 8 then
+        actor.move_dir = abs(actor.move_dir)
+        actor.xpos = camera_x + 8
+    elseif actor.xpos > camera_x + 110 then
+        actor.move_dir = -abs(actor.move_dir)
+        actor.xpos = camera_x + 110
+    end
+
+end
 
 function checkActorOutOfBounds(actor)
     if actor.xpos + 8 < camera_x - 16
