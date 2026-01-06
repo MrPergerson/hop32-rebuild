@@ -168,7 +168,7 @@ function getSurfaceTileAtXPos(x_pos)
     local x = flr(x_pos/8)
 
     -- 1. Identify which chunk to search for
-    printh(#loaded_chunks)
+    --printh(#loaded_chunks)
     for c in all(loaded_chunks) do
         if x >= c.x and x < c.x + chunk_x_size then
             chunk = c
@@ -177,9 +177,9 @@ function getSurfaceTileAtXPos(x_pos)
     end
 
     local st = chunk.surface_tiles
-    printh(st)
+    --printh(st)
     for index, surface_tile in ipairs(st) do
-        printh(surface_tile.x .. " looking for " .. x)
+        --printh(surface_tile.x .. " looking for " .. x)
         if surface_tile.x == x then
             return surface_tile
         end

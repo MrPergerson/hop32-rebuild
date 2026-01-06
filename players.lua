@@ -48,14 +48,14 @@ function initPlayers()
 end
 
 function disablePlayer(player)
+    queue_respawn_bird(player.id)
     disableActor(player)
     disabledPlayerCount = disabledPlayerCount + 1
-    queue_respawn_bird(player.key)
     
 end
 
 function enablePlayer(player)
-    enableActor(players, player.key, 0,0) -- I already have the player ref??
+    enableActor(players, player.key, player.xpos,player.ypos) -- I already have the player ref??
     disabledPlayerCount = disabledPlayerCount - 1
 end
 
@@ -73,6 +73,7 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
 
                 playerCount = playerCount + 1
                 local p = players[playerCount]
+                p.id = keyInput
                 p.sprite = player_sprite_index[keyInput]
                 p.xpos = 8 + posx + camera_x
                 p.ypos = 8 + posy + camera_y
@@ -156,12 +157,15 @@ function update_players(game_progress_x, game_progress_y, dt)
 
             if checkActorOutOfBounds(player) then
                 disablePlayer(player)
+                player.xpos = -8
+                player.ypos = -8
             end
 
              -- Check for respawn bird collisions
              for _, respawn in ipairs(activeBirdList) do
                 if check_object_collision(player, respawn.bird) then
                     enableActor(players, respawn.playerKey, player.xpos, player.ypos) -- update this
+                    disabledPlayerCount = disabledPlayerCount - 1
                     del(activeBirdList, respawn)
                 end
             end   
@@ -170,6 +174,8 @@ function update_players(game_progress_x, game_progress_y, dt)
             for _, zombie in ipairs(zombies) do
                 if check_object_collision(player, zombie) then
                     disablePlayer(player)
+                    player.xpos = -8
+                    player.ypos = -8
                     sfx(1)
                 end
             end

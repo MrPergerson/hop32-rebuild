@@ -11,7 +11,7 @@ function init_respawn_birds()
 end
 
 function queue_respawn_bird(player_key)
-    respawnQueue:enqueue_unique({bird = {x = -8, y = -8, width = 8, height = 16, boundsOffsetX = 0, boundsOffsetY = 4, sprite = 1}, playerKey = player_key})
+    respawnQueue:enqueue_unique({bird = {xpos = -8, ypos = -8, width = 8, height = 16, boundsOffsetX = 0, boundsOffsetY = 4, sprite = 1}, playerKey = player_key})
 end
 
 function addRespawnBird()
@@ -20,10 +20,10 @@ function addRespawnBird()
     local bird = respawn.bird
     local initXPos = camera_x + 128
     local initYPos = camera_y + 20 + flr(rnd(10))
-    bird.x = initXPos
-    bird.y = initYPos
-    player.x = initXPos
-    player.y = initYPos + 8
+    bird.xpos = initXPos
+    bird.ypos = initYPos
+    player.xpos = initXPos
+    player.ypos = initYPos + 8
 
     add(activeBirdList, respawn)
 
@@ -37,10 +37,10 @@ function update_respawns()
 
     local returnToQueue = nil -- move all birds across the screen
     for _, respawn in ipairs(activeBirdList) do
-        local newPos = respawn.bird.x - birdSpeed      
-        respawn.bird.x = newPos
+        local newPos = respawn.bird.xpos - birdSpeed      
+        respawn.bird.xpos = newPos
         local p = players[respawn.playerKey];
-        p.x = newPos
+        p.xpos = newPos
 
         if newPos < camera_x - 8 then
            returnToQueue = respawn
@@ -58,6 +58,6 @@ end
 
 function draw_respawn_birds()
     for _, respawn in ipairs(activeBirdList) do
-        spr(respawn.bird.sprite, respawn.bird.x, respawn.bird.y)
+        spr(respawn.bird.sprite, respawn.bird.xpos, respawn.bird.ypos)
     end
 end

@@ -22,7 +22,13 @@ end
 function initVulture()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 122})
+    initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 126})
+
+    ufos[1].tracker_beam.width = 12
+    ufos[1].tracker_beam.height = 8
+    ufos[1].tracker_beam.boundsOffsetX = 4
+    ufos[1].tracker_beam.boundsOffsetY = 6
+
 end
 
 
@@ -49,12 +55,12 @@ function updateUFO(dt)
             
             moveLeftRight(ufo)
 
-            ufo.timer_1 = processTimer(ufo.timer_1, dt)
-
             if ufo.timer_1 == 0 and ufo.xpos > camera_x + 70 then
                 ufo.vx = 0
                 ufo.state = 2
             end
+
+            ufo.timer_1 = processTimer(ufo.timer_1, dt)
 
         elseif ufo.state == 2 then
 
@@ -69,6 +75,8 @@ function updateUFO(dt)
                         ufo.timer_1 = 5
                         sfx(3,1)
                     end
+                else
+                    ufo.state = 1
                 end
             elseif ufo.type == "vulture" then
 
@@ -142,12 +150,8 @@ end
 
 function disableCapturedActors(ufo)
     for key, captured in pairs(ufo.capture_tracker) do
-        if ufo.type == "vulture" or (captured.t > .2) then
-            disablePlayer(captured.player)
-            printh("done")
-        else
-            captured.player.inputDisabled = false
-        end
+        captured.player.xpos = -8
+        captured.player.ypos = -8
     end
 end
 
@@ -162,18 +166,22 @@ function attractPlayer(player, dt)
             t = 0
         }
 
-        ufo.capture_tracker[player.id].player.inputDisabled = true
+        disableActor(player)
+        disabledPlayerCount = disabledPlayerCount + 1
 
     else
         local captured = ufo.capture_tracker[player.id] 
 
         if ufo.type ~= "vulture" then
-            player.xpos = player.xpos + (ufo.xpos - player.xpos) * min(captured.t,1)
-            player.ypos = player.ypos + ((ufo.ypos+8) - player.ypos) * min(captured.t,1)
+            player.xpos = player.xpos + (ufo.xpos - player.xpos) * min(captured.t,.2)
+            player.ypos = player.ypos + ((ufo.ypos+8) - player.ypos) * min(captured.t,.2)
 
             captured.t += .1 * dt 
-            -- t will increase past 1 but never in calculations
-            -- t is also used to determine who gets released first
+
+            if captured.t >= .2 then
+                player.xpos = -8
+                player.ypos = -8
+            end
         end
     end
 end
@@ -184,20 +192,24 @@ function drawUFO()
 
     if ufo.enabled then
         
+        spr(ufo.sprite, ufo.xpos, ufo.ypos)
 
         if  ufo.state == 3 or ufo.state == 4 or (ufo.type == "vulture" and ufo.state == 2) then
-            spr(ufo.sprite2, ufo.xpos, ufo.ypos+6)
+            
+            if ufo.type == "vulture" then
+                spr(ufo.sprite2, ufo.xpos, ufo.ypos+4)
+            else
+                spr(ufo.sprite2, ufo.xpos, ufo.ypos+6)
+            end
 
             if debug_mode then
                 local beam_bounds = get_edges(ufo.tracker_beam)
 
                 rect(beam_bounds.left, beam_bounds.top, beam_bounds.right, beam_bounds.bottom, 8)
-            
-
             end
         end
 
-        spr(ufo.sprite, ufo.xpos, ufo.ypos)
+        
 
         if debug_mode then
 

@@ -41,7 +41,7 @@ function switchGameState(state)
         camera_y = 0
         initMenu(startGameFromMainMenu)
     elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 12
+        chunk_progress_x = 3
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
@@ -149,7 +149,6 @@ function _update()
             end
 
             updateUFO(delta_time)
-            updateActors(delta_time)
             update_players(camera_x, camera_y, delta_time)
             update_zombies(delta_time)
             update_respawns()
@@ -182,19 +181,15 @@ function _update()
 
             bouncePlayer(keyInput)       
         end
-    elseif gameState == gstate.complete or gameState == gstate.gameover then
+    elseif gameState == gstate.gameover then
+        updateUFO(delta_time)
+        update_players(camera_x, camera_y, delta_time)
+        update_zombies(delta_time)
+        resetGameAfterTimer()
 
-        if timer_1 < timeUntilRestart then
-            timer_1 += delta_time     
-        else
-            score_timer -= delta_time
-
-            if score_timer <= 0 then
-                restart()
-            elseif stat(30) and stat(31) == "\32" then
-                    restart()
-            end
-        end
+    elseif gameState == gstate.complete then
+        resetGameAfterTimer()
+        
     end
 end
 
@@ -261,6 +256,20 @@ function _draw()
             mouse_y = stat(33) + camera_y
             rect(mouse_x, mouse_y, mouse_x + 2, mouse_y + 2)
         end       
+end
+
+function resetGameAfterTimer()
+    if timer_1 < timeUntilRestart then
+        timer_1 += delta_time     
+    else
+        score_timer -= delta_time
+
+        if score_timer <= 0 then
+            restart()
+        elseif stat(30) and stat(31) == "\32" then
+                restart()
+        end
+    end
 end
 
 function toggleDebugMode()

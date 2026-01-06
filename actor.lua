@@ -80,9 +80,8 @@ function createActor(actor_data, id)
             height = 32,
             boundsOffsetX = 4,
             boundsOffsetY = 28
-        },
-        update = nil
         }
+    }
     --add(keys, keyInput)
     --playerCount = playerCount + 1
     return actor
@@ -130,8 +129,8 @@ function disableActor(actor)
     actor.ai_enabled = false
     actor.disabledCount = actor.disabledCount + 1 -- player
     actor.totalTimeEnabled = actor.totalTimeEnabled + (time() - actor.totalTimeEnabled)  -- player
-    actor.xpos = -8
-    actor.ypos = -8
+    --actor.xpos = -8
+    --actor.ypos = -8
     actor.vx = 0
     actor.vy = 0
     --disabledPlayerCount = disabledPlayerCount + 1
@@ -218,9 +217,9 @@ end
 
 function drawActors(actor_table)
     for key, actor in pairs(actor_table) do
-        if actor.enabled then
+        --if actor.enabled then
             spr(actor.sprite, actor.xpos, actor.ypos)
-        end 
+        --end 
     end
 end
 
