@@ -137,12 +137,6 @@ function disableActor(actor)
     --queue_respawn_bird(player.key)
 end
 
-function updateActors(dt)
-    for i, actor_table in ipairs(actors) do
-        
-    end
-    
-end
 
 function getNewActorPosition(zombie, dt)
     if zombie.vy >= 0 then

@@ -24,7 +24,7 @@ function initVulture()
 
     initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 126})
 
-    ufos[1].tracker_beam.width = 12
+    ufos[1].tracker_beam.width = 10
     ufos[1].tracker_beam.height = 8
     ufos[1].tracker_beam.boundsOffsetX = 4
     ufos[1].tracker_beam.boundsOffsetY = 6
@@ -123,8 +123,8 @@ function updateUFO(dt)
 
         if ufo.type == "vulture" then
             for key, captured in pairs(ufo.capture_tracker) do
-                captured.player.xpos = ufo.xpos
-                captured.player.ypos = ufo.ypos
+                captured.player.xpos = ufo.xpos + 4
+                captured.player.ypos = ufo.ypos + 4
             end
         end
         
