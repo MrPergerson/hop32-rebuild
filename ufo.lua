@@ -24,7 +24,7 @@ function initVulture()
 
     initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 126})
 
-    ufos[1].tracker_beam.width = 10
+    ufos[1].tracker_beam.width = 8
     ufos[1].tracker_beam.height = 8
     ufos[1].tracker_beam.boundsOffsetX = 4
     ufos[1].tracker_beam.boundsOffsetY = 6
@@ -89,7 +89,7 @@ function updateUFO(dt)
                 else
                     ufo.vy = -VULTURE_DOWN_SPEED
                     ufo.state = 4
-                    disableCapturedActors(ufo)
+                    hideCapturedActors(ufo)
                 end
 
             end
@@ -101,7 +101,7 @@ function updateUFO(dt)
             ufo.tracker_beam.ypos = ufo.ypos
 
             if ufo.timer_1 == 0 then
-                disableCapturedActors(ufo)
+                hideCapturedActors(ufo)
                 ufo.state = 4
             end                             
         elseif ufo.state == 4 then
@@ -128,6 +128,10 @@ function updateUFO(dt)
             end
         end
         
+        if ufo.type == "ufo" then
+            attractPlayers()
+        end
+
         local self_new_x = ufo.xpos + ufo.vx * dt
         local self_new_y = ufo.ypos + ufo.vy * dt
         
@@ -148,14 +152,14 @@ function resetUFO(ufo, xpos, ypos)
     ufo.capture_tracker = {}
 end
 
-function disableCapturedActors(ufo)
+function hideCapturedActors(ufo)
     for key, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = -8
         captured.player.ypos = -8
     end
 end
 
-function attractPlayer(player, dt)
+function capturePlayer(player)
 
     local ufo = ufos[1]
 
@@ -166,22 +170,28 @@ function attractPlayer(player, dt)
             t = 0
         }
 
+        --printh("attracted " .. player.id)
         disableActor(player)
         disabledPlayerCount = disabledPlayerCount + 1
 
-    else
-        local captured = ufo.capture_tracker[player.id] 
+    end
 
-        if ufo.type ~= "vulture" then
-            player.xpos = player.xpos + (ufo.xpos - player.xpos) * min(captured.t,.2)
-            player.ypos = player.ypos + ((ufo.ypos+8) - player.ypos) * min(captured.t,.2)
+end
 
-            captured.t += .1 * dt 
+function attractPlayers()
 
-            if captured.t >= .2 then
-                player.xpos = -8
-                player.ypos = -8
-            end
+    local ufo = ufos[1]
+    local captured = ufo.capture_tracker[player.id] 
+
+    for key, captured in pairs(ufo.capture_tracker) do
+        captured.player.xpos = captured.player.xpos + (ufo.xpos - captured.player.xpos) * min(captured.t,.2)
+        captured.player.ypos = captured.player.ypos + ((ufo.ypos+8) - captured.player.ypos) * min(captured.t,.2)
+
+        captured.t += .1 * dt 
+
+        if captured.t >= .2 then
+            captured.player.xpos = -8
+            captured.player.ypos = -8
         end
     end
 end

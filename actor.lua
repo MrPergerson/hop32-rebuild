@@ -39,8 +39,6 @@ end
 
 
 function createActor(actor_data, id)
-
-    --local sprite = player_sprite_index[actor_data.id]
     local actor = {
         id=id, 
         type = actor_data.type,
@@ -120,7 +118,7 @@ function enableActor(actor_table, id, xpos, ypos)
     actor.search_timer = 5 + flr(rnd(5)) -- ufo
     actor.ypos = ypos
     actor.xpos = xpos
-    actor.bounce_charge = 0-- may want to change this, but adding charge introduces bug
+    actor.bounce_charge = 0
     return actor
 end
 

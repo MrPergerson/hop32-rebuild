@@ -22,7 +22,7 @@ function _init()
     if gameState == gstate.complete or gameState == gstate.gameover then
         gameState = gstate.playerSelect
     else
-        gameState = gstate.playerSelect
+        gameState = gstate.mainMenu
     end
     switchGameState(gameState)
 end
@@ -40,13 +40,14 @@ function switchGameState(state)
         camera_x = 0
         camera_y = 0
         initMenu(startGameFromMainMenu)
+        initUFOPool()
     elseif gameState == gstate.playerSelect then
         chunk_progress_x = 11
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
-        initUFOPool()
+        
         initZombiePool(5)
         init_respawn_birds()
         initProceduralGen()
@@ -196,10 +197,10 @@ end
 function _draw()
         cls()
         camera(camera_x, camera_y)
-        map(0,0,0,camera_y,128,16) -- make this repeatable
-        map(0,0,1024,camera_y,128,16) -- make this repeatable
-        map(0,0,2048,camera_y,128,16) -- make this repeatable
-        map(0,0,3072,camera_y,128,16) -- make this repeatable
+        map(0,0,0,camera_y,128,16)
+        map(0,0,1024,camera_y,128,16) 
+        map(0,0,2048,camera_y,128,16)
+        map(0,0,3072,camera_y,128,16)
         drawChunks()
         drawUFO()
         draw_respawn_birds()
@@ -244,10 +245,6 @@ function _draw()
         end
 
         if (debug_mode) then
-            --print("cpu usage: " .. stat(1) * 100 .. "%", camera_x,camera_y+8,6)
-            --print("memory usage: " .. flr(stat(0)) .. "/2048 bytes bytes", camera_x,camera_y+16,6)
-            --print("frame rate: " .. stat(7), camera_x,camera_y+24,6)
-
             rect(camera_x, camera_y, camera_x + 127, camera_y + 127, 7)
             print(camera_x/8 .. "," .. camera_y/8, camera_x+4, camera_y+4)
             print(camera_x/8+16 .. "," .. camera_y/8+16, camera_x + 128 + 4, camera_y + 128 + 4)
