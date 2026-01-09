@@ -17,7 +17,6 @@ function isInsidePolygon(vertices, xp, yp)
     return not(count%2 == 0)
 end
 
--- creates polygon with 4 vertices that expand to the max height and width
 function generateSimplePolygon(x,y,width, height)
 
     local x_edge_1 = x + rnd(width)

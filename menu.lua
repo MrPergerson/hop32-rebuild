@@ -16,7 +16,8 @@ local menus = {
     [menu_option.settings] = { 
         [1] = {text = "play", active = false, color = 6, action = function() startGameFunction() end},
         [2] = {text = "gamemode", active = false, color = 6, action = function() changeGameMode() end},
-        [3] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end}
+        [3] = {text = "input mode", active = false, color = 6, action = function() changeInputMode() end},
+        [4] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end}
     },
     [menu_option.credits] = { 
         [1] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end},
@@ -31,9 +32,7 @@ local active_option = 1
 function initMenu(startGameCallback)
     active_menu = menu_option.main
     changeOption(1)
-    --startGameCallback()
     startGameFunction = startGameCallback
-    --startGameFunction()
 end
 
 function updateMenu(dt)
@@ -72,13 +71,19 @@ function drawMenu()
     if active_menu == menu_option.main then
         print("\^w\^thop32", 46,16, 6)
     elseif active_menu == menu_option.settings then
-        --print("\^w\^tsettings", 46,16, 6)
         x_pos = 16
         
-        gmodetext = showGameModeText()
-        print(gmodetext.title, x_pos + 40 ,y_pos + 10, 6)
-        print(gmodetext.description, x_pos + 40 ,y_pos + 20, 6)
-        
+        if active_option == 2 then
+            gmodetext = showGameModeText()
+            print(gmodetext.title, x_pos + 44 ,y_pos + 10, 6)
+            print(gmodetext.description, x_pos + 44 ,y_pos + 20, 6)
+        elseif active_option == 3 then
+            gmodetext = showInputModeText()
+            print(gmodetext.title, x_pos + 44 ,y_pos + 20, 6)
+            print(gmodetext.description, x_pos + 44 ,y_pos + 30, 6)
+        end
+            
+
     elseif active_menu == menu_option.credits then
 
         print("\^w\^tcredits", 46,16, 6)
@@ -112,6 +117,7 @@ function changeOption(option, previous_menu)
     active_option = option
 end
 
+
 function changeMenu(menu)
     local previous_menu = active_menu
     if menu == menu_option.main then      
@@ -138,6 +144,16 @@ function changeGameMode()
     end
 end
 
+function changeInputMode()
+    local nextMode = keyboard_input + 1
+    if nextMode > 1 then
+        nextMode = 0
+    end
+
+    keyboard_input = nextMode
+end
+
+
 function showGameModeText()
     if gameMode == gMode.tournament then
         return {title = "tournament" , description = "players cannot \njoin once the game \nhas started."}
@@ -145,6 +161,17 @@ function showGameModeText()
         return  {title = "freeplay" , description = "players are free \nto join after the game \nhas started."}
     end
 end
+
+function showInputModeText()
+    if keyboard_input == 0 then
+        return {title = "strict" , description = "characters are \nassigned to \nspecific keys."}
+    elseif keyboard_input == 1 then
+        return  {title = "any key" , description = "characters can be \nassigned to \nany key."}
+    elseif keyboard_input == 2 then
+        return  {title = "controller" , description = "characters are \nassigned to \ncontroller buttons."}
+    end
+end
+
 
 function drawCompleteMenu()
 

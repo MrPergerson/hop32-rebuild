@@ -3,7 +3,7 @@ debug_fast_travel = false
 debug_player_cannon = false
 debug_camera_x = 0 --??
 debug_camera_y = 0
-keyboard_input = true
+keyboard_input = 1 -- 1 or 0
 gstate = {
     mainMenu = 0,
     playerSelect = 1,
@@ -18,6 +18,7 @@ gMode = {
     freeplay = 1
 }
 gameMode = gMode.tournament
+
 
 --camera
 camera_x = 0
@@ -84,8 +85,6 @@ TILE = {
     GLITCH = 88
 }
 
--- next time don't use cumulative distance. 
--- these values should be the distance of each biome
 BIOME_DIST_UNIT = {
     GRASS = 48,
     DESERT = 96,

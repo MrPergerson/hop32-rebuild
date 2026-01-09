@@ -22,11 +22,7 @@ local jump_x_velocity = 4
 local bounceCharge = 0 -- [0-1]
 local maxChargeTime = 4 -- seconds
 
-
 local d_last_time = 0 -- ??
-
---voters = {}
---votesToStart = 0
 
 -- start screen variables
 local posx = 0 -- not using this
@@ -61,12 +57,12 @@ end
 
 
 function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
-    local sprites = {33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}
+    local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
 
     if ready and stat(30) then 
         local keyInput = stat(31)
         
-        if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount <= 32 then 
+        if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then 
 
             if not players[keyInput] then
                 start_timer = 5.9 -- plus .9 so the players see "5"
@@ -74,7 +70,11 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
                 playerCount = playerCount + 1
                 local p = players[playerCount]
                 p.id = keyInput
-                p.sprite = player_sprite_index[keyInput]
+                if keyboard_input == 1 then
+                    p.sprite = sprites[playerCount]
+                else
+                    p.sprite = player_sprite_index[keyInput]
+                end
                 p.xpos = 8 + posx + camera_x
                 p.ypos = 8 + posy + camera_y
                 p.startPosition = posy
@@ -152,7 +152,6 @@ function update_players(game_progress_x, game_progress_y, dt)
 
             -- Apply final position updates, if any
             player.xpos = min(checked_position.x, game_progress_x+128-player.width)
-            --player.x = checked_position.x
             player.ypos = checked_position.y
 
             if checkActorOutOfBounds(player) then
@@ -214,7 +213,6 @@ function bouncePlayer(key)
     elseif gameMode == gMode.freeplay then
         createActor(camera_x + 64, camera_y, key)
         setRespawnTimer()
-        --disablePlayer(players[key]) -- new mode?
     end
 end
 

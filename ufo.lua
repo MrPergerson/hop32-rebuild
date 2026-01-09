@@ -170,7 +170,6 @@ function capturePlayer(player)
             t = 0
         }
 
-        --printh("attracted " .. player.id)
         disableActor(player)
         disabledPlayerCount = disabledPlayerCount + 1
 

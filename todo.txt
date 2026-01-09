@@ -1,7 +1,10 @@
 MAIN TASKS
+- Fix bug where vulture is not properly reset after gameover
+- Fix bug where error is received when adding a non-supported key in freeplay mode
 - Fix death bug where players are still considered alive (still repos!!)
-- Fix bug where game finishes mid game
 - Create victory screen
+- Add keyboard settings with main menu support
+- Add controller support
 - Finalize player art
 - Finalize cloud kingdom
 - [COMPLETE] Design and add vulture
@@ -17,6 +20,7 @@ MAIN TASKS
 - [COMPLETE] Make terrain gen random
 - [COMPLETE](fixed by hack) Fix upper bounds limit when jumping
 - [COMPLETE](maybe) Fix chunk gen so that left most chunk de-spawns at the correct offset
+- (?) Fix bug where game finishes mid game
 
 SIDEQUESTS
 - images of the complete landscape
