@@ -1,12 +1,7 @@
 poke(0x5F2D, 0x1) -- enable keyboard input
-
 chunks = {} -- 2 or 3 chunk tables
-
 local TERRAIN_Y_OFFSET = 0
-
 biome_length = 48
-
-
 chunk_x_size = 16
 map_x_size = 0
 map_y_size = 32
@@ -20,7 +15,6 @@ local rnd_terrain_seed = 0
 -- tile ids: air = 0; grass = 2; ground = 3; wall = 4; 
 
 debug_poly_render = {}
-
 groundlevel = 11 -- relative to tiles, not pixels
 
 function initProceduralGen()
@@ -66,7 +60,6 @@ function generateChunk(x_offset)
         end
     end
 
-    --printh(x_offset)
     if x_offset == chunk_progress_x * 16 and gameState == gstate.playerSelect then
             -- do nothing 
     else 
@@ -291,55 +284,17 @@ end
 function get_cell_height_at_(x)
 
     if x <= BIOME_DIST_UNIT.GRASS then
-        return biome_grass_height_at_(x)
+        return sin( ((x-1 + rnd_terrain_seed) / 16)) 
     elseif x <= BIOME_DIST_UNIT.DESERT then
-        return biome_desert_height_at_(x)
+        return sin( ((x-1 + rnd_terrain_seed) / 8))
     elseif x <= BIOME_DIST_UNIT.MOUNTAIN then
-        return biome_mountain_height_at_(x)
+        return sin( ((x-1 + rnd_terrain_seed) / 16)) + 4 * sin( ((x-1 + rnd_terrain_seed) / 16) * 1.5)
     elseif x <= BIOME_DIST_UNIT.SNOW then
-        return biome_grass_height_at_(x)
-    elseif x <= BIOME_DIST_UNIT.CITY then
-        return biome_oreland_height_at_(x)
-    elseif x <= BIOME_DIST_UNIT.VOID then
-        return biome_hell_height_at_(x)
+        return sin( ((x-1 + rnd_terrain_seed) / 16)) 
     else
-        return biome_grass_height_at_(x)
+        return sin( ((x-1 + rnd_terrain_seed) / 16)) 
     end
 
-end
-
-function biome_grass_height_at_(x) -- lower ground level
-    return sin( ((x-1 + rnd_terrain_seed) / 16)) 
-end
-
-function biome_desert_height_at_(x)
-    return sin( ((x-1 + rnd_terrain_seed) / 8))
-end
-
-function biome_mountain_height_at_(x) -- raise ground level?
-    return sin( ((x-1 + rnd_terrain_seed) / 16)) + 4 * sin( ((x-1 + rnd_terrain_seed) / 16) * 1.5)
-end
-
-function biome_oreland_height_at_(x)
-    return sin( ((x-1 + rnd_terrain_seed) / 16)) + 2 * sin( ((x-1 + rnd_terrain_seed) / 20) * 3.5)
-end
-
-function biome_hell_height_at_(x)
-    return sin( ((x-1 + rnd_terrain_seed) / 8)) + 1.2 * sin( ((x-1 + rnd_terrain_seed) / 16) * 6.5)
-end
-
-
-function draw_holes()
-    local hole_width = 3
-
-    -- draw holes at the end of each biome
-    for i = biome_length-hole_width, map_x_size-biome_length-hole_width, biome_length do
-        for x = i, i + hole_width - 1, 1 do
-            for y = 0, map_y_size - 1 do
-                chunks[x][y].tile = TILE.NONE   
-            end
-        end
-    end
 end
 
 function getSurfaceTiles(chunk, x_offset, y_offset, surface_sprite)

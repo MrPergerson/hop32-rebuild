@@ -51,13 +51,40 @@ function disablePlayer(player)
 end
 
 function enablePlayer(player)
-    enableActor(players, player.key, player.xpos,player.ypos) -- I already have the player ref??
+    enableActor(players, player.key, player.xpos,player.ypos)
     disabledPlayerCount = disabledPlayerCount - 1
 end
 
+function createPlayer(xpos, ypos, keyInput)
+    local spr = nil
+
+    if keyboard_input == 1 then
+        local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
+        spr = sprites[playerCount + 1]
+    else
+        spr = player_sprite_index[keyInput]
+    end
+
+    if spr == nil then
+        return nil
+    end
+
+    playerCount = playerCount + 1
+    local p = players[playerCount]
+    p.id = keyInput
+    p.sprite = spr
+    p.xpos = xpos
+    p.ypos = ypos
+    players[playerCount] = nil
+    players[keyInput] = p     
+
+    enableActor(players, keyInput, xpos, posy)
+    add(keys, keyInput)
+
+    return p
+end
 
 function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
-    local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
 
     if ready and stat(30) then 
         local keyInput = stat(31)
@@ -67,23 +94,11 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
             if not players[keyInput] then
                 start_timer = 5.9 -- plus .9 so the players see "5"
 
-                playerCount = playerCount + 1
-                local p = players[playerCount]
-                p.id = keyInput
-                if keyboard_input == 1 then
-                    p.sprite = sprites[playerCount]
-                else
-                    p.sprite = player_sprite_index[keyInput]
+                local p = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)    
+                if p == nil then
+                    return
                 end
-                p.xpos = 8 + posx + camera_x
-                p.ypos = 8 + posy + camera_y
                 p.startPosition = posy
-                players[playerCount] = nil
-                players[keyInput] = p     
-
-                enableActor(players, keyInput, posx + startingCamPos_x, posy + startingCamPos_y)
-                add(keys, keyInput)
-                
 
                 posx = posx + 9
                 if (posx >= 100) then
@@ -110,16 +125,12 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
         
     end
 
-
-
     -- bounce affect 
     for key, player in pairs(players) do
             if player.ypos < player.startPosition then
                 player.ypos = min(player.startPosition, player.ypos + (20 * dt))
             end
     end
-
-
 
     return false
 end
@@ -184,14 +195,15 @@ function update_players(game_progress_x, game_progress_y, dt)
                     // if colliding with top of ufo, bounce
                     if check_object_collision_on_top(player, ufo) then
                         sfx(2)
-                        
+                        if ufo.type == "king" then
+                            final_boss_health -= 1
+                        end
                         player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
                         player.vy = -100
                     end       
                 end
 
                 if (ufo.state == 3 or (ufo.type == "vulture" and ufo.state == 2)) and check_object_collision(player, ufo.tracker_beam) then
-                    printh(player.id .. " " .. player.xpos .. " " .. ufo.tracker_beam.xpos)
                     capturePlayer(player, dt)
                 end
             end
@@ -210,8 +222,8 @@ function bouncePlayer(key)
 
     if not (player == nil) and not(player.inputDisabled) then
         bounceActor(player)
-    elseif gameMode == gMode.freeplay then
-        createActor(camera_x + 64, camera_y, key)
+    elseif gameMode == gMode.freeplay and playerCount < 32 then
+        createPlayer(camera_x + 64, camera_y, key)
         setRespawnTimer()
     end
 end

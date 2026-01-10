@@ -175,17 +175,28 @@ end
 
 function drawCompleteMenu()
 
-    draw_winners(camera_x, camera_y)
-
+    if gameover_menu_timer > 0 then        
+        if gameState == gstate.complete then
+            print("\^w\^tyou win!", camera_x + 30, camera_y + 60, 10)
+        else
+            print("\^w\^tnext time...", camera_x + 20, camera_y + 60, 10)
+        end
+    else
+        
+        rectfill(camera_x, camera_y, camera_x + 128, camera_y + 128, 12)
+        draw_winners(camera_x, camera_y)
+        
+    end
+    
 
 end
 
 function draw_winners(x, y)
     local indent = ""
     local line_height = 10
-    local current_y = y
+    local current_y = y + 16
     
-    print("\t\t\tplayers\n", x, current_y, 10)
+    print("players\n", x + 45, current_y, 10)
     current_y = current_y + line_height
     leftCounter = 0
     for i = 1, #win_order do
@@ -198,8 +209,7 @@ function draw_winners(x, y)
         leftCounter = (leftCounter + 1) % 4
         --end
     end
-
-    rectfill(camera_x, camera_y + 116, camera_x + 128, camera_y + 128, 0)
-    print("\t\t\tcontinue in " .. flr(score_timer) .. "\n", x, y + 120, 10)
+    
+    print("\t\tcontinue in " .. flr(score_timer) .. "\n", x, y + 116, 10)
 end
 

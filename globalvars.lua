@@ -38,6 +38,7 @@ end
 start_timer = 5.9
 gamemode_timer = 0
 score_timer = 15
+gameover_menu_timer = 3
 
 -- players
 win_order = {}
@@ -57,6 +58,7 @@ current_area = -1
 chunk_progress_x = 0
 chunk_progress_y = 0
 finalBossEnabled = false
+final_boss_health = 4
 
 TILE = {
     NONE = 0,

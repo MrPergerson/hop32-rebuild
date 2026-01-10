@@ -173,17 +173,11 @@ end
 -- autoMoveLeftRight()
 -- attractActors(thisActor)
 
-function processTimer(time, dt)
-    return max(time - dt, 0)
-end
+function moveLeftRight(actor, speed)
 
-function moveLeftRight(actor)
 
-    if actor.move_dir > 0 then
-        actor.vx = actor.move_dir * MAX_SPEED
-    else
-        actor.vx = actor.move_dir * MIN_SPEED
-    end
+    actor.vx = actor.move_dir * speed
+    
 
     if actor.xpos < camera_x + 8 then
         actor.move_dir = abs(actor.move_dir)

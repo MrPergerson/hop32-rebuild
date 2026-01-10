@@ -55,8 +55,6 @@ function loadChunk()
         new_chunk = generateCloudChunk(x_offset, y_offset)
 
         if x_offset == 384 then
-            printh("final boss")
-
             initKing()
             enableUFO(376 * 8, 40)
             finalBossEnabled = true

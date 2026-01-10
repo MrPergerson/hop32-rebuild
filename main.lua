@@ -67,8 +67,11 @@ function switchGameState(state)
     elseif gameState == gstate.game then
         setRespawnTimer()
     elseif gameState == gstate.complete or gameState == gstate.gameover then
+
+        gameover_menu_timer = 3
+
         for key, player in pairs(players) do
-            if player.disabled == false then
+            if player.enabled == true then
                 add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
             end
         end
@@ -183,13 +186,16 @@ function _update()
             bouncePlayer(keyInput)       
         end
     elseif gameState == gstate.gameover then
+
         updateUFO(delta_time)
         update_players(camera_x, camera_y, delta_time)
         update_zombies(delta_time)
         resetGameAfterTimer()
+        gameover_menu_timer = processTimer(gameover_menu_timer, delta_time)
 
     elseif gameState == gstate.complete then
         resetGameAfterTimer()
+        gameover_menu_timer = processTimer(gameover_menu_timer, delta_time)
         
     end
 end
@@ -233,7 +239,7 @@ function _draw()
         elseif gameState == gstate.game then
 
         elseif gameState == gstate.complete or gameState == gstate.gameover then
-           drawCompleteMenu()
+            drawCompleteMenu()
         end
 
         if gameState == gstate.game or gameState == gstate.playerSelect then
@@ -350,14 +356,12 @@ end
 function appendLosersToWinOrder()
     local lose_order = {}
 
-    -- add disabled players to lose_order
     for key, player in pairs(players) do
-        if player.disabled then
+        if player.enabled == false and type(player.id) ~= "number" then
             add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
         end
     end
 
-    -- sort lost_order
     local n = #lose_order
     for i = 1, n - 1 do
         for j = 1, n - i do
@@ -366,17 +370,14 @@ function appendLosersToWinOrder()
             -- Compare by disabledCount (ascending)
             -- If disabledCount is the same, compare by totalTimeEnabled (descending)
             if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
-                -- Swap elements if necessary
                 lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
             end
             
         end
     end
 
-    -- append lose order to win_order
     for i = 1, #lose_order do 
-        add(win_order, lose_order[i])
-        -- for debug printh("Player " .. lose_order[i][1] .. " | Disabled count: " .. lose_order[i][2] .. " | TotalTimeEnabled: " .. lose_order[i][3])
+        add(win_order, lose_order[i])    
     end
 
 end

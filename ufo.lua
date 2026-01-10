@@ -15,7 +15,7 @@ end
 
 function initKing()
     ufos = {}
-
+    final_boss_health = 4
     initActorPool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
 end
 
@@ -53,11 +53,20 @@ function updateUFO(dt)
 
         if ufo.state == 1 then
             
-            moveLeftRight(ufo)
+            moveLeftRight(ufo, 50)
 
-            if ufo.timer_1 == 0 and ufo.xpos > camera_x + 70 then
-                ufo.vx = 0
-                ufo.state = 2
+            if ufo.type == "king" then
+                if ufo.timer_1 == 0 then
+                    enableActor(zombies, -1, ufo.xpos, ufo.ypos)
+                    ufo.timer_1 = 5
+                elseif final_boss_health <= 0 then
+                    ufo.state = 4
+                end                
+            else
+                if ufo.timer_1 == 0 and ufo.xpos > camera_x + 70 then
+                    ufo.vx = 0
+                    ufo.state = 2
+                end
             end
 
             ufo.timer_1 = processTimer(ufo.timer_1, dt)
@@ -80,7 +89,7 @@ function updateUFO(dt)
                 end
             elseif ufo.type == "vulture" then
 
-                moveLeftRight(ufo)
+                moveLeftRight(ufo, 65)
 
                 if ufo.ypos < (7) * 8 then
                     ufo.vy = VULTURE_DOWN_SPEED
@@ -218,7 +227,17 @@ function drawUFO()
             end
         end
 
-        
+        if ufo.type == "king" then
+            local xpos = camera_x + 38
+            local ypos = camera_y + 4
+            local offset = 12
+            rectfill(xpos - 2, ypos - 2, xpos - 2 + (offset * 4) , ypos + 9,0 )
+            rect(xpos - 2, ypos - 2, xpos - 2 + (offset * 4) , ypos + 9, 8 )
+            for i = 1, final_boss_health, 1 do
+                spr(8, xpos, ypos)
+                xpos += offset
+            end
+        end
 
         if debug_mode then
 

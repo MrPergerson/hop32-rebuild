@@ -1,12 +1,12 @@
 MAIN TASKS
 - Fix bug where vulture is not properly reset after gameover
-- Fix bug where error is received when adding a non-supported key in freeplay mode
 - Fix death bug where players are still considered alive (still repos!!)
-- Create victory screen
-- Add keyboard settings with main menu support
 - Add controller support
 - Finalize player art
-- Finalize cloud kingdom
+- [COMPLETE] Create victory screen
+- [COMPLETE] Finalize cloud kingdom
+- [COMPLETE] Fix bug where error is received when adding a non-supported key in freeplay mode
+- [COMPLETE] Add keyboard settings with main menu support
 - [COMPLETE] Design and add vulture
 - [COMPLETE] Redesign UFO class to be modular
 - [COMPLETE] Redesign Zombie class to be modular
@@ -23,6 +23,7 @@ MAIN TASKS
 - (?) Fix bug where game finishes mid game
 
 SIDEQUESTS
+- Spawn players all in to the cloud kingdom?
 - images of the complete landscape
 - export player sprites???
 - UFO animation

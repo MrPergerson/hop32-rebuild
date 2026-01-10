@@ -9,9 +9,6 @@ function contains(table, value)
     return false
 end
 
--- Queue
-
--- Queue implementation
 Queue = {}
 Queue.__index = Queue
 
@@ -23,12 +20,6 @@ function Queue.new()
         tail = 1    -- Index of the next insertion point
     }, Queue)
     return self
-end
-
--- Add an item to the end of the queue
-function Queue:enqueue(item)
-    self.items[self.tail] = item
-    self.tail = self.tail + 1
 end
 
 function Queue:enqueue_unique(item)
@@ -55,21 +46,6 @@ function Queue:isempty()
     return self.head == self.tail
 end
 
--- Peek at the item at the front of the queue without removing it
-function Queue:peek()
-    if self:isempty() then
-        return nil
-    end
-    return self.items[self.head]
-end
-
--- Get the number of items in the queue
-function Queue:size()
-    return self.tail - self.head
-end
-
-------- TIMER
-
 function timer(interval)
     local last_time = t()  -- Track the last time the function was called
     
@@ -82,6 +58,10 @@ function timer(interval)
         end
         return false  -- Indicate that the interval has not elapsed
     end
+end
+
+function processTimer(time, dt)
+    return max(time - dt, 0)
 end
 
 function lerp(a, b, t)
