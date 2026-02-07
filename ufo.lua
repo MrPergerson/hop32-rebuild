@@ -15,7 +15,7 @@ end
 
 function initKing()
     ufos = {}
-    final_boss_health = 4
+    final_boss_health = 3
     initActorPool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
 end
 
@@ -118,7 +118,8 @@ function updateUFO(dt)
 
             if ufo.ypos+8 <= camera_y-32 then 
 
-                if ufo.type == "vulture" and ufo.disabledCount < 1 then
+                // set 0 to 1 for vulture to respawn
+                if ufo.type == "vulture" and ufo.disabledCount < 0 then
                     ufo.disabledCount = ufo.disabledCount + 1
                     resetUFO(ufo, camera_x + 8, 8)
                 else    
@@ -228,11 +229,11 @@ function drawUFO()
         end
 
         if ufo.type == "king" then
-            local xpos = camera_x + 38
+            local xpos = camera_x + 46
             local ypos = camera_y + 4
             local offset = 12
-            rectfill(xpos - 2, ypos - 2, xpos - 2 + (offset * 4) , ypos + 9,0 )
-            rect(xpos - 2, ypos - 2, xpos - 2 + (offset * 4) , ypos + 9, 8 )
+            rectfill(xpos - 2, ypos - 2, xpos - 2 + (offset * 3) , ypos + 9,0 )
+            rect(xpos - 2, ypos - 2, xpos - 2 + (offset * 3) , ypos + 9, 8 )
             for i = 1, final_boss_health, 1 do
                 spr(8, xpos, ypos)
                 xpos += offset

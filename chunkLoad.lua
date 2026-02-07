@@ -54,7 +54,7 @@ function loadChunk()
     if x_offset >= BIOME_DIST_UNIT.VOID then
         new_chunk = generateCloudChunk(x_offset, y_offset)
 
-        if x_offset == 384 then
+        if x_offset == BIOME_DIST_UNIT.VOID + 16 then
             initKing()
             enableUFO(376 * 8, 40)
             finalBossEnabled = true

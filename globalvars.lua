@@ -93,6 +93,6 @@ BIOME_DIST_UNIT = {
     MOUNTAIN = 144,
     SNOW = 192,
     CITY = 240,
-    VOID = 368,
-    KINGDOM = 416 
+    VOID = 288,
+    KINGDOM = 336 
 }
