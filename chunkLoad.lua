@@ -62,7 +62,7 @@ function loadChunk()
 
     elseif x_offset >= BIOME_DIST_UNIT.CITY then
         new_chunk = generateVoidChunk(x_offset,y_offset, startingAsteroidSize)
-        startingAsteroidSize -= 2
+        startingAsteroidSize -= 1
 
     elseif x_offset >= BIOME_DIST_UNIT.SNOW then
         new_chunk = generateCityChunk(x_offset, y_offset)
