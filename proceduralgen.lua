@@ -275,6 +275,16 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
 
     if tileCount == 0 then
        tiles[origin_x][origin_y].sprite = 88
+
+       if origin_x + 1 == x_offset + 15 + size - 1 then
+        tiles[origin_x-1][origin_y].sprite = 88
+       else
+        tiles[origin_x+1][origin_y].sprite = 88
+       end
+       
+       
+       tiles[origin_x][origin_y+1].sprite = 88
+
     end
 
 
