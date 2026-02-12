@@ -15,7 +15,7 @@ end
 
 function initKing()
     ufos = {}
-    final_boss_health = 3
+    final_boss_health = max(playerCount, 3)
     initActorPool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
 end
 
@@ -229,15 +229,7 @@ function drawUFO()
         end
 
         if ufo.type == "king" then
-            local xpos = camera_x + 46
-            local ypos = camera_y + 4
-            local offset = 12
-            rectfill(xpos - 2, ypos - 2, xpos - 2 + (offset * 3) , ypos + 9,0 )
-            rect(xpos - 2, ypos - 2, xpos - 2 + (offset * 3) , ypos + 9, 8 )
-            for i = 1, final_boss_health, 1 do
-                spr(8, xpos, ypos)
-                xpos += offset
-            end
+            drawHearts(final_boss_health)               
         end
 
         if debug_mode then
@@ -249,4 +241,43 @@ function drawUFO()
 
     end
 
+end
+
+function drawHearts(heart_count)
+    local heart_size = 10
+    local rows = ceil((heart_count * 10) / 128)
+    local hearts_left_to_draw = heart_count
+
+    for i = 1, rows, 1 do
+
+        local xpos = camera_x + 4
+        local ypos = camera_y + 4 + (10 *(i-1))
+        local offset = 10
+        local hearts = 12
+
+        if i == rows then
+            hearts = hearts_left_to_draw
+            --local xpos = camera_x
+        end
+
+        for j = 1, hearts, 1 do
+            spr(8, xpos, ypos)
+            hearts_left_to_draw -= 1
+            xpos += offset
+        end
+        
+    end
+
+
+    
+    -- local xpos = camera_x + 46
+    -- local ypos = camera_y + 4
+    -- local offset = 12
+    -- rectfill(xpos - 2, ypos - 2, xpos - 2 + (offset * 3) , ypos + 9,0 )
+    -- rect(xpos - 2, ypos - 2, xpos - 2 + (offset * 3) , ypos + 9, 8 )
+    -- for i = 1, final_boss_health, 1 do
+    --     spr(8, xpos, ypos)
+    --     xpos += offset
+    -- end
+    
 end

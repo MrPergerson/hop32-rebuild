@@ -42,7 +42,7 @@ function switchGameState(state)
         initMenu(startGameFromMainMenu)
         initUFOPool()
     elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 14
+        chunk_progress_x = 20
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
