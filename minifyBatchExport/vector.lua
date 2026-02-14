@@ -1,0 +1,3 @@
+function n(n,c,e)local d=0for o=1,#n do local l=o+1if(l>#n)l=1
+if(e<n[o].y~=(e<n[l].y)and c<n[o].x+(e-n[o].y)/(n[l].y-n[o].y)*(n[l].x-n[o].x))d+=1
+end return not(d%2==0)end function o(n,o,l,e)local d,c,t,f=n+rnd(l),n+rnd(l),o+rnd(e),o+rnd(e)return{{x=d,y=o},{x=n+l,y=f},{x=c,y=o+e},{x=n,y=t}}end function l(n)line()for o=1,#n do line(n[o].x,n[o].y,11)end line(n[1].x,n[1].y,11)end function e(n,o,l)line()line(n.x,n.y,n.x+o.x*100,n.y+o.y*100,l)end

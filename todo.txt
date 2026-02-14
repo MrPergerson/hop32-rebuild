@@ -3,6 +3,7 @@ MAIN TASKS
 - Fix death bug where players are still considered alive (still repos!!)
 - Add controller support
 - Finalize player art
+- FIX THE BUG WHERE GAME THINKS SOMEONE IS STILL alive. Affects winning too. Game auto wins on restart
 - [COMPLETE] Create victory screen
 - [COMPLETE] Finalize cloud kingdom
 - [COMPLETE] Fix bug where error is received when adding a non-supported key in freeplay mode
@@ -21,6 +22,8 @@ MAIN TASKS
 - [COMPLETE](fixed by hack) Fix upper bounds limit when jumping
 - [COMPLETE](maybe) Fix chunk gen so that left most chunk de-spawns at the correct offset
 - (?) Fix bug where game finishes mid game
+- 
+
 
 SIDEQUESTS
 - Spawn players all in to the cloud kingdom?

@@ -1,0 +1,4 @@
+local n,l=c.new(),{}o=nil function a()n=c.new()l={}o=nil end function f(l)n:enqueue_unique({bird={xpos=-8,ypos=-8,width=8,height=16,boundsOffsetX=0,boundsOffsetY=4,sprite=1},playerKey=l})end function i()local n=n:dequeue()local o,c,i,e=e[n.playerKey],n.bird,d+128,u+20+flr(rnd(10))c.xpos=i c.ypos=e o.xpos=i o.ypos=e+8add(l,n)end function h()if(o()and not n:isempty())i()
+local o=nil for l,n in ipairs(l)do local l=n.bird.xpos-.8n.bird.xpos=l local c=e[n.playerKey]c.xpos=l if(l<d-8)o=n
+end if(not(o==nil))n:enqueue_unique(o)del(l,o)
+end function r()for l,n in ipairs(l)do spr(n.bird.sprite,n.bird.xpos,n.bird.ypos)end end
