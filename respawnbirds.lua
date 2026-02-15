@@ -1,3 +1,5 @@
+-- perserve: Queue
+
 local respawnQueue = Queue.new()
 local activeBirdList = {}
 respawnTimer = nil
