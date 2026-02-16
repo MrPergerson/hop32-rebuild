@@ -1,9 +1,9 @@
 MAIN TASKS
-- Fix bug where vulture is not properly reset after gameover
-- Fix death bug where players are still considered alive (still repos!!)
 - Add controller support
 - Finalize player art
 - FIX THE BUG WHERE GAME THINKS SOMEONE IS STILL alive. Affects winning too. Game auto wins on restart
+- [COMPLETE] Fix bug where bounce sound was still heard after death\
+- [COMPLETE] Fix bug where vulture is not properly reset after gameover
 - [COMPLETE] Create victory screen
 - [COMPLETE] Finalize cloud kingdom
 - [COMPLETE] Fix bug where error is received when adding a non-supported key in freeplay mode

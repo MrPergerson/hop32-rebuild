@@ -181,7 +181,7 @@ function capturePlayer(player)
         }
 
         disableActor(player)
-        disabledPlayerCount = disabledPlayerCount + 1
+        setDisabledPlayerCount(disabledPlayerCount + 1)
 
     end
 
@@ -209,7 +209,7 @@ function drawUFO()
 
     local ufo = ufos[1]
 
-    if ufo.enabled then
+    if ufo and ufo.enabled then
         
         spr(ufo.sprite, ufo.xpos, ufo.ypos)
 

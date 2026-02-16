@@ -3,14 +3,10 @@ poke(0x5F2D, 0x1) -- enable keyboard input
 -- game variables
 local GRAVITY = 15  -- Gravity value
 local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
-
-keys = {}
-key_index = 1 -- used for sorting through keys
-playerCount = 0
 local playerWonCount = 0
 local maxPlayers = 32
 local maxFallVelocity = 200
-disabledPlayerCount = 0
+
 
 local jump_acceleration_x = 10
 local jump_acceleration_y = 20
@@ -35,7 +31,7 @@ function initPlayers()
     playerCount = 0
     playerWonCount = 0
     init_respawn_birds()
-    disabledPlayerCount = 0
+    setDisabledPlayerCount(0)
     posx = 0
     posy = 16
     xOffset = 0
@@ -46,13 +42,12 @@ end
 function disablePlayer(player)
     queue_respawn_bird(player.id)
     disableActor(player)
-    disabledPlayerCount = disabledPlayerCount + 1
-    
+    setDisabledPlayerCount(disabledPlayerCount + 1)
 end
 
 function enablePlayer(player)
-    enableActor(players, player.key, player.xpos,player.ypos)
-    disabledPlayerCount = disabledPlayerCount - 1
+    enableActor(players, player.key, player.xpos, player.ypos)
+    setDisabledPlayerCount(disabledPlayerCount - 1)
 end
 
 function createPlayer(xpos, ypos, keyInput)
@@ -160,7 +155,6 @@ function update_players(game_progress_x, game_progress_y, dt)
                 player.jump_distance = lerp(min_jump_distance, max_jump_distance, t)
             end
 
-
             -- Apply final position updates, if any
             player.xpos = min(checked_position.x, game_progress_x+128-player.width)
             player.ypos = checked_position.y
@@ -169,14 +163,16 @@ function update_players(game_progress_x, game_progress_y, dt)
                 disablePlayer(player)
                 player.xpos = -8
                 player.ypos = -8
+                break;
             end
 
-             -- Check for respawn bird collisions
-             for _, respawn in ipairs(activeBirdList) do
+            -- Check for respawn bird collisions
+            for _, respawn in ipairs(activeBirdList) do
                 if check_object_collision(player, respawn.bird) then
                     enableActor(players, respawn.playerKey, player.xpos, player.ypos) -- update this
-                    disabledPlayerCount = disabledPlayerCount - 1
+                    setDisabledPlayerCount(disabledPlayerCount - 1)
                     del(activeBirdList, respawn)
+                    break;
                 end
             end   
             
@@ -187,12 +183,13 @@ function update_players(game_progress_x, game_progress_y, dt)
                     player.xpos = -8
                     player.ypos = -8
                     sfx(1)
+                    break;
                 end
             end
 
             for _, ufo in ipairs(ufos) do
                 if check_object_collision(player, ufo) then
-                    // if colliding with top of ufo, bounce
+                    --if colliding with top of ufo, bounce
                     if check_object_collision_on_top(player, ufo) then
                         sfx(2)
                         if ufo.type == "king" then
@@ -220,7 +217,7 @@ function bouncePlayer(key)
     
     local player = players[key]
 
-    if not (player == nil) and not(player.inputDisabled) then
+    if not (player == nil) and not(player.inputDisabled) and player.enabled then
         bounceActor(player)
     elseif gameMode == gMode.freeplay and playerCount < 32 then
         createPlayer(camera_x + 64, camera_y, key)
