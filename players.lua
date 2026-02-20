@@ -219,7 +219,7 @@ function bouncePlayer(key)
 
     if not (player == nil) and not(player.inputDisabled) and player.enabled then
         bounceActor(player)
-    elseif gameMode == gMode.freeplay and playerCount < 32 then
+    elseif (player == nil) and gameMode == gMode.freeplay and playerCount < 32 then
         createPlayer(camera_x + 64, camera_y, key)
         setRespawnTimer()
     end
