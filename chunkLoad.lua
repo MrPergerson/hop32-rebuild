@@ -85,9 +85,9 @@ function loadChunk()
         end
 
         if x_offset == 64 then
-            printh(#ufos)
+           -- printh(#ufos)
             local ufo = enableUFO(64 * 8, 2 * 8)
-            printh(ufo.xpos)
+            --printh(ufo.xpos)
         end
 
     end

@@ -40,14 +40,13 @@ function switchGameState(state)
         camera_x = 0
         camera_y = 0
         initMenu(startGameFromMainMenu)
-        initUFOPool()
     elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 20
+        chunk_progress_x = 0
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
-        
+        initUFOPool()
         initZombiePool(5)
         init_respawn_birds()
         initProceduralGen()
@@ -234,7 +233,7 @@ function _draw()
                 print("starting in " .. flr(start_timer), camera_x + 4, camera_y+8, 7)
             end
 
-            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56)
+            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56, 7)
 
         elseif gameState == gstate.game then
 

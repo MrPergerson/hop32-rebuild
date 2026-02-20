@@ -1,0 +1,70 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test-earliest:
+    name: Test on earliest supported Python
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.8"
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pillow
+        
+    - name: Test
+      run: |
+        python run_tests.py
+        
+    - name: Save failure data
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-earliest-failure-output
+        path: test_output
+        retention-days: 2
+        
+  test-latest:
+    name: Test on latest known Python
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.14"
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pillow
+        
+    - name: Test
+      run: |
+        python run_tests.py
+        
+    - name: Save failure data
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-latest-failure-output
+        path: test_output
+        retention-days: 2

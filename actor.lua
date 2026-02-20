@@ -1,13 +1,8 @@
 
 -- player variables
-players = {}
-keys = {}
-key_index = 1 -- used for sorting through keys
-playerCount = 0
 local playerWonCount = 0
 local maxPlayers = 32
 local maxFallVelocity = 200
-disabledPlayerCount = 0
 
 -- movement
 local GRAVITY = 15  -- Gravity value
@@ -44,8 +39,8 @@ function createActor(actor_data, id)
         type = actor_data.type,
         enabled = false,
         inputDisabled = false,
-        xpos = 0, 
-        ypos = 0, 
+        xpos = -8, 
+        ypos = -8, 
         startPosition = 0,
         boundsOffsetX = 0, 
         boundsOffsetY = 0, 

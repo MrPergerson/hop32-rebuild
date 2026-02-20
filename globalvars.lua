@@ -42,6 +42,20 @@ gameover_menu_timer = 3
 
 -- players
 win_order = {}
+playerCount = 0
+disabledPlayerCount = 0
+keys = {}
+key_index = 1 -- used for sorting through keys
+
+function setDisabledPlayerCount(value)
+
+    if value > playerCount then
+        value = playerCount
+    end
+
+    disabledPlayerCount = value
+    --printh("disPC " .. disabledPlayerCount)
+end
 
 -- actors
 ufos = {}

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./hop32.p8)",
+      "Bash(powershell:*)"
+    ]
+  }
+}

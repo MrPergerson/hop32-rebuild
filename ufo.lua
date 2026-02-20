@@ -139,7 +139,7 @@ function updateUFO(dt)
         end
         
         if ufo.type == "ufo" then
-            attractPlayers()
+           attractPlayers(dt)
         end
 
         local self_new_x = ufo.xpos + ufo.vx * dt
@@ -181,16 +181,16 @@ function capturePlayer(player)
         }
 
         disableActor(player)
-        disabledPlayerCount = disabledPlayerCount + 1
+        setDisabledPlayerCount(disabledPlayerCount + 1)
 
     end
 
 end
 
-function attractPlayers()
+function attractPlayers(dt)
 
     local ufo = ufos[1]
-    local captured = ufo.capture_tracker[player.id] 
+    --local captured = ufo.capture_tracker[player.id] 
 
     for key, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = captured.player.xpos + (ufo.xpos - captured.player.xpos) * min(captured.t,.2)
@@ -209,7 +209,7 @@ function drawUFO()
 
     local ufo = ufos[1]
 
-    if ufo.enabled then
+    if ufo and ufo.enabled then
         
         spr(ufo.sprite, ufo.xpos, ufo.ypos)
 
