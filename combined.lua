@@ -43,6 +43,20 @@ gameover_menu_timer = 3
 
 -- players
 win_order = {}
+playerCount = 0
+disabledPlayerCount = 0
+keys = {}
+key_index = 1 -- used for sorting through keys
+
+function setDisabledPlayerCount(value)
+
+    if value > playerCount then
+        value = playerCount
+    end
+
+    disabledPlayerCount = value
+    --printh("disPC " .. disabledPlayerCount)
+end
 
 -- actors
 ufos = {}
@@ -220,8 +234,16 @@ function drawRayCast(point, direction, color)
 
 end
 -- === playerspriteindex.lua ===
-player_sprite_index = {
-    ["a"] = 33, ["b"] = 34, ["c"] = 35, ["d"] = 36,  ["e"] = 37,  ["f"] = 38,  ["g"] = 39,["h"] = 40, ["i"] = 41, ["j"] = 42,
+player_sprite_index = { ["a"] = 33,
+    ["b"] = 34, 
+    ["c"] = 35, 
+    ["d"] = 36,  
+    ["e"] = 37,  
+    ["f"] = 38,  
+    ["g"] = 39,
+    ["h"] = 40, 
+    ["i"] = 41, 
+    ["j"] = 42,
     ["k"] = 43,
     ["l"] = 44,
     ["m"] = 45,
@@ -692,9 +714,9 @@ function loadChunk()
         end
 
         if x_offset == 64 then
-            printh(#ufos)
+           -- printh(#ufos)
             local ufo = enableUFO(64 * 8, 2 * 8)
-            printh(ufo.xpos)
+            --printh(ufo.xpos)
         end
 
     end
@@ -862,14 +884,9 @@ end
 -- === actor.lua ===
 
 -- player variables
-players = {}
-keys = {}
-key_index = 1 -- used for sorting through keys
-playerCount = 0
 local playerWonCount = 0
 local maxPlayers = 32
 local maxFallVelocity = 200
-disabledPlayerCount = 0
 
 -- movement
 local GRAVITY = 15  -- Gravity value
@@ -906,8 +923,8 @@ function createActor(actor_data, id)
         type = actor_data.type,
         enabled = false,
         inputDisabled = false,
-        xpos = 0, 
-        ypos = 0, 
+        xpos = -8, 
+        ypos = -8, 
         startPosition = 0,
         boundsOffsetX = 0, 
         boundsOffsetY = 0, 
@@ -1308,7 +1325,7 @@ function updateUFO(dt)
         end
         
         if ufo.type == "ufo" then
-            attractPlayers()
+           attractPlayers(dt)
         end
 
         local self_new_x = ufo.xpos + ufo.vx * dt
@@ -1350,16 +1367,16 @@ function capturePlayer(player)
         }
 
         disableActor(player)
-        disabledPlayerCount = disabledPlayerCount + 1
+        setDisabledPlayerCount(disabledPlayerCount + 1)
 
     end
 
 end
 
-function attractPlayers()
+function attractPlayers(dt)
 
     local ufo = ufos[1]
-    local captured = ufo.capture_tracker[player.id] 
+    --local captured = ufo.capture_tracker[player.id] 
 
     for key, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = captured.player.xpos + (ufo.xpos - captured.player.xpos) * min(captured.t,.2)
@@ -1378,7 +1395,7 @@ function drawUFO()
 
     local ufo = ufos[1]
 
-    if ufo.enabled then
+    if ufo and ufo.enabled then
         
         spr(ufo.sprite, ufo.xpos, ufo.ypos)
 
@@ -1522,14 +1539,10 @@ poke(0x5F2D, 0x1) -- enable keyboard input
 -- game variables
 local GRAVITY = 15  -- Gravity value
 local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
-
-keys = {}
-key_index = 1 -- used for sorting through keys
-playerCount = 0
 local playerWonCount = 0
 local maxPlayers = 32
 local maxFallVelocity = 200
-disabledPlayerCount = 0
+
 
 local jump_acceleration_x = 10
 local jump_acceleration_y = 20
@@ -1554,7 +1567,7 @@ function initPlayers()
     playerCount = 0
     playerWonCount = 0
     init_respawn_birds()
-    disabledPlayerCount = 0
+    setDisabledPlayerCount(0)
     posx = 0
     posy = 16
     xOffset = 0
@@ -1565,13 +1578,12 @@ end
 function disablePlayer(player)
     queue_respawn_bird(player.id)
     disableActor(player)
-    disabledPlayerCount = disabledPlayerCount + 1
-    
+    setDisabledPlayerCount(disabledPlayerCount + 1)
 end
 
 function enablePlayer(player)
-    enableActor(players, player.key, player.xpos,player.ypos)
-    disabledPlayerCount = disabledPlayerCount - 1
+    enableActor(players, player.key, player.xpos, player.ypos)
+    setDisabledPlayerCount(disabledPlayerCount - 1)
 end
 
 function createPlayer(xpos, ypos, keyInput)
@@ -1679,7 +1691,6 @@ function update_players(game_progress_x, game_progress_y, dt)
                 player.jump_distance = lerp(min_jump_distance, max_jump_distance, t)
             end
 
-
             -- Apply final position updates, if any
             player.xpos = min(checked_position.x, game_progress_x+128-player.width)
             player.ypos = checked_position.y
@@ -1688,14 +1699,16 @@ function update_players(game_progress_x, game_progress_y, dt)
                 disablePlayer(player)
                 player.xpos = -8
                 player.ypos = -8
+                break;
             end
 
-             -- Check for respawn bird collisions
-             for _, respawn in ipairs(activeBirdList) do
+            -- Check for respawn bird collisions
+            for _, respawn in ipairs(activeBirdList) do
                 if check_object_collision(player, respawn.bird) then
                     enableActor(players, respawn.playerKey, player.xpos, player.ypos) -- update this
-                    disabledPlayerCount = disabledPlayerCount - 1
+                    setDisabledPlayerCount(disabledPlayerCount - 1)
                     del(activeBirdList, respawn)
+                    break;
                 end
             end   
             
@@ -1706,12 +1719,13 @@ function update_players(game_progress_x, game_progress_y, dt)
                     player.xpos = -8
                     player.ypos = -8
                     sfx(1)
+                    break;
                 end
             end
 
             for _, ufo in ipairs(ufos) do
                 if check_object_collision(player, ufo) then
-                    // if colliding with top of ufo, bounce
+                    --if colliding with top of ufo, bounce
                     if check_object_collision_on_top(player, ufo) then
                         sfx(2)
                         if ufo.type == "king" then
@@ -1739,7 +1753,7 @@ function bouncePlayer(key)
     
     local player = players[key]
 
-    if not (player == nil) and not(player.inputDisabled) then
+    if not (player == nil) and not(player.inputDisabled) and player.enabled then
         bounceActor(player)
     elseif gameMode == gMode.freeplay and playerCount < 32 then
         createPlayer(camera_x + 64, camera_y, key)
@@ -1825,10 +1839,10 @@ function drawMenu()
     local y_pos = 60
 
     if active_menu == menu_option.main then
-        print("\^w\^thop32", 46,16, 6)
+        print("\^w\^thop32", 46,16, 7)
     elseif active_menu == menu_option.settings then
         x_pos = 16
-        
+        print("\^w\^thop32", 46,16, 7)
         if active_option == 2 then
             gmodetext = showGameModeText()
             print(gmodetext.title, x_pos + 44 ,y_pos + 10, 6)
@@ -2013,14 +2027,13 @@ function switchGameState(state)
         camera_x = 0
         camera_y = 0
         initMenu(startGameFromMainMenu)
-        initUFOPool()
     elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 11
+        chunk_progress_x = 0
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
-        
+        initUFOPool()
         initZombiePool(5)
         init_respawn_birds()
         initProceduralGen()
@@ -2207,7 +2220,7 @@ function _draw()
                 print("starting in " .. flr(start_timer), camera_x + 4, camera_y+8, 7)
             end
 
-            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56)
+            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56, 7)
 
         elseif gameState == gstate.game then
 
