@@ -40,6 +40,7 @@ function switchGameState(state)
         camera_x = 0
         camera_y = 0
         initMenu(startGameFromMainMenu)
+        music(0, 500)
     elseif gameState == gstate.playerSelect then
         chunk_progress_x = 0
         chunk_progress_y = 0
@@ -64,10 +65,13 @@ function switchGameState(state)
             [2] = zombies
         }
     elseif gameState == gstate.game then
+        music(2, 1000)
         setRespawnTimer()
     elseif gameState == gstate.complete or gameState == gstate.gameover then
 
         gameover_menu_timer = 3
+
+        music(0, 2000)
 
         for key, player in pairs(players) do
             if player.enabled == true then

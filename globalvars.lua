@@ -110,3 +110,7 @@ BIOME_DIST_UNIT = {
     VOID = 336,
     KINGDOM = 384 
 }
+
+-- SFX
+sfx_hop = 8
+sfx_player_death_to_zombie = 1

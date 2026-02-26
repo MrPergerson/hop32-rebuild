@@ -182,7 +182,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                     disablePlayer(player)
                     player.xpos = -8
                     player.ypos = -8
-                    sfx(1)
+                    sfx(sfx_player_death_to_zombie)
                     break;
                 end
             end
@@ -191,7 +191,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                 if check_object_collision(player, ufo) then
                     --if colliding with top of ufo, bounce
                     if check_object_collision_on_top(player, ufo) then
-                        sfx(2)
+                        sfx(sfx_hop)
                         if ufo.type == "king" then
                             final_boss_health -= 1
                         end
