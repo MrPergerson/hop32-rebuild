@@ -40,13 +40,14 @@ function switchGameState(state)
         camera_x = 0
         camera_y = 0
         initMenu(startGameFromMainMenu)
-        music(0, 500)
+        music(0, 1000, 1)
     elseif gameState == gstate.playerSelect then
         chunk_progress_x = 0
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
+        finalBossEnabled = false
         initUFOPool()
         initZombiePool(5)
         init_respawn_birds()
@@ -64,11 +65,14 @@ function switchGameState(state)
             [1] = players,
             [2] = zombies
         }
+        music(-1, 1000, 1)
+        music(4, 1000, 2)
     elseif gameState == gstate.game then
-        music(2, 1000)
+        music(-1, 1000, 2)
+        music(6, 1000, 3)
         setRespawnTimer()
     elseif gameState == gstate.complete or gameState == gstate.gameover then
-
+        
         gameover_menu_timer = 3
 
         music(0, 2000)

@@ -113,8 +113,8 @@ BIOME_DIST_UNIT = {
 }
 
 -- SFX
-sfx_hop = 8
-sfx_player_death_to_zombie = 1
+sfx_hop = 23
+sfx_player_death_to_zombie = 24
 -- === helper.lua ===
 
 -- Tables
@@ -1236,11 +1236,9 @@ end
 
 
 function updateUFO(dt)
-
     local ufo = ufos[1]
 
     if ufo.enabled and ufo.ai_enabled then
-
         if ufo.state == 1 then
             
             moveLeftRight(ufo, 50)
@@ -1874,6 +1872,8 @@ function drawMenu()
             print(menus[active_menu][i].text, x_pos, y_pos, menus[active_menu][i].color)
             y_pos += 10
     end
+
+    print("menu controls: \148\131 and \151", 12, 120, 6)
 end
 
 function changeOption(option, previous_menu)
@@ -2031,13 +2031,14 @@ function switchGameState(state)
         camera_x = 0
         camera_y = 0
         initMenu(startGameFromMainMenu)
-        music(0, 500)
+        music(0, 1000, 1)
     elseif gameState == gstate.playerSelect then
         chunk_progress_x = 0
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
+        finalBossEnabled = false
         initUFOPool()
         initZombiePool(5)
         init_respawn_birds()
@@ -2055,11 +2056,14 @@ function switchGameState(state)
             [1] = players,
             [2] = zombies
         }
+        music(-1, 1000, 1)
+        music(4, 1000, 2)
     elseif gameState == gstate.game then
-        music(2, 1000)
+        music(-1, 1000, 2)
+        music(6, 1000, 3)
         setRespawnTimer()
     elseif gameState == gstate.complete or gameState == gstate.gameover then
-
+        
         gameover_menu_timer = 3
 
         music(0, 2000)

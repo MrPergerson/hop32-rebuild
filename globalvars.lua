@@ -112,5 +112,5 @@ BIOME_DIST_UNIT = {
 }
 
 -- SFX
-sfx_hop = 8
-sfx_player_death_to_zombie = 1
+sfx_hop = 23
+sfx_player_death_to_zombie = 24

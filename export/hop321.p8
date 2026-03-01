@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
+
 -- === globalvars.lua ===
 debug_mode = false
 debug_fast_travel = false
@@ -9,19 +10,19 @@ debug_camera_x = 0 --??
 debug_camera_y = 0
 keyboard_input = 1 -- 1 or 0
 gstate = {
-    mainmenu = 0,
-    playerselect = 1,
+    mainMenu = 0,
+    playerSelect = 1,
     game = 2,
     gameover = 3,
     complete = 4
 }
-gamestate = gstate.mainmenu
+gameState = gstate.mainMenu
 
-gmode = {
+gMode = {
     tournament = 0,
     freeplay = 1
 }
-gamemode = gmode.tournament
+gameMode = gMode.tournament
 
 
 --camera
@@ -32,7 +33,7 @@ new_camera_y_pos = 0
 new_camera_y_lerp_t = 1
 new_camera_y_lerp_r = 0
 
-function setcameraypos(y_pos)
+function setCameraYPos(y_pos)
     old_camera_y_pos = camera_y
     new_camera_y_pos = y_pos
     new_camera_y_lerp_t = 0
@@ -46,19 +47,19 @@ gameover_menu_timer = 3
 
 -- players
 win_order = {}
-playercount = 0
-disabledplayercount = 0
+playerCount = 0
+disabledPlayerCount = 0
 keys = {}
 key_index = 1 -- used for sorting through keys
 
-function setdisabledplayercount(value)
+function setDisabledPlayerCount(value)
 
-    if value > playercount then
-        value = playercount
+    if value > playerCount then
+        value = playerCount
     end
 
-    disabledplayercount = value
-    --printh("dispc " .. disabledplayercount)
+    disabledPlayerCount = value
+    --printh("disPC " .. disabledPlayerCount)
 end
 
 -- actors
@@ -68,59 +69,59 @@ players = {}
 actors = {}
 
 -- progress
-area = {
-    green_lands = 0,
-    cloud_kingdom = 10
+AREA = {
+    GREEN_LANDS = 0,
+    CLOUD_KINGDOM = 10
 }
 current_area = -1
 chunk_progress_x = 0
 chunk_progress_y = 0
-finalbossenabled = false
+finalBossEnabled = false
 final_boss_health = 4
 
-tile = {
-    none = 0,
-    grass = 2,
-    ground = 3,
-    wall = 4,
-    sand_1 = 93,
-    sand_2 = 94,
-    sand_3 = 95,
-    mountain_1 = 96,
-    mountain_2 = 97,
-    mountain_3 = 99,
-    snow_1 = 99,
-    snow_2 = 100,
-    snow_3 = 101,
-    oreland_1 = 102,
-    oreland_2 = 103,
-    oreland_3 = 104,
-    hell_1 = 105,
-    hell_2 = 106,
-    hell_3 = 107,
-    cloud_1 = 89,
-    cloud_2 = 90,
-    cloud_3 = 91,
-    cloud_4 = 92,
-    glitch = 88
+TILE = {
+    NONE = 0,
+    GRASS = 2,
+    GROUND = 3,
+    WALL = 4,
+    SAND_1 = 93,
+    SAND_2 = 94,
+    SAND_3 = 95,
+    MOUNTAIN_1 = 96,
+    MOUNTAIN_2 = 97,
+    MOUNTAIN_3 = 99,
+    SNOW_1 = 99,
+    SNOW_2 = 100,
+    SNOW_3 = 101,
+    ORELAND_1 = 102,
+    ORELAND_2 = 103,
+    ORELAND_3 = 104,
+    HELL_1 = 105,
+    HELL_2 = 106,
+    HELL_3 = 107,
+    CLOUD_1 = 89,
+    CLOUD_2 = 90,
+    CLOUD_3 = 91,
+    CLOUD_4 = 92,
+    GLITCH = 88
 }
 
-biome_dist_unit = {
-    grass = 48,
-    desert = 96,
-    mountain = 144,
-    snow = 192,
-    city = 240,
-    void = 336,
-    kingdom = 384 
+BIOME_DIST_UNIT = {
+    GRASS = 48,
+    DESERT = 96,
+    MOUNTAIN = 144,
+    SNOW = 192,
+    CITY = 240,
+    VOID = 336,
+    KINGDOM = 384 
 }
 
--- sfx
+-- SFX
 sfx_hop = 23
 sfx_player_death_to_zombie = 24
 -- === helper.lua ===
 
--- tables
+-- Tables
 function contains(table, value)
     for _, v in ipairs(table) do
         if v == value then 
@@ -130,20 +131,20 @@ function contains(table, value)
     return false
 end
 
-queue = {}
-queue.__index = queue
+Queue = {}
+Queue.__index = Queue
 
--- create a new queue
-function queue.new()
+-- Create a new queue
+function Queue.new()
     local self = setmetatable({
-        items = {}, -- the table to hold queue items
-        head = 1,   -- index of the first element
-        tail = 1    -- index of the next insertion point
-    }, queue)
+        items = {}, -- The table to hold queue items
+        head = 1,   -- Index of the first element
+        tail = 1    -- Index of the next insertion point
+    }, Queue)
     return self
 end
 
-function queue:enqueue_unique(item)
+function Queue:enqueue_unique(item)
     if not contains(self.items, item) then
         self.items[self.tail] = item
         self.tail = self.tail + 1
@@ -151,37 +152,37 @@ function queue:enqueue_unique(item)
 
 end
 
--- remove and return the item from the front of the queue
-function queue:dequeue()
+-- Remove and return the item from the front of the queue
+function Queue:dequeue()
     if self:isempty() then
         return nil
     end
     local item = self.items[self.head]
-    self.items[self.head] = nil -- remove reference
+    self.items[self.head] = nil -- Remove reference
     self.head = self.head + 1
     return item
 end
 
--- check if the queue is empty
-function queue:isempty()
+-- Check if the queue is empty
+function Queue:isempty()
     return self.head == self.tail
 end
 
 function timer(interval)
-    local last_time = t()  -- track the last time the function was called
+    local last_time = t()  -- Track the last time the function was called
     
     return function()
         local current_time = t()
-        -- check if the interval has passed
+        -- Check if the interval has passed
         if current_time - last_time >= interval then
-            last_time = current_time  -- update the last time to current time
-            return true  -- indicate that the interval has elapsed
+            last_time = current_time  -- Update the last time to current time
+            return true  -- Indicate that the interval has elapsed
         end
-        return false  -- indicate that the interval has not elapsed
+        return false  -- Indicate that the interval has not elapsed
     end
 end
 
-function processtimer(time, dt)
+function processTimer(time, dt)
     return max(time - dt, 0)
 end
 
@@ -191,7 +192,7 @@ end
 
 
 -- === vector.lua ===
-function isinsidepolygon(vertices, xp, yp)
+function isInsidePolygon(vertices, xp, yp)
     local count = 0
 
     for p = 1, #vertices do
@@ -210,7 +211,7 @@ function isinsidepolygon(vertices, xp, yp)
     return not(count%2 == 0)
 end
 
-function generatesimplepolygon(x,y,width, height)
+function generateSimplePolygon(x,y,width, height)
 
     local x_edge_1 = x + rnd(width)
     local x_edge_2 = x + rnd(width)
@@ -226,7 +227,7 @@ function generatesimplepolygon(x,y,width, height)
 
 end
 
-function drawpolygon(polygon)
+function drawPolygon(polygon)
     line()
     for i = 1, #polygon do 
         line(polygon[i].x, polygon[i].y, 11)
@@ -234,7 +235,7 @@ function drawpolygon(polygon)
     line(polygon[1].x, polygon[1].y, 11)
 end
 
-function drawraycast(point, direction, color)
+function drawRayCast(point, direction, color)
 
     line()
     line(point.x, point.y, point.x + direction.x * 100, point.y + direction.y * 100, color)
@@ -276,9 +277,9 @@ player_sprite_index = { ["a"] = 33,
     ["8"] = 65,
 }
 -- === proceduralgen.lua ===
-poke(0x5f2d, 0x1) -- enable keyboard input
+poke(0x5F2D, 0x1) -- enable keyboard input
 chunks = {} -- 2 or 3 chunk tables
-local terrain_y_offset = 0
+local TERRAIN_Y_OFFSET = 0
 biome_length = 48
 chunk_x_size = 16
 map_x_size = 0
@@ -295,50 +296,50 @@ local rnd_terrain_seed = 0
 debug_poly_render = {}
 groundlevel = 11 -- relative to tiles, not pixels
 
-function initproceduralgen()
+function initProceduralGen()
     --set_biome_distances()
-    map_x_size = biome_dist_unit.void
+    map_x_size = BIOME_DIST_UNIT.VOID
     rnd_terrain_seed = flr(rnd(128))
 end
 
-function generatechunk(x_offset)
+function generateChunk(x_offset)
 
     local chunk = {x = x_offset, y = 0,  tiles = {}, surface_tiles = {}}
 
-    -- fill all cells with ground
+    -- Fill all cells with ground
     for x = x_offset, x_offset+chunk_x_size-1 do
         chunk.tiles[x] = {}
-        for y = 0, map_y_size-1 do -- this creates 31 tiles fyi   
-            if x < biome_dist_unit.grass then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = tile.ground}
-            elseif x < biome_dist_unit.desert then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = tile.sand_1}
-            elseif x < biome_dist_unit.mountain then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = tile.mountain_2}
-            elseif x < biome_dist_unit.snow then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = tile.snow_2}
-            elseif x < biome_dist_unit.city then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = tile.oreland_1}
-            elseif x < biome_dist_unit.void then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = tile.hell_2}
+        for y = 0, map_y_size-1 do -- this creates 31 tiles FYI   
+            if x < BIOME_DIST_UNIT.GRASS then
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GROUND}
+            elseif x < BIOME_DIST_UNIT.DESERT then
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SAND_1}
+            elseif x < BIOME_DIST_UNIT.MOUNTAIN then
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.MOUNTAIN_2}
+            elseif x < BIOME_DIST_UNIT.SNOW then
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SNOW_2}
+            elseif x < BIOME_DIST_UNIT.CITY then
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.ORELAND_1}
+            elseif x < BIOME_DIST_UNIT.VOID then
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.HELL_2}
             else
-                chunk.tiles[x][y] = {x = x, y = y, sprite = tile.ground}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GROUND}
             end  
         end
     end
 
     for x = x_offset, x_offset+chunk_x_size-1 do
         for y = 0, map_y_size-1 do      
-            local h = get_cell_height_at_(x) + terrain_y_offset -- normalize x to [0, 1] (remember to explain why dividing by chunk_x_size fixes sin output)
+            local h = get_cell_height_at_(x) + TERRAIN_Y_OFFSET -- Normalize x to [0, 1] (remember to explain why dividing by chunk_x_size fixes sin output)
             --h = 2 * sin( ((x-1) / chunk_x_size) * 2)
             if y - groundlevel < h then
-                chunk.tiles[x][y].sprite = tile.none
+                chunk.tiles[x][y].sprite = TILE.NONE
             end
             
         end
     end
 
-    if x_offset == chunk_progress_x * 16 and gamestate == gstate.playerselect then
+    if x_offset == chunk_progress_x * 16 and gameState == gstate.playerSelect then
             -- do nothing 
     else 
         -- draw a holes randomly
@@ -349,29 +350,29 @@ function generatechunk(x_offset)
 
             for x = hole_start , hole_start + hole_width, 1 do
                 for y = 0, map_y_size-1, 1 do
-                    chunk.tiles[x][y].sprite = tile.none   
+                    chunk.tiles[x][y].sprite = TILE.NONE   
                 end
             end
         end
     end
 
-    -- get all surface tiles. update surface sprites if needed
+    -- get all surface tiles. Update surface sprites if needed
     for x = x_offset, x_offset+chunk_x_size-1 do
         for y = 1, map_y_size-1 do 
 
             local above_tile = chunk.tiles[x][y-1]
             local target_tile = chunk.tiles[x][y]
 
-            if above_tile.sprite == tile.none and target_tile.sprite ~= tile.none then
+            if above_tile.sprite == TILE.NONE and target_tile.sprite ~= TILE.NONE then
                 add(chunk.surface_tiles, target_tile)
                 
-                if x < biome_dist_unit.grass then
-                    target_tile.sprite = tile.grass
-                elseif x < biome_dist_unit.desert then
-                    --target_tile.sprite = tile.grass
-                elseif x < biome_dist_unit.mountain then
-                    target_tile.sprite = tile.mountain_1
-                elseif x < biome_dist_unit.snow then
+                if x < BIOME_DIST_UNIT.GRASS then
+                    target_tile.sprite = TILE.GRASS
+                elseif x < BIOME_DIST_UNIT.DESERT then
+                    --target_tile.sprite = TILE.GRASS
+                elseif x < BIOME_DIST_UNIT.MOUNTAIN then
+                    target_tile.sprite = TILE.MOUNTAIN_1
+                elseif x < BIOME_DIST_UNIT.SNOW then
                     --do nothing
                 end                    
             end
@@ -383,43 +384,43 @@ function generatechunk(x_offset)
     return chunk
 end
 
-function generatecitychunk(x_offset, y_offset)
+function generateCityChunk(x_offset, y_offset)
     local chunk = {x = x_offset, y = y_offset,  tiles = {}, surface_tiles = {}}
 
-        -- fill all cells with none
+        -- Fill all cells with NONE
     for x = x_offset, x_offset+15 do
         chunk.tiles[x] = {}
-        for y = y_offset, y_offset+15 do -- this creates 31 tiles fyi   
-            chunk.tiles[x][y] = {x = x, y = y, sprite = tile.none}
+        for y = y_offset, y_offset+15 do -- this creates 31 tiles FYI   
+            chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.NONE}
         end
     end
 
-    local buildingheight = 10 -- higher is lower..
-    local buildinglength = 0
-    local buildingheightvariance = 0
+    local buildingHeight = 10 -- higher is lower..
+    local buildingLength = 0
+    local buildingHeightVariance = 0
     local signal = true
 
     for x = x_offset, x_offset+15 do
 
-        if buildinglength == 4 then
+        if buildingLength == 4 then
             signal = not(signal)
-            buildinglength = 0
+            buildingLength = 0
         end
-        buildinglength += 1 
+        buildingLength += 1 
 
-        buildingheightvariance = flr(rnd(4))-2
+        buildingHeightVariance = flr(rnd(4))-2
 
         for y = y_offset, y_offset+15 do
         
 
-            if signal and y == buildingheight + buildingheightvariance then
-                chunk.tiles[x][y].sprite = tile.oreland_3
-            elseif signal and y > buildingheight-1 + buildingheightvariance then
-                chunk.tiles[x][y].sprite = tile.oreland_1
+            if signal and y == buildingHeight + buildingHeightVariance then
+                chunk.tiles[x][y].sprite = TILE.ORELAND_3
+            elseif signal and y > buildingHeight-1 + buildingHeightVariance then
+                chunk.tiles[x][y].sprite = TILE.ORELAND_1
             end
 
             if y > 14 then
-                chunk.tiles[x][y].sprite = tile.oreland_2
+                chunk.tiles[x][y].sprite = TILE.ORELAND_2
             end
             
         end
@@ -431,7 +432,7 @@ function generatecitychunk(x_offset, y_offset)
             local above_tile = chunk.tiles[x][y-1]
             local target_tile = chunk.tiles[x][y]
 
-            if above_tile.sprite == tile.none and target_tile.sprite ~= tile.none then
+            if above_tile.sprite == TILE.NONE and target_tile.sprite ~= TILE.NONE then
                 add(chunk.surface_tiles, target_tile)
             end
             
@@ -442,22 +443,22 @@ function generatecitychunk(x_offset, y_offset)
 
 end
 
-function generatevoidchunk(x_offset, y_offset, startingsize)
+function generateVoidChunk(x_offset, y_offset, startingSize)
     local chunk = {x = x_offset, y = y_offset,  tiles = {}, surface_tiles = {}}
 
-    -- fill all cells with none
+    -- Fill all cells with NONE
     for x = x_offset, x_offset+15 do
         chunk.tiles[x] = {}
-        for y = y_offset, y_offset+15 do -- this creates 31 tiles fyi   
-            chunk.tiles[x][y] = {x = x, y = y, sprite = tile.none}
+        for y = y_offset, y_offset+15 do -- this creates 31 tiles FYI   
+            chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.NONE}
         end
     end
 
-    local asteroidcount = 3
+    local asteroidCount = 3
     local next_asteroid_x = 0
-    local asteroidsize = startingsize
+    local asteroidSize = startingSize
 
-    for i = 1, asteroidcount do
+    for i = 1, asteroidCount do
 
         local x = next_asteroid_x
         next_asteroid_x = next_asteroid_x + 4 + flr(rnd(2))
@@ -466,57 +467,57 @@ function generatevoidchunk(x_offset, y_offset, startingsize)
 
         local rnd_offset_x = flr(rnd(2))
         local rnd_offset_y = flr(rnd(2))
-        createasteroid(asteroidsize, x_offset + x + rnd_offset_x , y_offset + y + rnd_offset_y, x_offset, y_offset, chunk.tiles)
+        createAsteroid(asteroidSize, x_offset + x + rnd_offset_x , y_offset + y + rnd_offset_y, x_offset, y_offset, chunk.tiles)
        
         if i & 2 == 0 then
-            asteroidsize = max(3, asteroidsize - 1)
+            asteroidSize = max(3, asteroidSize - 1)
         end
 
     end
 
-    getsurfacetiles(chunk, x_offset, y_offset, 88)
+    getSurfaceTiles(chunk, x_offset, y_offset, 88)
 
     return chunk
 
 end
 
-function generatecloudchunk(x_offset, y_offset)
+function generateCloudChunk(x_offset, y_offset)
     local chunk = {x = x_offset, y = y_offset,  tiles = {}, surface_tiles = {}}
 
-    -- fill all cells with none
+    -- Fill all cells with NONE
     for x = x_offset, x_offset+15 do
         chunk.tiles[x] = {}
-        for y = y_offset, y_offset+15 do -- this creates 31 tiles fyi   
-            chunk.tiles[x][y] = {x = x, y = y, sprite = tile.cloud_1}
+        for y = y_offset, y_offset+15 do -- this creates 31 tiles FYI   
+            chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.CLOUD_1}
         end
     end
 
     for x = x_offset, x_offset+15 do
         for y = y_offset, y_offset+15 do      
             if y < sin( ((x-1) / 8)) + 13 and y > sin( ((x-5) / 8)) + 2  then
-                chunk.tiles[x][y].sprite = tile.none
+                chunk.tiles[x][y].sprite = TILE.NONE
             end
             
         end
     end
 
 
-    getsurfacetiles(chunk, x_offset, y_offset, -1)
+    getSurfaceTiles(chunk, x_offset, y_offset, -1)
 
 
     return chunk
 
 end
 
-function createasteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
+function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
 
     origin_x = min(origin_x, (x_offset + 14) - size)
     origin_y = min(origin_y, (y_offset + 14) - size+1)
 
-    local asteroidpoly = generatesimplepolygon(origin_x * 8, origin_y * 8, size * 8, size * 8)
-    add(debug_poly_render, asteroidpoly)
+    local asteroidPoly = generateSimplePolygon(origin_x * 8, origin_y * 8, size * 8, size * 8)
+    add(debug_poly_render, asteroidPoly)
 
-    local tilecount = 0
+    local tileCount = 0
 
     for x = 0, size-1, 1 do
         for y = 0, size-1, 1 do
@@ -524,34 +525,34 @@ function createasteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
             local tile_x = origin_x + x
             local tile_y = origin_y + y
 
-            local inpolycount = 0
+            local inPolyCount = 0
 
-            if isinsidepolygon(asteroidpoly, tile_x * 8, tile_y * 8) then
-                inpolycount += 1
+            if isInsidePolygon(asteroidPoly, tile_x * 8, tile_y * 8) then
+                inPolyCount += 1
             end
 
-            if isinsidepolygon(asteroidpoly, (tile_x + 1) * 8, tile_y * 8) then
-                inpolycount += 1
+            if isInsidePolygon(asteroidPoly, (tile_x + 1) * 8, tile_y * 8) then
+                inPolyCount += 1
             end
 
-            if isinsidepolygon(asteroidpoly, (tile_x + 1) * 8, (tile_y + 1) * 8) then
-                inpolycount += 1
+            if isInsidePolygon(asteroidPoly, (tile_x + 1) * 8, (tile_y + 1) * 8) then
+                inPolyCount += 1
             end
 
-            if isinsidepolygon(asteroidpoly, tile_x * 8, (tile_y + 1)  * 8) then
-                inpolycount += 1
+            if isInsidePolygon(asteroidPoly, tile_x * 8, (tile_y + 1)  * 8) then
+                inPolyCount += 1
             end
 
-            if inpolycount >= 2 then
+            if inPolyCount >= 2 then
                 tiles[tile_x][tile_y].sprite = 88
-                tilecount += 1
+                tileCount += 1
             end
 
         end
     end
 
 
-    if tilecount == 0 then
+    if tileCount == 0 then
        tiles[origin_x][origin_y].sprite = 88
 
        if origin_x + 1 == x_offset + 15 + size - 1 then
@@ -571,13 +572,13 @@ end
 
 function get_cell_height_at_(x)
 
-    if x <= biome_dist_unit.grass then
+    if x <= BIOME_DIST_UNIT.GRASS then
         return sin( ((x-1 + rnd_terrain_seed) / 16)) 
-    elseif x <= biome_dist_unit.desert then
+    elseif x <= BIOME_DIST_UNIT.DESERT then
         return sin( ((x-1 + rnd_terrain_seed) / 8))
-    elseif x <= biome_dist_unit.mountain then
+    elseif x <= BIOME_DIST_UNIT.MOUNTAIN then
         return sin( ((x-1 + rnd_terrain_seed) / 16)) + 4 * sin( ((x-1 + rnd_terrain_seed) / 16) * 1.5)
-    elseif x <= biome_dist_unit.snow then
+    elseif x <= BIOME_DIST_UNIT.SNOW then
         return sin( ((x-1 + rnd_terrain_seed) / 16)) 
     else
         return sin( ((x-1 + rnd_terrain_seed) / 16)) 
@@ -585,15 +586,15 @@ function get_cell_height_at_(x)
 
 end
 
-function getsurfacetiles(chunk, x_offset, y_offset, surface_sprite)
-    -- get all surface tiles. update surface sprites if needed
+function getSurfaceTiles(chunk, x_offset, y_offset, surface_sprite)
+    -- get all surface tiles. Update surface sprites if needed
     for x = x_offset, x_offset+15 do
         for y = y_offset+1, y_offset+15 do
 
             local above_tile = chunk.tiles[x][y-1]
             local target_tile = chunk.tiles[x][y]
 
-            if above_tile.sprite == tile.none and target_tile.sprite ~= tile.none then
+            if above_tile.sprite == TILE.NONE and target_tile.sprite ~= TILE.NONE then
                 if surface_sprite > 0 then
                     target_tile.sprite = surface_sprite               
                 end
@@ -604,7 +605,7 @@ function getsurfacetiles(chunk, x_offset, y_offset, surface_sprite)
     end
 end
 
-function getrndsurfacetile(tiles)
+function getRndSurfaceTile(tiles)
     return tiles[flr(rnd(#tiles))+1]
 end
 
@@ -612,12 +613,12 @@ function get_surface_tile_at_pos(x_pos)
     local x = flr(x_pos / 8)
     for y = 1, 15 do 
 
-        local above_tile = gettile(x,y-1)
-        local target_tile = gettile(x,y)
+        local above_tile = getTile(x,y-1)
+        local target_tile = getTile(x,y)
 
         --printh("get surface " + target_tile.tile)
 
-        if above_tile.tile == tile.none and target_tile.tile ~= tile.none then
+        if above_tile.tile == TILE.NONE and target_tile.tile ~= TILE.NONE then
             return target_tile
         end
         
@@ -628,7 +629,7 @@ end
 function debug_draw_asteroid_polys()
 
     for index, poly in ipairs(debug_poly_render) do
-        drawpolygon(poly)
+        drawPolygon(poly)
         
     end
 
@@ -645,27 +646,27 @@ local x_offset = 0
 local y_offset = 0
 local land_progress = 0
 
-local startingasteroidsize = 8
+local startingAsteroidSize = 8
 
-function initlevelload(chunk_progress_x)
+function initLevelLoad(chunk_progress_x)
 
     loaded_chunks = {}
 
-    startingasteroidsize = 8
+    startingAsteroidSize = 8
     debug_poly_render = {}
     
     x_offset = chunk_progress_x * 16 --initial
     y_offset = 0
 
-    loadchunk()
-    loadchunk()
-    --loadchunk()
+    loadChunk()
+    loadChunk()
+    --loadChunk()
 
 end
 
-function updatechunks(chunk_progress_x)
+function updateChunks(chunk_progress_x)
     --printh(chunk_progress_x)        
-        local new_chunk = loadchunk(x_offset, 0)
+        local new_chunk = loadChunk(x_offset, 0)
         
         add(loaded_chunks, new_chunk)
         new_chunk_threshold += 1
@@ -683,46 +684,46 @@ function updatechunks(chunk_progress_x)
     
 end
 
--- note: using distance to check biome won't work for secret areas
-function loadchunk()
+-- Note: using distance to check biome won't work for secret areas
+function loadChunk()
     local new_chunk = {}
     
-    if x_offset >= biome_dist_unit.void then
-        new_chunk = generatecloudchunk(x_offset, y_offset)
+    if x_offset >= BIOME_DIST_UNIT.VOID then
+        new_chunk = generateCloudChunk(x_offset, y_offset)
 
-        if x_offset == biome_dist_unit.void + 16 then
-            initking()
-            enableufo(376 * 8, 40)
-            finalbossenabled = true
+        if x_offset == BIOME_DIST_UNIT.VOID + 16 then
+            initKing()
+            enableUFO(376 * 8, 40)
+            finalBossEnabled = true
         end
 
-    elseif x_offset >= biome_dist_unit.city then
-        new_chunk = generatevoidchunk(x_offset,y_offset, startingasteroidsize)
-        startingasteroidsize -= 1
+    elseif x_offset >= BIOME_DIST_UNIT.CITY then
+        new_chunk = generateVoidChunk(x_offset,y_offset, startingAsteroidSize)
+        startingAsteroidSize -= 1
 
-    elseif x_offset >= biome_dist_unit.snow then
-        new_chunk = generatecitychunk(x_offset, y_offset)
+    elseif x_offset >= BIOME_DIST_UNIT.SNOW then
+        new_chunk = generateCityChunk(x_offset, y_offset)
 
-        if x_offset == biome_dist_unit.snow + 16 then
-            initvulture()
-            enableufo((biome_dist_unit.snow + 16) * 8, 8)
+        if x_offset == BIOME_DIST_UNIT.SNOW + 16 then
+            initVulture()
+            enableUFO((BIOME_DIST_UNIT.SNOW + 16) * 8, 8)
         end
 
 
     else
-        new_chunk = generatechunk(x_offset)
+        new_chunk = generateChunk(x_offset)
 
-        if new_chunk.x == chunk_progress_x * 16 and gamestate == gstate.playerselect then
+        if new_chunk.x == chunk_progress_x * 16 and gameState == gstate.playerSelect then
 
         else 
             
-            local zombie_spawn_point = getrndsurfacetile(new_chunk.surface_tiles)
-            enableactor(zombies, -1, zombie_spawn_point.x * 8, (zombie_spawn_point.y-1) * 8)
+            local zombie_spawn_point = getRndSurfaceTile(new_chunk.surface_tiles)
+            enableActor(zombies, -1, zombie_spawn_point.x * 8, (zombie_spawn_point.y-1) * 8)
         end
 
         if x_offset == 64 then
            -- printh(#ufos)
-            local ufo = enableufo(64 * 8, 2 * 8)
+            local ufo = enableUFO(64 * 8, 2 * 8)
             --printh(ufo.xpos)
         end
 
@@ -732,13 +733,13 @@ function loadchunk()
     x_offset += chunk_x_size
 
     --y_offset -= 2
-    --setcameraypos(y_offset * 8)
+    --setCameraYPos(y_offset * 8)
 
     return new_chunk
 end
 
 
-function drawchunks()
+function drawChunks()
     for chunk in all(loaded_chunks) do
         for x = chunk.x, chunk.x + chunk_x_size-1 do
             for y = chunk.y, chunk.y + chunk_y_size-1 do     
@@ -746,7 +747,7 @@ function drawchunks()
                 local tile = chunk.tiles[x][y]
                 if tile.sprite > 0 then -- no error was returned
                     spr(tile.sprite, tile.x * 8, tile.y * 8)
-                    --debug
+                    --Debug
                     if (debug_mode) then
                         rect(tile.x * 8, tile.y * 8, tile.x * 8 + 8, tile.y * 8 + 8, 9)                      
                     end
@@ -761,12 +762,12 @@ function drawchunks()
 
 end
 
-function gettile(x,y)
-    local rearchunk = loaded_chunks[1]
-    local forwardchunk = loaded_chunks[#loaded_chunks]
+function getTile(x,y)
+    local rearChunk = loaded_chunks[1]
+    local forwardChunk = loaded_chunks[#loaded_chunks]
 
-    if x < rearchunk.x or x >= forwardchunk.x + chunk_x_size or 
-    y < rearchunk.y or y >= rearchunk.y + map_y_size then
+    if x < rearChunk.x or x >= forwardChunk.x + chunk_x_size or 
+    y < rearChunk.y or y >= rearChunk.y + map_y_size then
         --printh("(" .. x .. "," .. y .. ") tile index is out of bounds")
         -- for some reason, get_tile calls in out of bounds (x 298-303) spike when player reaches the end.
         return {tile = -1}
@@ -777,7 +778,7 @@ function gettile(x,y)
         x = flr(x)
         y = flr(y)
 
-        -- 1. identify which chunk to search for
+        -- 1. Identify which chunk to search for
         for c in all(loaded_chunks) do
             if x >= c.x and x < c.x + chunk_x_size then
                 chunk = c
@@ -790,18 +791,18 @@ function gettile(x,y)
             return chunk
         end
 
-        -- 2. return tile from the correct chunk
+        -- 2. Return tile from the correct chunk
         return chunk.tiles[x][y]
     end
 end
 
-function getsurfacetileatxpos(x_pos)
+function getSurfaceTileAtXPos(x_pos)
 
     local chunk = {tile = -1}
 
     local x = flr(x_pos/8)
 
-    -- 1. identify which chunk to search for
+    -- 1. Identify which chunk to search for
     --printh(#loaded_chunks)
     for c in all(loaded_chunks) do
         if x >= c.x and x < c.x + chunk_x_size then
@@ -822,85 +823,85 @@ function getsurfacetileatxpos(x_pos)
 end
 
 
-function checktilecollision(new_x, new_y, x,y, is_player)
+function checkTileCollision(new_x, new_y, x,y, is_player)
     -- convert world positions to grid positions
     local new_x_unit = new_x / 8
     local new_y_unit = new_y / 8
     local x_unit = x / 8
     local y_unit = y / 8
-    local onground = false
+    local onGround = false
     local hit_wall = false
 
     --printh(new_x)
-    -- check x axis collisions
-    local tile_x_1 = gettile(new_x_unit, y_unit)
-    local tile_x_2 = gettile(new_x_unit, y_unit + 0.999)
-    local tile_x_3 = gettile(new_x_unit + 1, y_unit)
-    local tile_x_4 = gettile(new_x_unit + 1, y_unit + 0.999)
+    -- check X axis collisions
+    local tile_x_1 = getTile(new_x_unit, y_unit)
+    local tile_x_2 = getTile(new_x_unit, y_unit + 0.999)
+    local tile_x_3 = getTile(new_x_unit + 1, y_unit)
+    local tile_x_4 = getTile(new_x_unit + 1, y_unit + 0.999)
 
-    -- check y axis collisions
-    local tile_y_1 = gettile(x_unit, new_y_unit)
-    local tile_y_2 = gettile(x_unit + 0.999, new_y_unit)
-    local tile_y_3 = gettile(x_unit, new_y_unit + 1)
-    local tile_y_4 = gettile(x_unit + 0.999, new_y_unit + 1)
+    -- check Y axis collisions
+    local tile_y_1 = getTile(x_unit, new_y_unit)
+    local tile_y_2 = getTile(x_unit + 0.999, new_y_unit)
+    local tile_y_3 = getTile(x_unit, new_y_unit + 1)
+    local tile_y_4 = getTile(x_unit + 0.999, new_y_unit + 1)
 
-    local cornercount = 0
+    local cornerCount = 0
 
-    -- x
-    if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= tile.none or tile_x_2.sprite ~= tile.none) then
-        if is_player == false then -- hack, for players this stops collisions in beyond the grid in the -y direction
+    -- X
+    if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
+        if is_player == false then -- HACK, for players this stops collisions in beyond the grid in the -y direction
             new_x_unit = flr(new_x_unit) + 1 
         end 
         hit_wall = true
-    elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= tile.none or tile_x_4.sprite ~= tile.none) then
+    elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
         new_x_unit = flr(new_x_unit)
-        cornercount += 1
+        cornerCount += 1
         hit_wall = true
     end
 
-    -- y
-    if (tile_y_1 ~= nil and tile_y_2 ~= nil) and (tile_y_1.sprite ~= tile.none or tile_y_2.sprite ~= tile.none) then
-        if new_y > 0 or is_player == false then -- hack, this stops collisions in beyond the grid in the -y direction
+    -- Y
+    if (tile_y_1 ~= nil and tile_y_2 ~= nil) and (tile_y_1.sprite ~= TILE.NONE or tile_y_2.sprite ~= TILE.NONE) then
+        if new_y > 0 or is_player == false then -- HACK, this stops collisions in beyond the grid in the -y direction
             new_y_unit = flr(new_y_unit) + 1
         end
-        cornercount += 1
-    elseif (tile_y_3 ~= nil and tile_y_4 ~= nil) and (tile_y_3.sprite ~= tile.none or tile_y_4.sprite ~= tile.none) then
+        cornerCount += 1
+    elseif (tile_y_3 ~= nil and tile_y_4 ~= nil) and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then
         new_y_unit = flr(new_y_unit)
         
-        onground = true
+        onGround = true
     end
 
-    if cornercount == 2 then -- yay this fixes the corner bug
+    if cornerCount == 2 then -- yay this fixes the corner bug
         if new_y > y then -- going down
             new_y_unit = new_y_unit - 1
         end
 
     end
 
-    -- note on hack: it seems that ignoring tile collisions in the -y and -x direction allows the player to jump beyond the 
-    -- camera position in the -y direction. i had to add a condition to check if the y position is greater than zero 
-    -- so that players would collide with the cloud kingdom roof. if i decide to modify generation to have different heights,
+    -- NOTE on HACK: it seems that ignoring tile collisions in the -Y and -X direction allows the player to jump beyond the 
+    -- camera position in the -Y direction. I had to add a condition to check if the y position is greater than zero 
+    -- so that players would collide with the cloud kingdom roof. If I decide to modify generation to have different heights,
     -- then this check will need to account for that.
 
     -- convert grid positions to world positions
     new_x = new_x_unit * 8
     new_y = new_y_unit * 8
 
-    return {x = new_x, y = new_y, onground = onground, hit_wall = hit_wall} -- this is returning nil for some reason
+    return {x = new_x, y = new_y, onGround = onGround, hit_wall = hit_wall} -- this is returning nil for some reason
 end
 -- === actor.lua ===
 
 -- player variables
-local playerwoncount = 0
-local maxplayers = 32
-local maxfallvelocity = 200
+local playerWonCount = 0
+local maxPlayers = 32
+local maxFallVelocity = 200
 
 -- movement
-local gravity = 15  -- gravity value
-local speed = 5
-local min_speed = 50
-local max_speed = 65 -- camera speed is 15
-local bounce_factor = -8  -- factor to bounce back after collision
+local GRAVITY = 15  -- Gravity value
+local SPEED = 5
+local MIN_SPEED = 50
+local MAX_SPEED = 65 -- camera speed is 15
+local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
 local jump_acceleration_x = 10
 local jump_acceleration_y = 20
 local min_jump_height = 1.5
@@ -908,41 +909,41 @@ local min_jump_distance = 1.5
 local max_jump_height = 12
 local max_jump_distance = 8
 local jump_x_velocity = 4
-local bouncecharge = 0 -- [0-1]
-local maxchargetime = 4 -- seconds
-local hover_down_speed = 30 -- ufo
+local bounceCharge = 0 -- [0-1]
+local maxChargeTime = 4 -- seconds
+local HOVER_DOWN_SPEED = 30 -- UFO
 local debug = false
 local players_can_release_others = false
 
 local d_last_time = 0 -- ??
 
 
-function initactorpool(actor_count, actor_table, actor_data)
+function initActorPool(actor_count, actor_table, actor_data)
     for i = 1, actor_count, 1 do
-        actor_table[i] = createactor(actor_data, i)
+        actor_table[i] = createActor(actor_data, i)
     end
 end
 
 
-function createactor(actor_data, id)
+function createActor(actor_data, id)
     local actor = {
         id=id, 
         type = actor_data.type,
         enabled = false,
-        inputdisabled = false,
+        inputDisabled = false,
         xpos = -8, 
         ypos = -8, 
-        startposition = 0,
-        boundsoffsetx = 0, 
-        boundsoffsety = 0, 
+        startPosition = 0,
+        boundsOffsetX = 0, 
+        boundsOffsetY = 0, 
         vx = 0, 
         vy = 0, 
         move_dir = -1,
         width = actor_data.width,
         height = actor_data.height,
-        boundsoffsetx = 0,
-        boundsoffsety = 0,
-        onground = false, 
+        boundsOffsetX = 0,
+        boundsOffsetY = 0,
+        onGround = false, 
         bounce_charge = 0,
         jump_height = min_jump_height,
         jump_distance = min_jump_distance,
@@ -950,10 +951,10 @@ function createactor(actor_data, id)
         fall_gravity = 50,
         sprite = actor_data.sprite, 
         sprite2 = actor_data.sprite2,
-        disabledcount = 0,
+        disabledCount = 0,
         ai_enabled = false,
         state = 1,
-        totaltimeenabled = 0,
+        totalTimeEnabled = 0,
         won = false,
         timer_1 = 0,
         capture_tracker = {},
@@ -962,18 +963,18 @@ function createactor(actor_data, id)
             ypos = 0,
             width = 16,
             height = 32,
-            boundsoffsetx = 4,
-            boundsoffsety = 28
+            boundsOffsetX = 4,
+            boundsOffsetY = 28
         }
     }
-    --add(keys, keyinput)
-    --playercount = playercount + 1
+    --add(keys, keyInput)
+    --playerCount = playerCount + 1
     return actor
 
 
 end
 
-function enableactor(actor_table, id, xpos, ypos)
+function enableActor(actor_table, id, xpos, ypos)
     local actor = nil
 
     if id == -1 then -- if id -1, then enable first available inactive
@@ -999,7 +1000,7 @@ function enableactor(actor_table, id, xpos, ypos)
 
     actor.enabled = true
     actor.ai_enabled = true
-    actor.inputdisabled = false
+    actor.inputDisabled = false
     actor.state = 1
     actor.search_timer = 5 + flr(rnd(5)) -- ufo
     actor.ypos = ypos
@@ -1008,21 +1009,21 @@ function enableactor(actor_table, id, xpos, ypos)
     return actor
 end
 
-function disableactor(actor)
+function disableActor(actor)
     actor.enabled = false
     actor.ai_enabled = false
-    actor.disabledcount = actor.disabledcount + 1 -- player
-    actor.totaltimeenabled = actor.totaltimeenabled + (time() - actor.totaltimeenabled)  -- player
+    actor.disabledCount = actor.disabledCount + 1 -- player
+    actor.totalTimeEnabled = actor.totalTimeEnabled + (time() - actor.totalTimeEnabled)  -- player
     --actor.xpos = -8
     --actor.ypos = -8
     actor.vx = 0
     actor.vy = 0
-    --disabledplayercount = disabledplayercount + 1
+    --disabledPlayerCount = disabledPlayerCount + 1
     --queue_respawn_bird(player.key)
 end
 
 
-function getnewactorposition(zombie, dt)
+function getNewActorPosition(zombie, dt)
     if zombie.vy >= 0 then
         jump_acceleration_y = zombie.fall_gravity * 8
     else
@@ -1034,13 +1035,13 @@ function getnewactorposition(zombie, dt)
     local zombie_new_y = zombie.ypos + zombie.vy * dt + 0.5 * jump_acceleration_y * dt * dt
     zombie.vx += jump_acceleration_x * dt
     zombie.vy += jump_acceleration_y * dt
-    zombie.vy = min(zombie.vy, maxfallvelocity)
+    zombie.vy = min(zombie.vy, maxFallVelocity)
 
     return {xpos = zombie_new_x, ypos = zombie_new_y}
 end
 
-function bounceactor(actor) -- or actor?
-    if actor.onground and not(actor.won) then
+function bounceActor(actor) -- or actor?
+    if actor.onGround and not(actor.won) then
         local jump_dist_p1 = actor.jump_distance * .6
         local jump_dist_p2 = actor.jump_distance * .4
         local jump_velocity = (-2 * actor.jump_height * jump_x_velocity) / jump_dist_p1
@@ -1055,11 +1056,11 @@ function bounceactor(actor) -- or actor?
 end
 
 -- timer()
--- moveactorto()
--- automoveleftright()
--- attractactors(thisactor)
+-- moveActorTo()
+-- autoMoveLeftRight()
+-- attractActors(thisActor)
 
-function moveleftright(actor, speed)
+function moveLeftRight(actor, speed)
 
 
     actor.vx = actor.move_dir * speed
@@ -1075,7 +1076,7 @@ function moveleftright(actor, speed)
 
 end
 
-function checkactoroutofbounds(actor)
+function checkActorOutOfBounds(actor)
     if actor.xpos + 8 < camera_x - 16
     --or actor.xpos > camera_x + 200 -- we don't care about right bounds
     --or actor.ypos < camera_y  
@@ -1087,7 +1088,7 @@ function checkactoroutofbounds(actor)
     return false
 end
 
-function drawactors(actor_table)
+function drawActors(actor_table)
     for key, actor in pairs(actor_table) do
         --if actor.enabled then
             spr(actor.sprite, actor.xpos, actor.ypos)
@@ -1115,15 +1116,15 @@ function check_object_collision_on_top(a, b)
     local b_edges = get_edges(b)
     
 
-     -- super janky here. i should figure out how to properly do this
+     -- super janky here. I should figure out how to properly do this
      return a_edges.bottom > b_edges.top and a.ypos < b.ypos and a.vy > 0
         
 end
 
 function get_edges(obj)
-    -- calculate reference point
-    local center_x = obj.xpos + obj.boundsoffsetx
-    local center_y = obj.ypos + obj.boundsoffsety
+    -- Calculate reference point
+    local center_x = obj.xpos + obj.boundsOffsetX
+    local center_y = obj.ypos + obj.boundsOffsetY
     
     local half_w = obj.width / 2
     local half_h = obj.height / 2
@@ -1136,17 +1137,17 @@ function get_edges(obj)
     }
 end
 -- === zombies.lua ===
-local speed = 5
+local SPEED = 5
 
-function initzombiepool(max_zombies)
+function initZombiePool(max_zombies)
 
     zombies = {}
 
-    initactorpool(max_zombies, zombies, {type = "zombie", width = 1, height = 1, sprite = 108, sprite2 = 0})
+    initActorPool(max_zombies, zombies, {type = "zombie", width = 1, height = 1, sprite = 108, sprite2 = 0})
     
 end
 
-function updatezombie(id, dt)
+function updateZombie(id, dt)
 
 end
 
@@ -1155,26 +1156,26 @@ function update_zombies(dt)
 
         if zombie.enabled and zombie.ai_enabled then
 
-            if checkactoroutofbounds(zombie) then
-                disableactor(zombie)
+            if checkActorOutOfBounds(zombie) then
+                disableActor(zombie)
                 break
             end
         
-            zombie.vx = zombie.move_dir * speed
+            zombie.vx = zombie.move_dir * SPEED
 
-            local zombie_new_pos = getnewactorposition(zombie, dt)
+            local zombie_new_pos = getNewActorPosition(zombie, dt)
 
-            -- check new positions for collisions
-            local checked_position = checktilecollision(zombie_new_pos.xpos, zombie_new_pos.ypos, zombie.xpos, zombie.ypos, false)
-            zombie.onground = checked_position.onground
+            -- Check new positions for collisions
+            local checked_position = checkTileCollision(zombie_new_pos.xpos, zombie_new_pos.ypos, zombie.xpos, zombie.ypos, false)
+            zombie.onGround = checked_position.onGround
 
-            if zombie.onground then
+            if zombie.onGround then
                 zombie.vx = 0
                 zombie.vy = 0
 
                 if checked_position.hit_wall then
 
-                bounceactor(zombie)
+                bounceActor(zombie)
                     -- if can't bounce then
                     --zombie.move_dir = -zombie.move_dir
                     --zombie.vx = 0
@@ -1182,7 +1183,7 @@ function update_zombies(dt)
             end
 
 
-            -- apply final position updates, if any
+            -- Apply final position updates, if any
             zombie.xpos = checked_position.x
             --zombie.x = checked_position.x
             zombie.ypos = checked_position.y
@@ -1192,65 +1193,67 @@ function update_zombies(dt)
 end
 -- === ufo.lua ===
 
-local speed = 500
-local min_speed = 50
-local max_speed = 65 -- camera speed is 15
-local hover_down_speed = 30
-local vulture_down_speed = 10
+local SPEED = 500
+local MIN_SPEED = 50
+local MAX_SPEED = 65 -- camera speed is 15
+local HOVER_DOWN_SPEED = 30
+local VULTURE_DOWN_SPEED = 10
 local debug = false
 local players_can_release_others = false
 
-function initufopool()
+function initUFOPool()
     ufos = {}
 
-    initactorpool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 109, sprite2 = 110})
+    initActorPool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 109, sprite2 = 110})
 end
 
-function initking()
+function initKing()
     ufos = {}
-    final_boss_health = max(playercount, 3)
-    initactorpool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
+    final_boss_health = max(playerCount, 3)
+    initActorPool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
 end
 
-function initvulture()
+function initVulture()
     ufos = {}
 
-    initactorpool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 126})
+    initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 126})
 
     ufos[1].tracker_beam.width = 8
     ufos[1].tracker_beam.height = 8
-    ufos[1].tracker_beam.boundsoffsetx = 4
-    ufos[1].tracker_beam.boundsoffsety = 6
+    ufos[1].tracker_beam.boundsOffsetX = 4
+    ufos[1].tracker_beam.boundsOffsetY = 6
 
 end
 
 
-function enableufo(xpos, ypos)
+function enableUFO(xpos, ypos)
 
-    local ufo = enableactor(ufos, 1, xpos, ypos)
-    ufo.boundsoffsetx = 4
-    ufo.boundsoffsety = 4
+    local ufo = enableActor(ufos, 1, xpos, ypos)
+    ufo.boundsOffsetX = 4
+    ufo.boundsOffsetY = 4
 
-    resetufo(ufo, xpos, ypos)
+    resetUFO(ufo, xpos, ypos)
 
     return ufo
 
 end
 
 
-function updateufo(dt)
+function updateUFO(dt)
     local ufo = ufos[1]
 
     if ufo.enabled and ufo.ai_enabled then
+    printh("huh1")
         if ufo.state == 1 then
             
-            moveleftright(ufo, 50)
+            moveLeftRight(ufo, 50)
 
             if ufo.type == "king" then
                 if ufo.timer_1 == 0 then
-                    enableactor(zombies, -1, ufo.xpos, ufo.ypos)
+                    enableActor(zombies, -1, ufo.xpos, ufo.ypos)
                     ufo.timer_1 = 5
                 elseif final_boss_health <= 0 then
+                    printh("huh")
                     ufo.state = 4
                 end                
             else
@@ -1260,15 +1263,15 @@ function updateufo(dt)
                 end
             end
 
-            ufo.timer_1 = processtimer(ufo.timer_1, dt)
+            ufo.timer_1 = processTimer(ufo.timer_1, dt)
 
         elseif ufo.state == 2 then
 
             if ufo.type == "ufo" then
-                local tile = getsurfacetileatxpos(ufo.xpos)
+                local tile = getSurfaceTileAtXPos(ufo.xpos)
                 if (tile) then
                     if ufo.ypos < (tile.y - 4) * 8 then
-                        ufo.vy = hover_down_speed
+                        ufo.vy = HOVER_DOWN_SPEED
                     else
                         ufo.vy = 0
                         ufo.state = 3
@@ -1280,41 +1283,41 @@ function updateufo(dt)
                 end
             elseif ufo.type == "vulture" then
 
-                moveleftright(ufo, 65)
+                moveLeftRight(ufo, 65)
 
                 if ufo.ypos < (7) * 8 then
-                    ufo.vy = vulture_down_speed
+                    ufo.vy = VULTURE_DOWN_SPEED
                     ufo.tracker_beam.xpos = ufo.xpos
                     ufo.tracker_beam.ypos = ufo.ypos
                 else
-                    ufo.vy = -vulture_down_speed
+                    ufo.vy = -VULTURE_DOWN_SPEED
                     ufo.state = 4
-                    hidecapturedactors(ufo)
+                    hideCapturedActors(ufo)
                 end
 
             end
 
         
         elseif ufo.state == 3 then
-            ufo.timer_1 = processtimer(ufo.timer_1, dt)
+            ufo.timer_1 = processTimer(ufo.timer_1, dt)
             ufo.tracker_beam.xpos = ufo.xpos
             ufo.tracker_beam.ypos = ufo.ypos
 
             if ufo.timer_1 == 0 then
-                hidecapturedactors(ufo)
+                hideCapturedActors(ufo)
                 ufo.state = 4
             end                             
         elseif ufo.state == 4 then
-            ufo.ypos -= max_speed * dt
+            ufo.ypos -= MAX_SPEED * dt
 
             if ufo.ypos+8 <= camera_y-32 then 
 
                 // set 0 to 1 for vulture to respawn
-                if ufo.type == "vulture" and ufo.disabledcount < 0 then
-                    ufo.disabledcount = ufo.disabledcount + 1
-                    resetufo(ufo, camera_x + 8, 8)
+                if ufo.type == "vulture" and ufo.disabledCount < 0 then
+                    ufo.disabledCount = ufo.disabledCount + 1
+                    resetUFO(ufo, camera_x + 8, 8)
                 else    
-                    disableactor(ufo)
+                    disableActor(ufo)
                     --printh("complete")
                 end
 
@@ -1330,7 +1333,7 @@ function updateufo(dt)
         end
         
         if ufo.type == "ufo" then
-           attractplayers(dt)
+           attractPlayers(dt)
         end
 
         local self_new_x = ufo.xpos + ufo.vx * dt
@@ -1343,7 +1346,7 @@ function updateufo(dt)
     
 end
 
-function resetufo(ufo, xpos, ypos)
+function resetUFO(ufo, xpos, ypos)
     ufo.xpos = xpos
     ufo.ypos = ypos
     ufo.vx = 0
@@ -1353,14 +1356,14 @@ function resetufo(ufo, xpos, ypos)
     ufo.capture_tracker = {}
 end
 
-function hidecapturedactors(ufo)
+function hideCapturedActors(ufo)
     for key, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = -8
         captured.player.ypos = -8
     end
 end
 
-function captureplayer(player)
+function capturePlayer(player)
 
     local ufo = ufos[1]
 
@@ -1371,14 +1374,14 @@ function captureplayer(player)
             t = 0
         }
 
-        disableactor(player)
-        setdisabledplayercount(disabledplayercount + 1)
+        disableActor(player)
+        setDisabledPlayerCount(disabledPlayerCount + 1)
 
     end
 
 end
 
-function attractplayers(dt)
+function attractPlayers(dt)
 
     local ufo = ufos[1]
     --local captured = ufo.capture_tracker[player.id] 
@@ -1396,7 +1399,7 @@ function attractplayers(dt)
     end
 end
 
-function drawufo()
+function drawUFO()
 
     local ufo = ufos[1]
 
@@ -1420,7 +1423,7 @@ function drawufo()
         end
 
         if ufo.type == "king" then
-            drawhearts(final_boss_health)               
+            drawHearts(final_boss_health)               
         end
 
         if debug_mode then
@@ -1434,7 +1437,7 @@ function drawufo()
 
 end
 
-function drawhearts(heart_count)
+function drawHearts(heart_count)
     local heart_size = 10
     local rows = ceil((heart_count * 10) / 128)
     local hearts_left_to_draw = heart_count
@@ -1473,60 +1476,60 @@ function drawhearts(heart_count)
     
 end
 -- === respawnbirds.lua ===
--- perserve: queue
+-- perserve: Queue
 
-local respawnqueue = queue.new()
-local activebirdlist = {}
-respawntimer = nil
---local flyposition = camera_y + 24 need to make a global var file
-local birdspeed = .8
+local respawnQueue = Queue.new()
+local activeBirdList = {}
+respawnTimer = nil
+--local flyPosition = camera_y + 24 need to make a global var file
+local birdSpeed = .8
 
 function init_respawn_birds()
-    respawnqueue = queue.new()
-    activebirdlist = {}
-    respawntimer = nil
+    respawnQueue = Queue.new()
+    activeBirdList = {}
+    respawnTimer = nil
 end
 
 function queue_respawn_bird(player_key)
-    respawnqueue:enqueue_unique({bird = {xpos = -8, ypos = -8, width = 8, height = 16, boundsoffsetx = 0, boundsoffsety = 4, sprite = 1}, playerkey = player_key})
+    respawnQueue:enqueue_unique({bird = {xpos = -8, ypos = -8, width = 8, height = 16, boundsOffsetX = 0, boundsOffsetY = 4, sprite = 1}, playerKey = player_key})
 end
 
-function addrespawnbird()
-    local respawn = respawnqueue:dequeue()
-    local player = players[respawn.playerkey]
+function addRespawnBird()
+    local respawn = respawnQueue:dequeue()
+    local player = players[respawn.playerKey]
     local bird = respawn.bird
-    local initxpos = camera_x + 128
-    local initypos = camera_y + 20 + flr(rnd(10))
-    bird.xpos = initxpos
-    bird.ypos = initypos
-    player.xpos = initxpos
-    player.ypos = initypos + 8
+    local initXPos = camera_x + 128
+    local initYPos = camera_y + 20 + flr(rnd(10))
+    bird.xpos = initXPos
+    bird.ypos = initYPos
+    player.xpos = initXPos
+    player.ypos = initYPos + 8
 
-    add(activebirdlist, respawn)
+    add(activeBirdList, respawn)
 
 end
 
 function update_respawns()
 
-    if respawntimer() and not(respawnqueue:isempty()) then
-        addrespawnbird()
+    if respawnTimer() and not(respawnQueue:isempty()) then
+        addRespawnBird()
     end
 
-    local returntoqueue = nil -- move all birds across the screen
-    for _, respawn in ipairs(activebirdlist) do
-        local newpos = respawn.bird.xpos - birdspeed      
-        respawn.bird.xpos = newpos
-        local p = players[respawn.playerkey];
-        p.xpos = newpos
+    local returnToQueue = nil -- move all birds across the screen
+    for _, respawn in ipairs(activeBirdList) do
+        local newPos = respawn.bird.xpos - birdSpeed      
+        respawn.bird.xpos = newPos
+        local p = players[respawn.playerKey];
+        p.xpos = newPos
 
-        if newpos < camera_x - 8 then
-           returntoqueue = respawn
+        if newPos < camera_x - 8 then
+           returnToQueue = respawn
         end
     end
 
-    if not(returntoqueue == nil) then -- remove first bird to go out of bounds
-        respawnqueue:enqueue_unique(returntoqueue)
-        del(activebirdlist, returntoqueue)
+    if not(returnToQueue == nil) then -- remove first bird to go out of bounds
+        respawnQueue:enqueue_unique(returnToQueue)
+        del(activeBirdList, returnToQueue)
     end
 
     
@@ -1534,19 +1537,19 @@ function update_respawns()
 end
 
 function draw_respawn_birds()
-    for _, respawn in ipairs(activebirdlist) do
+    for _, respawn in ipairs(activeBirdList) do
         spr(respawn.bird.sprite, respawn.bird.xpos, respawn.bird.ypos)
     end
 end
 -- === players.lua ===
-poke(0x5f2d, 0x1) -- enable keyboard input
+poke(0x5F2D, 0x1) -- enable keyboard input
 
 -- game variables
-local gravity = 15  -- gravity value
-local bounce_factor = -8  -- factor to bounce back after collision
-local playerwoncount = 0
-local maxplayers = 32
-local maxfallvelocity = 200
+local GRAVITY = 15  -- Gravity value
+local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
+local playerWonCount = 0
+local maxPlayers = 32
+local maxFallVelocity = 200
 
 
 local jump_acceleration_x = 10
@@ -1556,106 +1559,106 @@ local min_jump_distance = 1.5
 local max_jump_height = 12
 local max_jump_distance = 8
 local jump_x_velocity = 4
-local bouncecharge = 0 -- [0-1]
-local maxchargetime = 4 -- seconds
+local bounceCharge = 0 -- [0-1]
+local maxChargeTime = 4 -- seconds
 
 local d_last_time = 0 -- ??
 
 -- start screen variables
 local posx = 0 -- not using this
 local posy = 0
-local xoffset = 0
+local xOffset = 0
 local row = 1
 
-function initplayers()
+function initPlayers()
     players = {}
-    playercount = 0
-    playerwoncount = 0
+    playerCount = 0
+    playerWonCount = 0
     init_respawn_birds()
-    setdisabledplayercount(0)
+    setDisabledPlayerCount(0)
     posx = 0
     posy = 16
-    xoffset = 0
+    xOffset = 0
     row = 1
-    initactorpool(32, players, {type = "player", width = 8, height = 8, sprite = 0, sprite2 = 0})
+    initActorPool(32, players, {type = "player", width = 8, height = 8, sprite = 0, sprite2 = 0})
 end
 
-function disableplayer(player)
+function disablePlayer(player)
     queue_respawn_bird(player.id)
-    disableactor(player)
-    setdisabledplayercount(disabledplayercount + 1)
+    disableActor(player)
+    setDisabledPlayerCount(disabledPlayerCount + 1)
 end
 
-function enableplayer(player)
-    enableactor(players, player.key, player.xpos, player.ypos)
-    setdisabledplayercount(disabledplayercount - 1)
+function enablePlayer(player)
+    enableActor(players, player.key, player.xpos, player.ypos)
+    setDisabledPlayerCount(disabledPlayerCount - 1)
 end
 
-function createplayer(xpos, ypos, keyinput)
+function createPlayer(xpos, ypos, keyInput)
     local spr = nil
 
     if keyboard_input == 1 then
         local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
-        spr = sprites[playercount + 1]
+        spr = sprites[playerCount + 1]
     else
-        spr = player_sprite_index[keyinput]
+        spr = player_sprite_index[keyInput]
     end
 
     if spr == nil then
         return nil
     end
 
-    playercount = playercount + 1
-    local p = players[playercount]
-    p.id = keyinput
+    playerCount = playerCount + 1
+    local p = players[playerCount]
+    p.id = keyInput
     p.sprite = spr
     p.xpos = xpos
     p.ypos = ypos
-    players[playercount] = nil
-    players[keyinput] = p     
+    players[playerCount] = nil
+    players[keyInput] = p     
 
-    enableactor(players, keyinput, xpos, posy)
-    add(keys, keyinput)
+    enableActor(players, keyInput, xpos, posy)
+    add(keys, keyInput)
 
     return p
 end
 
-function addplayers(startingcampos_x, startingcampos_y, dt, ready)
+function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
 
     if ready and stat(30) then 
-        local keyinput = stat(31)
+        local keyInput = stat(31)
         
-        if not (keyinput == "\32") and not (keyinput == "\13") and not (keyinput == "\112") and playercount < 32 then 
+        if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then 
 
-            if not players[keyinput] then
+            if not players[keyInput] then
                 start_timer = 5.9 -- plus .9 so the players see "5"
 
-                local p = createplayer(posx + startingcampos_x, posy + startingcampos_y, keyinput)    
+                local p = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)    
                 if p == nil then
                     return
                 end
-                p.startposition = posy
+                p.startPosition = posy
 
                 posx = posx + 9
                 if (posx >= 100) then
                     
-                    if xoffset >= 8 then
-                        xoffset = 0
+                    if xOffset >= 8 then
+                        xOffset = 0
                     else
-                        xoffset = xoffset + 2
+                        xOffset = xOffset + 2
                     end
 
-                    posx = xoffset
+                    posx = xOffset
 
                     posy = posy + 9
                 end
             end
             
-            players[keyinput].ypos = players[keyinput].startposition - 2
+            players[keyInput].ypos = players[keyInput].startPosition - 2
         end
     
         -- exit player selection and start the game
-        if (keyinput == "\32" and playercount > 0) then            
+        if (keyInput == "\32" and playerCount > 0) then            
             return true
         end  
         
@@ -1663,8 +1666,8 @@ function addplayers(startingcampos_x, startingcampos_y, dt, ready)
 
     -- bounce affect 
     for key, player in pairs(players) do
-            if player.ypos < player.startposition then
-                player.ypos = min(player.startposition, player.ypos + (20 * dt))
+            if player.ypos < player.startPosition then
+                player.ypos = min(player.startPosition, player.ypos + (20 * dt))
             end
     end
 
@@ -1673,54 +1676,54 @@ end
 
 function update_players(game_progress_x, game_progress_y, dt)  
     for key, player in pairs(players) do
-        if player.enabled and not(player.inputdisabled) then
+        if player.enabled and not(player.inputDisabled) then
             if not(player.vx == 0) then
                 jump_acceleration_x = 0
             else
                 jump_acceleration_x = 0 -- what's this for ?? 
             end
 
-            local player_new_pos = getnewactorposition(player, dt)
+            local player_new_pos = getNewActorPosition(player, dt)
 
-            -- check new positions for collisions
-            local checked_position = checktilecollision(player_new_pos.xpos, player_new_pos.ypos, player.xpos, player.ypos, true)
-            player.onground = checked_position.onground
+            -- Check new positions for collisions
+            local checked_position = checkTileCollision(player_new_pos.xpos, player_new_pos.ypos, player.xpos, player.ypos, true)
+            player.onGround = checked_position.onGround
 
-            if player.onground then
+            if player.onGround then
                 player.vx = 0
                 player.vy = 0
 
-                player.bounce_charge = min(player.bounce_charge + dt , maxchargetime)
-                local t = player.bounce_charge / maxchargetime
+                player.bounce_charge = min(player.bounce_charge + dt , maxChargeTime)
+                local t = player.bounce_charge / maxChargeTime
                 player.jump_height = lerp(min_jump_height, max_jump_height, t)
                 player.jump_distance = lerp(min_jump_distance, max_jump_distance, t)
             end
 
-            -- apply final position updates, if any
+            -- Apply final position updates, if any
             player.xpos = min(checked_position.x, game_progress_x+128-player.width)
             player.ypos = checked_position.y
 
-            if checkactoroutofbounds(player) then
-                disableplayer(player)
+            if checkActorOutOfBounds(player) then
+                disablePlayer(player)
                 player.xpos = -8
                 player.ypos = -8
                 break;
             end
 
-            -- check for respawn bird collisions
-            for _, respawn in ipairs(activebirdlist) do
+            -- Check for respawn bird collisions
+            for _, respawn in ipairs(activeBirdList) do
                 if check_object_collision(player, respawn.bird) then
-                    enableactor(players, respawn.playerkey, player.xpos, player.ypos) -- update this
-                    setdisabledplayercount(disabledplayercount - 1)
-                    del(activebirdlist, respawn)
+                    enableActor(players, respawn.playerKey, player.xpos, player.ypos) -- update this
+                    setDisabledPlayerCount(disabledPlayerCount - 1)
+                    del(activeBirdList, respawn)
                     break;
                 end
             end   
             
-            -- check for zombie collisions
+            -- Check for zombie collisions
             for _, zombie in ipairs(zombies) do
                 if check_object_collision(player, zombie) then
-                    disableplayer(player)
+                    disablePlayer(player)
                     player.xpos = -8
                     player.ypos = -8
                     sfx(sfx_player_death_to_zombie)
@@ -1742,7 +1745,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                 end
 
                 if (ufo.state == 3 or (ufo.type == "vulture" and ufo.state == 2)) and check_object_collision(player, ufo.tracker_beam) then
-                    captureplayer(player, dt)
+                    capturePlayer(player, dt)
                 end
             end
 
@@ -1754,21 +1757,21 @@ function update_players(game_progress_x, game_progress_y, dt)
 end
 
 -- look up key associated with player and bounce them
-function bounceplayer(key)
+function bouncePlayer(key)
     
     local player = players[key]
 
-    if not (player == nil) and not(player.inputdisabled) and player.enabled then
-        bounceactor(player)
-    elseif (player == nil) and gamemode == gmode.freeplay and playercount < 32 then
-        createplayer(camera_x + 64, camera_y, key)
-        setrespawntimer()
+    if not (player == nil) and not(player.inputDisabled) and player.enabled then
+        bounceActor(player)
+    elseif (player == nil) and gameMode == gMode.freeplay and playerCount < 32 then
+        createPlayer(camera_x + 64, camera_y, key)
+        setRespawnTimer()
     end
 end
 
-function setrespawntimer()
-        local timedelay = lerp(10,1,playercount/32)
-        respawntimer = timer(timedelay)
+function setRespawnTimer()
+        local timeDelay = lerp(10,1,playerCount/32)
+        respawnTimer = timer(timeDelay)
 
 end
 
@@ -1781,21 +1784,21 @@ local menu_option = {
     credits = 3
 }
 
-local startgamefunction = nil
+local startGameFunction = nil
 
 local menus = {
     [menu_option.main] = {
-            [1] = {text = "start", active = false, color = 6, action = function() changemenu(menu_option.settings) end},
-            [2] = {text = "credits", active = false, color = 6, action = function() changemenu(menu_option.credits) end}
+            [1] = {text = "start", active = false, color = 6, action = function() changeMenu(menu_option.settings) end},
+            [2] = {text = "credits", active = false, color = 6, action = function() changeMenu(menu_option.credits) end}
     },
     [menu_option.settings] = { 
-        [1] = {text = "play", active = false, color = 6, action = function() startgamefunction() end},
-        [2] = {text = "gamemode", active = false, color = 6, action = function() changegamemode() end},
-        [3] = {text = "input mode", active = false, color = 6, action = function() changeinputmode() end},
-        [4] = {text = "back", active = false, color = 6, action = function() changemenu(menu_option.main) end}
+        [1] = {text = "play", active = false, color = 6, action = function() startGameFunction() end},
+        [2] = {text = "gamemode", active = false, color = 6, action = function() changeGameMode() end},
+        [3] = {text = "input mode", active = false, color = 6, action = function() changeInputMode() end},
+        [4] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end}
     },
     [menu_option.credits] = { 
-        [1] = {text = "back", active = false, color = 6, action = function() changemenu(menu_option.main) end},
+        [1] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end},
     }
 }
 
@@ -1804,13 +1807,13 @@ local active_option = 1
 
 
 
-function initmenu(startgamecallback)
+function initMenu(startGameCallback)
     active_menu = menu_option.main
-    changeoption(1)
-    startgamefunction = startgamecallback
+    changeOption(1)
+    startGameFunction = startGameCallback
 end
 
-function updatemenu(dt)
+function updateMenu(dt)
     
     if btnp(5) then
         menus[active_menu][active_option].action()
@@ -1821,7 +1824,7 @@ function updatemenu(dt)
         if option < 1 then
             option = #menus[active_menu]
         end
-        changeoption(option)
+        changeOption(option)
      end
      
      if btnp(3) then
@@ -1829,16 +1832,16 @@ function updatemenu(dt)
         if option > #menus[active_menu] then
             option = 1
         end
-        changeoption(option)
+        changeOption(option)
      end
 
      if gamemode_timer > 0 then
-        print(showgamemodetext().title, camera_x + 32)
+        print(showGameModeText().title, camera_x + 32)
         gamemode_timer = max(0, gamemode_timer - dt)
      end
 end
 
-function drawmenu()
+function drawMenu()
 
     local x_pos = 16
     local y_pos = 60
@@ -1849,11 +1852,11 @@ function drawmenu()
         x_pos = 16
         print("\^w\^thop32", 46,16, 7)
         if active_option == 2 then
-            gmodetext = showgamemodetext()
+            gmodetext = showGameModeText()
             print(gmodetext.title, x_pos + 44 ,y_pos + 10, 6)
             print(gmodetext.description, x_pos + 44 ,y_pos + 20, 6)
         elseif active_option == 3 then
-            gmodetext = showinputmodetext()
+            gmodetext = showInputModeText()
             print(gmodetext.title, x_pos + 44 ,y_pos + 20, 6)
             print(gmodetext.description, x_pos + 44 ,y_pos + 30, 6)
         end
@@ -1875,11 +1878,9 @@ function drawmenu()
             print(menus[active_menu][i].text, x_pos, y_pos, menus[active_menu][i].color)
             y_pos += 10
     end
-
-    print("menu controls: \148\131 and \151", 12, 120, 6)
 end
 
-function changeoption(option, previous_menu)
+function changeOption(option, previous_menu)
 
     local previous_m = active_menu
     if previous_menu ~= nil then
@@ -1895,7 +1896,7 @@ function changeoption(option, previous_menu)
 end
 
 
-function changemenu(menu)
+function changeMenu(menu)
     local previous_menu = active_menu
     if menu == menu_option.main then      
        active_menu = menu_option.main     
@@ -1905,41 +1906,41 @@ function changemenu(menu)
         active_menu = menu_option.credits
     end
 
-    changeoption(1, previous_menu)
+    changeOption(1, previous_menu)
 end
 
-function changegamemode()
-    local nextmode = gamemode + 1
-    if nextmode > 1 then
-        nextmode = 0
+function changeGameMode()
+    local nextMode = gameMode + 1
+    if nextMode > 1 then
+        nextMode = 0
     end
 
-    gamemode = nextmode
+    gameMode = nextMode
 
-    if gamemode == gstate.playerselect or gamemode == gstate.game then
+    if gameMode == gstate.playerSelect or gameMode == gstate.game then
         gamemode_timer = 3
     end
 end
 
-function changeinputmode()
-    local nextmode = keyboard_input + 1
-    if nextmode > 1 then
-        nextmode = 0
+function changeInputMode()
+    local nextMode = keyboard_input + 1
+    if nextMode > 1 then
+        nextMode = 0
     end
 
-    keyboard_input = nextmode
+    keyboard_input = nextMode
 end
 
 
-function showgamemodetext()
-    if gamemode == gmode.tournament then
+function showGameModeText()
+    if gameMode == gMode.tournament then
         return {title = "tournament" , description = "players cannot \njoin once the game \nhas started."}
-    elseif gamemode == gmode.freeplay then
+    elseif gameMode == gMode.freeplay then
         return  {title = "freeplay" , description = "players are free \nto join after the game \nhas started."}
     end
 end
 
-function showinputmodetext()
+function showInputModeText()
     if keyboard_input == 0 then
         return {title = "strict" , description = "characters are \nassigned to \nspecific keys."}
     elseif keyboard_input == 1 then
@@ -1950,10 +1951,10 @@ function showinputmodetext()
 end
 
 
-function drawcompletemenu()
+function drawCompleteMenu()
 
     if gameover_menu_timer > 0 then        
-        if gamestate == gstate.complete then
+        if gameState == gstate.complete then
             print("\^w\^tyou win!", camera_x + 30, camera_y + 60, 10)
         else
             print("\^w\^tnext time...", camera_x + 20, camera_y + 60, 10)
@@ -1975,15 +1976,15 @@ function draw_winners(x, y)
     
     print("players\n", x + 45, current_y, 10)
     current_y = current_y + line_height
-    leftcounter = 0
+    leftCounter = 0
     for i = 1, #win_order do
-        xoffset = leftcounter * 32
-        spr(win_order[i][1], x + 12 + xoffset, current_y)
-        print(tostr(i)..indent.."\n", x + 4 + xoffset, current_y, 10)
-        if leftcounter == 3 then
+        xOffset = leftCounter * 32
+        spr(win_order[i][1], x + 12 + xOffset, current_y)
+        print(tostr(i)..indent.."\n", x + 4 + xOffset, current_y, 10)
+        if leftCounter == 3 then
             current_y = current_y + line_height
         end
-        leftcounter = (leftcounter + 1) % 4
+        leftCounter = (leftCounter + 1) % 4
         --end
     end
     
@@ -1992,11 +1993,11 @@ end
 
 
 -- === main.lua ===
-poke(0x5f2d, 0x1) -- enable keyboard input
+poke(0x5F2D, 0x1) -- enable keyboard input
 local delta_time
 local last_time
-local timeuntilcameramoves = 1.5
-local timeuntilrestart = 2
+local timeUntilCameraMoves = 1.5
+local timeUntilRestart = 2
 local timer_1 = 0
 local timer_2 = 0 -- input delay when player select starts
 local camera_speed = 15
@@ -2013,12 +2014,12 @@ function _init()
     delta_time = 0
     last_time = 0
     timer_1 = 0
-    if gamestate == gstate.complete or gamestate == gstate.gameover then
-        gamestate = gstate.playerselect
+    if gameState == gstate.complete or gameState == gstate.gameover then
+        gameState = gstate.playerSelect
     else
-        gamestate = gstate.mainmenu
+        gameState = gstate.mainMenu
     end
-    switchgamestate(gamestate)
+    switchGameState(gameState)
 end
 
 function restart()
@@ -2026,46 +2027,45 @@ function restart()
     _init()
 end
 
-function switchgamestate(state)
+function switchGameState(state)
 
-    gamestate = state
+    gameState = state
 
-    if gamestate == gstate.mainmenu then
+    if gameState == gstate.mainMenu then
         camera_x = 0
         camera_y = 0
-        initmenu(startgamefrommainmenu)
-        music(0, 1000, 1)
-    elseif gamestate == gstate.playerselect then
-        chunk_progress_x = 0
+        initMenu(startGameFromMainMenu)
+        music(0, 500)
+    elseif gameState == gstate.playerSelect then
+        chunk_progress_x = 20
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
-        finalbossenabled = false
-        initufopool()
-        initzombiepool(5)
+        finalBossEnabled = false
+        initUFOPool()
+        initZombiePool(5)
         init_respawn_birds()
-        initproceduralgen()
-        initlevelload(chunk_progress_x)
+        initProceduralGen()
+        initLevelLoad(chunk_progress_x)
         max_distance = map_x_size * 8 - 128 + 80
-        initplayers()
+        initPlayers()
         win_order = {}
         timer_2 = .4
         menuitem(2, "set gamemode", function ()
-            changegamemode()
+            changeGameMode()
         end)
         score_timer = 15
         actors = {
             [1] = players,
             [2] = zombies
         }
-        music(-1, 1000, 1)
-        music(4, 1000, 2)
-    elseif gamestate == gstate.game then
-        music(-1, 1000, 2)
-        music(6, 1000, 3)
-        setrespawntimer()
-    elseif gamestate == gstate.complete or gamestate == gstate.gameover then
+            printh("== playerSelect == ")
+    elseif gameState == gstate.game then
+     
+        music(2, 1000)
+        setRespawnTimer()
+    elseif gameState == gstate.complete or gameState == gstate.gameover then
         
         gameover_menu_timer = 3
 
@@ -2073,39 +2073,39 @@ function switchgamestate(state)
 
         for key, player in pairs(players) do
             if player.enabled == true then
-                add(win_order, {player.sprite, player.disabledcount, player.totaltimeenabled})
+                add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
             end
         end
 
-        appendloserstowinorder()
+        appendLosersToWinOrder()
     end
 
 
     
 end
 
-startgamefrommainmenu = function ()
-    switchgamestate(gstate.playerselect)
+startGameFromMainMenu = function ()
+    switchGameState(gstate.playerSelect)
 end
 
 function _update()
-    local current_time = time()  -- get the current time
-    delta_time = current_time - last_time  -- calculate delta time
+    local current_time = time()  -- Get the current time
+    delta_time = current_time - last_time  -- Calculate delta time
     last_time = current_time  
 
-    if gamestate == gstate.mainmenu then
-        updatemenu(delta_time)
-    elseif gamestate == gstate.playerselect then
+    if gameState == gstate.mainMenu then
+        updateMenu(delta_time)
+    elseif gameState == gstate.playerSelect then
         local complete = false
 
-        complete = addplayers(camera_x, camera_y, delta_time, timer_2 == 0)
+        complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
 
         if timer_2 > 0 then
             stat(31)
         end
         timer_2 = max(0, timer_2 - delta_time)        
         
-        if playercount > 0 then 
+        if playerCount > 0 then 
             start_timer = max(0, start_timer - delta_time)
             if start_timer == 0 then
                 complete = true
@@ -2113,20 +2113,20 @@ function _update()
         end
 
         if complete then
-            switchgamestate(gstate.game)
+            switchGameState(gstate.game)
         end
     
-    elseif gamestate == gstate.game then
+    elseif gameState == gstate.game then
         if debug_mode then
             debug_controls()
 
             if debug_fast_travel then
-                debugupdatequicktravel()
+                debugUpdateQuickTravel()
             elseif debug_player_cannon then
-                debugupdateplayercannon()
+                debugUpdatePlayerCannon()
             end
         else
-            if timer_1 < timeuntilcameramoves then
+            if timer_1 < timeUntilCameraMoves then
                 timer_1 += delta_time
             else 
                 
@@ -2135,25 +2135,25 @@ function _update()
             end
 
             -- set current area to cloud kingdom
-            -- maybe use the special conditions function i was thinking about
-            if current_area ~= area.cloud_kingdom then 
-                current_area = area.cloud_kingdom
+            -- maybe use the special conditions function I was thinking about
+            if current_area ~= AREA.CLOUD_KINGDOM then 
+                current_area = AREA.CLOUD_KINGDOM
             else
 
-                if finalbossenabled and not(ufos[1].enabled) then
-                    switchgamestate(gstate.complete)
+                if finalBossEnabled and not(ufos[1].enabled) then
+                    switchGameState(gstate.complete)
                 end
 
 
 
             end
 
-            if disabledplayercount == playercount then
-                switchgamestate(gstate.gameover)
+            if disabledPlayerCount == playerCount then
+                switchGameState(gstate.gameover)
                 timer_1 = 0
             end
 
-            updateufo(delta_time)
+            updateUFO(delta_time)
             update_players(camera_x, camera_y, delta_time)
             update_zombies(delta_time)
             update_respawns()
@@ -2170,33 +2170,33 @@ function _update()
             --printh("update " .. new_chunk_threshold .. " >= " .. max_distance)
             chunk_progress_x += 1
             new_chunk_threshold += 128
-            updatechunks(chunk_progress_x)
+            updateChunks(chunk_progress_x)
         end
 
         
 
 
-        -- process key input
+        -- Process key input
         while stat(30) do
-            keyinput = stat(31)
+            keyInput = stat(31)
 
-            if (keyinput == "れ") then
-                toggledebugmode()
+            if (keyInput == "れ") then
+                toggleDebugMode()
             end
 
-            bounceplayer(keyinput)       
+            bouncePlayer(keyInput)       
         end
-    elseif gamestate == gstate.gameover then
+    elseif gameState == gstate.gameover then
 
-        updateufo(delta_time)
+        updateUFO(delta_time)
         update_players(camera_x, camera_y, delta_time)
         update_zombies(delta_time)
-        resetgameaftertimer()
-        gameover_menu_timer = processtimer(gameover_menu_timer, delta_time)
+        resetGameAfterTimer()
+        gameover_menu_timer = processTimer(gameover_menu_timer, delta_time)
 
-    elseif gamestate == gstate.complete then
-        resetgameaftertimer()
-        gameover_menu_timer = processtimer(gameover_menu_timer, delta_time)
+    elseif gameState == gstate.complete then
+        resetGameAfterTimer()
+        gameover_menu_timer = processTimer(gameover_menu_timer, delta_time)
         
     end
 end
@@ -2208,12 +2208,12 @@ function _draw()
         map(0,0,1024,camera_y,128,16) 
         map(0,0,2048,camera_y,128,16)
         map(0,0,3072,camera_y,128,16)
-        drawchunks()
-        drawufo()
+        drawChunks()
+        drawUFO()
         draw_respawn_birds()
         --draw_zombies()
-        drawactors(zombies)
-        drawactors(players)
+        drawActors(zombies)
+        drawActors(players)
         
     
         if debug_mode then
@@ -2221,32 +2221,32 @@ function _draw()
             
         end
 
-        -- ui
-        if gamestate == gstate.mainmenu then
-            drawmenu()
+        -- UI
+        if gameState == gstate.mainMenu then
+            drawMenu()
 
-        elseif gamestate == gstate.playerselect then
+        elseif gameState == gstate.playerSelect then
 
             rectfill(camera_x, 0, camera_x + 128, camera_y + 5, camera_y)
 
             print("press any button to join", camera_x + 4, camera_y, 7)
 
-            if playercount > 0 then 
+            if playerCount > 0 then 
                 print("starting in " .. flr(start_timer), camera_x + 4, camera_y+8, 7)
             end
 
-            print("\^w\^thop" .. playercount, camera_x + 46,camera_y + 56, 7)
+            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56, 7)
 
-        elseif gamestate == gstate.game then
+        elseif gameState == gstate.game then
 
-        elseif gamestate == gstate.complete or gamestate == gstate.gameover then
-            drawcompletemenu()
+        elseif gameState == gstate.complete or gameState == gstate.gameover then
+            drawCompleteMenu()
         end
 
-        if gamestate == gstate.game or gamestate == gstate.playerselect then
+        if gameState == gstate.game or gameState == gstate.playerSelect then
             if gamemode_timer > 0 then
                 rectfill(camera_x, 0, camera_x + 128, camera_y + 5, camera_y)
-                print("set gamemode to " .. showgamemodetext().title, camera_x + 16, camera_y, 7)
+                print("set gamemode to " .. showGameModeText().title, camera_x + 16, camera_y, 7)
                 gamemode_timer = max(0, gamemode_timer - delta_time)
             end
         end
@@ -2262,8 +2262,8 @@ function _draw()
         end       
 end
 
-function resetgameaftertimer()
-    if timer_1 < timeuntilrestart then
+function resetGameAfterTimer()
+    if timer_1 < timeUntilRestart then
         timer_1 += delta_time     
     else
         score_timer -= delta_time
@@ -2276,12 +2276,12 @@ function resetgameaftertimer()
     end
 end
 
-function toggledebugmode()
+function toggleDebugMode()
     debug_mode = not(debug_mode)
 
     if debug_mode then
-        menuitem(2, "toggle fast travel", function() debugtogglequicktravel() end)
-        menuitem(3, "toggle pcannon", function() debugtoggleplayercannon() end)
+        menuitem(2, "toggle fast travel", function() debugToggleQuickTravel() end)
+        menuitem(3, "toggle pcannon", function() debugTogglePlayerCannon() end)
     else
         menuitem(2)
         menuitem(3)
@@ -2317,12 +2317,12 @@ function debug_controls()
     end
 end
 
-function debugtogglequicktravel()
+function debugToggleQuickTravel()
     --debug_mode = true
     debug_fast_travel = not(debug_fast_travel)
 end
 
-function debugupdatequicktravel()
+function debugUpdateQuickTravel()
     for key, player in pairs(players) do
         if player.enabled == false then
             player.xpos = camera_x + 56
@@ -2331,17 +2331,17 @@ function debugupdatequicktravel()
     end
 end
 
-function debugtoggleplayercannon()
+function debugTogglePlayerCannon()
     debug_player_cannon = not(debug_player_cannon)
 end
 
-function debugupdateplayercannon()
+function debugUpdatePlayerCannon()
 
     if stat(34) == 1 then
         --printh(flr(mouse_x/8) .. ", " .. flr(mouse_y/8))
 
         local p = players[keys[key_index]]
-        if p.enabled then enableplayer(p) end
+        if p.enabled then enablePlayer(p) end
         p.xpos = flr(mouse_x)
         p.ypos = flr(mouse_y)
 
@@ -2354,12 +2354,12 @@ function debugupdateplayercannon()
 
 end
 
-function appendloserstowinorder()
+function appendLosersToWinOrder()
     local lose_order = {}
 
     for key, player in pairs(players) do
         if player.enabled == false and type(player.id) ~= "number" then
-            add(lose_order, {player.sprite, player.disabledcount, player.totaltimeenabled})
+            add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
         end
     end
 
@@ -2368,8 +2368,8 @@ function appendloserstowinorder()
         for j = 1, n - i do
             local a = lose_order[j]
             local b = lose_order[j + 1]
-            -- compare by disabledcount (ascending)
-            -- if disabledcount is the same, compare by totaltimeenabled (descending)
+            -- Compare by disabledCount (ascending)
+            -- If disabledCount is the same, compare by totalTimeEnabled (descending)
             if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
                 lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
             end
@@ -2382,6 +2382,7 @@ function appendloserstowinorder()
     end
 
 end
+
 
 
 __gfx__
@@ -2509,6 +2510,65 @@ e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1
 00000000000000000000400000000040000000000020202020202020202020202020202020200000000000000000000020202020202020202020202020202020
 2020202020209090b0b0b0b0a0909000000020202020202020202020202020202020209090b0b0b0b020202020202020202020202020202020209090b0b0b0b0
 a0909020202020202020202020202020202020209030303030303030303030303030303030302020202090202020209030303030303030303030303030303030
+__map__
+0000000000000070000000710000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0070000078000071000000000000007100000000000070000000000070000000000000006f0000000000000000000000006f0000000000000000000000000000000000006f6f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+007100727300737574007000007874007000000000000000000000000000006f0000000000006f00006f00000000000000000000000000006f0000000000000000000000006f6f00000000710000000000000000000000007100710000000000006f6f0000000000000000007100006f00007000000000000000000070000000
+006f00000000006f0000000074740000000000710000000070000078770077006f00000000000000006f0000700000007100007000000000710000006f00000000007000006f00710000006f00700000000070006f00000000006f0000000000000000000000000000006f000000000000000000000000700000000000007000
+00000000007000000000006f000000000000000000000000000000000075000071000000006f00000000000000000000000000000000000000000000000000006f0000000000000000006f0000000000000000000000700000000000006f6f0000000000000000000000000000006f0000000000000000000000000070000000
+0000007000000000720000007200000072000000000000000000000000000000000000000000000000000000000000706f000000000000000070000000000000000000707100006f6f0000007100000000000000000000710000000000006f000000006f006f00000000000000007171000000006f0000000000000000000000
+0000007200720000007000000000720070000072000000000000006f000000000000006f000000000000000000000000000000006f0071006f000000006f00000000007100000000006f000071006f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000700000000000
+007200007000000000007200000000000000000000000070000000700000006f00006f000000000000710000006f00000000000000000000000000000071000000000000000000000000707100000000006f0000000000006f6f0071000000000000000000000000000000000000000000000071007171000000000000000000
+00000000000000000000007200007000000000000000006f000000000000000000706f00000000006f000000006f000070000000000000000000006f00000000006f000000006f7100000000000000000000000000000000000000000000000000000000000000000000006f0000000000000000000070000000710000000070
+00000000000072000072000000000000000072000000000000000000000070000000000000006f00000000700000000000000000006f000000006f000000007000700000000000000000000000000000000000006f00000000000000007100006f000000000000006f0000000000000000000000000000000000000000000000
+000072000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006f0000000000000000000000000000006f000000000000000000000000716f0000000000000000000070000000006f0000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000070000000000000000000006f00000000000000000000000000007000000000000070000000006f000000000000000070006f000000007000000000000000000000006f00000000710000000000000000000000006f000000700000000000000000000000007000
+00000000000000000000000000000000000000007000000000000000710000000071006f007000000000006f00000000007100000000006f0000000000000000000000006f000000000000000000000000006f00710000007000000000006f00006f000000007100000000000000000000000000000000700000000000000000
+0000000000000000000000000000000000000000006f000000000000000000006f000000000000000000000000000000000000000000000000000000006f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000006f0000000000000000000000006f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__gff__
+0000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__sfx__
+911e00002353423534235342353424e1224e122453424534245342453424e1224e122353423534235342353424e1224e122153421534215342153424e1224e121f5341f5341f5341f53424e1224e1224e1224e12
+951e00000c0350c03524e12130351303524e1224e12170301703024e12150351303524e1210030100301003024e1224e120c0350c03524e120c0350c0350c03024e1224e120c0350c03524e120c0350c03524e12
+d71e000024e1224e1224e1224e1224e122d1102d1102d1102b1102b11028110281102a1102a1102b1102b1102b1102b1102a1102a1102a1102811028110281102811028110281102811028110231102311023110
+911e00001f5341f5341f5341f53424e1224e121e5341e5341e5341e53424e1224e121f5341f5341f5341f53424e1224e121e5341e5341e5341e53424e1224e121c5341c5341c5341c53424e1224e1224e1224e12
+d71e0000211102111021110231102311023110241102411024110241102311023110231102311024e1224e1224e1224e121c1101c1101c1101e1101e1101e1101f1101f1101f1101f1101e1101e1101e1101e110
+911e00001c5341c5341c5341c53424e1224e122153421534215342153424e1224e121c5341c5341c5341c53424e1224e121a5341a5341a5341a53424e1224e121853418534185341853424e1224e1224e1224e12
+011e000024e1224e1200000000000000024e1524e1524e1524e1524e1524e1524e1524e150ce150c5150c5150c5140c5140c5140c5140c5140c5140c5140c5140c5140c5140c5340c5340c5340c5340c5340c534
+970d00000cf300cf30225320700007f30225320af300af300cf300cf30225320700007f30225320af300af300cf300cf30225320700007f30225320af300af300cf300cf30225320700007f30225320af300af30
+910d0000166000c6001b5321f600226001b5321b6001f60022600186001b53213000130001b5321c4001d4001e4001f4001b5321b0001b0001b5321f6002260018000180001b53218000180001b5321800000000
+910d00000c74300000185321360013645185320c7430c7000c74300000185321360013645185320c743000000c74300700185321360013645185320c743000000c74300000185321360013645185320c7430c700
+970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
+970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
+b70d0000274222742224422244221f4221f4221b4221b4221842218422184221842218422184220040200402004020040200402004021640216402164221642218422184221b4221b4221b4221b4221b4221b422
+970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
+b70d00001b4221b4221b4221b4221b4221b4221b42224422234222242221422204221f4221e4221d4221c4221b4221b4221b4221b4221b4221b4221b40200402004020040218422184221a4221a4221b4221b422
+970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
+970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
+970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
+970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
+970d000011030110301b532000000c0301b5320f0300f03011030110301b532050000c0301b5320f0300f03011030110301b5320c0000c0301b5320f0300f03011030110301b5320c0000c0301b5320f0300f030
+b70d000020422204221d4221d4221842218422144221442211422114221142211422114221142200402004020040200402004020040200402004020f4220f42211422114220c4020c40211422114220000200000
+910d00000000000000205320050000500205320050000500005000050020532185001850020532185001850018500185002053218500185002053218500185001850018500205321850018500205321800000000
+970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
+001e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__music__
+01 01050300
+00 01020300
+00 01040300
+02 01050300
+00 0a430809
+00 0a430809
+01 0b0c0809
+00 0d0e0809
+00 0f420809
+00 100c0809
+00 110e0809
+00 12420809
+00 13141509
+02 16420809
+00 57575757
 __label__
 00007770777007700770000077707700707000007070777070700000777007700000777077007700000077700000777070007770707077707770000000000000
 07707070700070007000000070707070707000007070700070700000070070700000707070707070000070700000707070007070707070007070000000000000
@@ -2638,66 +2698,3 @@ __label__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-
-__gff__
-0000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-__map__
-0000000000000070000000710000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0070000078000071000000000000007100000000000070000000000070000000000000006f0000000000000000000000006f0000000000000000000000000000000000006f6f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-007100727300737574007000007874007000000000000000000000000000006f0000000000006f00006f00000000000000000000000000006f0000000000000000000000006f6f00000000710000000000000000000000007100710000000000006f6f0000000000000000007100006f00007000000000000000000070000000
-006f00000000006f0000000074740000000000710000000070000078770077006f00000000000000006f0000700000007100007000000000710000006f00000000007000006f00710000006f00700000000070006f00000000006f0000000000000000000000000000006f000000000000000000000000700000000000007000
-00000000007000000000006f000000000000000000000000000000000075000071000000006f00000000000000000000000000000000000000000000000000006f0000000000000000006f0000000000000000000000700000000000006f6f0000000000000000000000000000006f0000000000000000000000000070000000
-0000007000000000720000007200000072000000000000000000000000000000000000000000000000000000000000706f000000000000000070000000000000000000707100006f6f0000007100000000000000000000710000000000006f000000006f006f00000000000000007171000000006f0000000000000000000000
-0000007200720000007000000000720070000072000000000000006f000000000000006f000000000000000000000000000000006f0071006f000000006f00000000007100000000006f000071006f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000700000000000
-007200007000000000007200000000000000000000000070000000700000006f00006f000000000000710000006f00000000000000000000000000000071000000000000000000000000707100000000006f0000000000006f6f0071000000000000000000000000000000000000000000000071007171000000000000000000
-00000000000000000000007200007000000000000000006f000000000000000000706f00000000006f000000006f000070000000000000000000006f00000000006f000000006f7100000000000000000000000000000000000000000000000000000000000000000000006f0000000000000000000070000000710000000070
-00000000000072000072000000000000000072000000000000000000000070000000000000006f00000000700000000000000000006f000000006f000000007000700000000000000000000000000000000000006f00000000000000007100006f000000000000006f0000000000000000000000000000000000000000000000
-000072000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006f0000000000000000000000000000006f000000000000000000000000716f0000000000000000000070000000006f0000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000070000000000000000000006f00000000000000000000000000007000000000000070000000006f000000000000000070006f000000007000000000000000000000006f00000000710000000000000000000000006f000000700000000000000000000000007000
-00000000000000000000000000000000000000007000000000000000710000000071006f007000000000006f00000000007100000000006f0000000000000000000000006f000000000000000000000000006f00710000007000000000006f00006f000000007100000000000000000000000000000000700000000000000000
-0000000000000000000000000000000000000000006f000000000000000000006f000000000000000000000000000000000000000000000000000000006f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000006f0000000000000000000000006f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-__sfx__
-911e00002353423534235342353424e1224e122453424534245342453424e1224e122353423534235342353424e1224e122153421534215342153424e1224e121f5341f5341f5341f53424e1224e1224e1224e12
-951e00000c0350c03524e12130351303524e1224e12170301703024e12150351303524e1210030100301003024e1224e120c0350c03524e120c0350c0350c03024e1224e120c0350c03524e120c0350c03524e12
-d71e000024e1224e1224e1224e1224e122d1102d1102d1102b1102b11028110281102a1102a1102b1102b1102b1102b1102a1102a1102a1102811028110281102811028110281102811028110231102311023110
-911e00001f5341f5341f5341f53424e1224e121e5341e5341e5341e53424e1224e121f5341f5341f5341f53424e1224e121e5341e5341e5341e53424e1224e121c5341c5341c5341c53424e1224e1224e1224e12
-d71e0000211102111021110231102311023110241102411024110241102311023110231102311024e1224e1224e1224e121c1101c1101c1101e1101e1101e1101f1101f1101f1101f1101e1101e1101e1101e110
-911e00001c5341c5341c5341c53424e1224e122153421534215342153424e1224e121c5341c5341c5341c53424e1224e121a5341a5341a5341a53424e1224e121853418534185341853424e1224e1224e1224e12
-011e000024e1224e1200000000000000024e1524e1524e1524e1524e1524e1524e1524e150ce150c5150c5150c5140c5140c5140c5140c5140c5140c5140c5140c5140c5140c5340c5340c5340c5340c5340c534
-970d00000cf300cf30225320700007f30225320af300af300cf300cf30225320700007f30225320af300af300cf300cf30225320700007f30225320af300af300cf300cf30225320700007f30225320af300af30
-910d0000166000c6001b5321f600226001b5321b6001f60022600186001b53213000130001b5321c4001d4001e4001f4001b5321b0001b0001b5321f6002260018000180001b53218000180001b5321800000000
-910d00000c74300000185321360013645185320c7430c7000c74300000185321360013645185320c743000000c74300700185321360013645185320c743000000c74300000185321360013645185320c7430c700
-970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
-970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
-b70d0000274222742224422244221f4221f4221b4221b4221842218422184221842218422184220040200402004020040200402004021640216402164221642218422184221b4221b4221b4221b4221b4221b422
-970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
-b70d00001b4221b4221b4221b4221b4221b4221b42224422234222242221422204221f4221e4221d4221c4221b4221b4221b4221b4221b4221b4221b40200402004020040218422184221a4221a4221b4221b422
-970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
-970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
-970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
-970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
-970d000011030110301b532000000c0301b5320f0300f03011030110301b532050000c0301b5320f0300f03011030110301b5320c0000c0301b5320f0300f03011030110301b5320c0000c0301b5320f0300f030
-b70d000020422204221d4221d4221842218422144221442211422114221142211422114221142200402004020040200402004020040200402004020f4220f42211422114220c4020c40211422114220000200000
-910d00000000000000205320050000500205320050000500005000050020532185001850020532185001850018500185002053218500185002053218500185001850018500205321850018500205321800000000
-970d00000c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a0300c0300c030225320700007030225320a0300a030
-0001000000000000000000000000000000000000000120401c0401e040200402204023040240401e0400000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000855008550045500655006550025500155000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-__music__
-01 01050300
-00 01020300
-00 01040300
-02 01050300
-00 0a430809
-00 0a430809
-01 0b0c0809
-00 0d0e0809
-00 0f420809
-00 100c0809
-00 110e0809
-00 12420809
-00 13141509
-02 16420809
-00 57575757
-

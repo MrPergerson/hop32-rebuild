@@ -100,6 +100,8 @@ function drawMenu()
             print(menus[active_menu][i].text, x_pos, y_pos, menus[active_menu][i].color)
             y_pos += 10
     end
+
+    print("menu controls: \148\131 and \151", 12, 120, 6)
 end
 
 function changeOption(option, previous_menu)
