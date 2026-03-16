@@ -18,7 +18,7 @@ function _draw()
     --map(0,0,0,0,128,16, 4)
     --map(0,0,0,16,128,16, 1)
     --map(0,0,0,16,128,16, 2)
-    --map(17,0,0,0,128,16)
+    map(17,0,0,0,128,16)
 
     
         
@@ -27,20 +27,21 @@ function _draw()
     
     local row1 = 24
     local row2 = 30
+    local yOffset_players = 73
     local offset = 7.8
     local xpos = 1
     local amplitude = 2.5
     
     for i = 1, 16, 1 do
         if i != 1 and i != 3  then
-            spr(sprites[i], xpos, row1 + (sin(xpos / 10) * amplitude) )
+            spr(sprites[i], xpos, row1 + (sin(xpos / 10) * amplitude) + yOffset_players  )
             
         end
         xpos += offset
     end
     
-    spr(sprites[1], 4, 12)
-    spr(sprites[3], 18, 6)
+    spr(sprites[1], 4, 12  + yOffset_players )
+    spr(sprites[3], 18, 6 + yOffset_players)
 
     
     --[[
@@ -65,12 +66,12 @@ function _draw()
         xpos = 2
         for i = 17, 32, 1 do
             if i != 28  then
-                spr(sprites[i], xpos, row2 + (sin(xpos / 10) * amplitude))
+                spr(sprites[i], xpos, row2 + (sin(xpos / 10) * amplitude) + yOffset_players )
             end
             xpos += offset
         end
         
-        spr(sprites[28], 90,8)
+        spr(sprites[28], 90,8  + yOffset_players)
         
         --[[
             spr(sprites[17], 5,row2)
@@ -96,7 +97,7 @@ function _draw()
             
             --print("", 0, 0, 7)
             --print("\^w\^thop32", 46, 56)
-            print("\^w\^thop32", 44, 12, 7)
+            print("\^w\^thop32", 46, 65, 7)
             local s = "multiplayer"
             local size = #s
            -- print("massively\nlocal\nmultiplayer", 127-#s*4, 24, 7)
