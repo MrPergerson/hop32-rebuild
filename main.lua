@@ -5,7 +5,6 @@ local timeUntilCameraMoves = 1.5
 local timeUntilRestart = 2
 local timer_1 = 0
 local timer_2 = 0 -- input delay when player select starts
-local camera_speed = 15
 --local camera_pos_y_offset = 128
 local new_chunk_threshold = 0
 local mouse_x = 0
@@ -14,6 +13,23 @@ local mouse_y = 0
 
 
 local debug_tile_flags = {}
+
+function updatePlayerPushedCamera(dt)
+    local lead = getLeadPlayer()
+    local min_advance = camera_x + camera_min_speed * dt
+
+    local target_x
+    if lead ~= nil then
+        target_x = lead.xpos - (128 - camera_push_cells * 8)
+    else
+        target_x = min_advance
+    end
+
+    -- never go backward; always apply minimum pressure
+    target_x = max(target_x, min_advance)
+
+    camera_x = camera_x + (target_x - camera_x) * min(camera_ease_speed * dt, 1)
+end
 
 function _init()
     delta_time = 0
@@ -136,7 +152,7 @@ function _update()
                 timer_1 += delta_time
             else 
                 
-                camera_x = camera_x + camera_speed * delta_time
+                updatePlayerPushedCamera(delta_time)
                 --printh(chunk_progress_x)
             end
 

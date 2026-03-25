@@ -26,6 +26,18 @@ local posy = 0
 local xOffset = 0
 local row = 1
 
+function getLeadPlayer()
+    local lead = nil
+    for key, player in pairs(players) do
+        if player.enabled then
+            if lead == nil or player.xpos > lead.xpos then
+                lead = player
+            end
+        end
+    end
+    return lead
+end
+
 function initPlayers()
     players = {}
     playerCount = 0
