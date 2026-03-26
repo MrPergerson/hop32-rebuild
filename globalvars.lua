@@ -27,7 +27,7 @@ old_camera_y_pos = 0
 new_camera_y_pos = 0
 new_camera_y_lerp_t = 1
 new_camera_y_lerp_r = 0
-camera_push_cells = 6    -- gap in cells (8px each) between front player and right edge
+camera_push_cells = 7    -- gap in cells (8px each) between front player and right edge
 camera_ease_speed = 1.5  -- how smoothly camera tracks the leader (higher = less lag)
 camera_min_speed  = 8    -- minimum scroll speed (px/sec) so stragglers still die
 
