@@ -16,14 +16,16 @@ end
 function initKing()
     ufos = {}
     final_boss_health = max(playerCount, 3)
-    initActorPool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
+    initActorPool(1, ufos, {type = "king", width = 16, height = 16, sprite = 12, sprite2 = 122})
 end
 
 function initVulture()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 126})
+    initActorPool(1, ufos, {type = "vulture", width = 16, height = 16, sprite = 14, sprite2 = 126})
 
+    ufos[1].boundsOffsetX = 8
+    ufos[1].boundsOffsetY = 8
     ufos[1].tracker_beam.width = 8
     ufos[1].tracker_beam.height = 8
     ufos[1].tracker_beam.boundsOffsetX = 4
@@ -35,8 +37,8 @@ end
 function enableUFO(xpos, ypos)
 
     local ufo = enableActor(ufos, 1, xpos, ypos)
-    ufo.boundsOffsetX = 4
-    ufo.boundsOffsetY = 4
+    --ufo.boundsOffsetX = 4
+    --ufo.boundsOffsetY = 4
 
     resetUFO(ufo, xpos, ypos)
 
@@ -209,7 +211,7 @@ function drawUFO()
 
     if ufo and ufo.enabled then
         
-        spr(ufo.sprite, ufo.xpos, ufo.ypos)
+        spr(ufo.sprite, ufo.xpos, ufo.ypos, 2, 2)
 
         if  ufo.state == 3 or ufo.state == 4 or (ufo.type == "vulture" and ufo.state == 2) then
             
