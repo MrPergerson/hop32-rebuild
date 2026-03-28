@@ -183,7 +183,7 @@ function _update()
 
 
         -- Process key input
-        if keyboard_input ~= 0 then
+        if keyboard_input ~= 2 then
             while stat(30) do
                 keyInput = stat(31)
 
