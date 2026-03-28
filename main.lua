@@ -40,12 +40,14 @@ function switchGameState(state)
         camera_x = 0
         camera_y = 0
         initMenu(startGameFromMainMenu)
+        music(0, 1000, 1)
     elseif gameState == gstate.playerSelect then
         chunk_progress_x = 0
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
+        finalBossEnabled = false
         initUFOPool()
         initZombiePool(5)
         init_respawn_birds()
@@ -63,11 +65,17 @@ function switchGameState(state)
             [1] = players,
             [2] = zombies
         }
+        music(-1, 1000, 1)
+        music(4, 1000, 2)
     elseif gameState == gstate.game then
+        music(-1, 1000, 2)
+        music(6, 1000, 3)
         setRespawnTimer()
     elseif gameState == gstate.complete or gameState == gstate.gameover then
-
+        
         gameover_menu_timer = 3
+
+        music(0, 2000)
 
         for key, player in pairs(players) do
             if player.enabled == true then
@@ -175,14 +183,22 @@ function _update()
 
 
         -- Process key input
-        while stat(30) do
-            keyInput = stat(31)
+        if keyboard_input ~= 0 then
+            while stat(30) do
+                keyInput = stat(31)
 
-            if (keyInput == "れ") then
-                toggleDebugMode()
+                if (keyInput == "れ") then
+                    toggleDebugMode()
+                end
+
+                bouncePlayer(keyInput)
             end
-
-            bouncePlayer(keyInput)       
+        else
+            for b = 0, 5 do
+                if btnp(b, 0) then
+                    bouncePlayer(b)
+                end
+            end
         end
     elseif gameState == gstate.gameover then
 
@@ -355,8 +371,9 @@ end
 function appendLosersToWinOrder()
     local lose_order = {}
 
-    for key, player in pairs(players) do
-        if player.enabled == false and type(player.id) ~= "number" then
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player and player.enabled == false then
             add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
         end
     end

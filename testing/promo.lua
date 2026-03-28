@@ -15,28 +15,35 @@ end
 function _draw()
 
     cls()
-    --map(0,0,0,0,128,16)
+    --map(0,0,0,0,128,16, 4)
+    --map(0,0,0,16,128,16, 1)
+    --map(0,0,0,16,128,16, 2)
     map(17,0,0,0,128,16)
 
+    
+        
     rectfill(0, 0, 0, 0 + 8, 0)
-
-
+    
+    
     local row1 = 24
     local row2 = 30
+    local yOffset_players = 73
     local offset = 7.8
     local xpos = 1
     local amplitude = 2.5
-
+    
     for i = 1, 16, 1 do
-        if i != 1 and i != 3 then
-            spr(sprites[i], xpos, row1 + (sin(xpos / 10) * amplitude) )
+        if i != 1 and i != 3  then
+            spr(sprites[i], xpos, row1 + (sin(xpos / 10) * amplitude) + yOffset_players  )
             
         end
         xpos += offset
     end
+    
+    spr(sprites[1], 4, 12  + yOffset_players )
+    spr(sprites[3], 18, 6 + yOffset_players)
 
-    spr(sprites[1], 4, 12)
-    spr(sprites[3], 18, 6)
+    
     --[[
         spr(sprites[1], xpos,row1)
         spr(sprites[2], ,row1)
@@ -55,42 +62,54 @@ function _draw()
         spr(sprites[15], 5,row1)
         spr(sprites[16], 14,row1)
         ]]
-
-    xpos = 2
-    for i = 17, 32, 1 do
-        if i != 28 then
-            spr(sprites[i], xpos, row2 + (sin(xpos / 10) * amplitude))
+        
+        xpos = 2
+        for i = 17, 32, 1 do
+            if i != 28  then
+                spr(sprites[i], xpos, row2 + (sin(xpos / 10) * amplitude) + yOffset_players )
+            end
+            xpos += offset
         end
-        xpos += offset
+        
+        spr(sprites[28], 90,8  + yOffset_players)
+        
+        --[[
+            spr(sprites[17], 5,row2)
+            spr(sprites[18], 38,row2)
+            spr(sprites[19], 97,row2)
+            spr(sprites[20], 100,row2)
+            spr(sprites[21], 105,row2)
+            spr(sprites[22], 110,row2)
+            spr(sprites[23], 115,row2)
+            spr(sprites[24], 115,row2)
+            spr(sprites[25], 75,row2)
+            spr(sprites[26], 85,row2)
+            spr(sprites[27], 48,row2)
+            spr(sprites[28], 58,row2)
+            spr(sprites[29], 68,row2)
+            spr(sprites[30], 110,row2)
+            spr(sprites[31], 88,row2)
+            spr(sprites[32], 98,row2)
+            ]]
+            
+            --spr(110, 45, 7)
+            --spr(109, 45, 1)
+            
+            --print("", 0, 0, 7)
+            --print("\^w\^thop32", 46, 56)
+            print("\^w\^thop32", 46, 65, 7)
+            local s = "multiplayer"
+            local size = #s
+           -- print("massively\nlocal\nmultiplayer", 127-#s*4, 24, 7)
+            s ="march 8th - 3pm"
+            size = #s
+           -- print(s, 127-size*4, 54, 7)
+            s = "@ guildhouse"
+           -- print(s, 127-#s*4, 64, 7)
+            s = "420 south first st,"
+           -- print("420 south first st,\n san jose ca", 127-#s*4, 74, 7)
+            
+            --rectfill(0, 5*8, 128, 128, 1)
+            
+           
     end
-
-    spr(sprites[28], 90,8)
-    --[[
-        spr(sprites[17], 5,row2)
-        spr(sprites[18], 38,row2)
-        spr(sprites[19], 97,row2)
-        spr(sprites[20], 100,row2)
-        spr(sprites[21], 105,row2)
-        spr(sprites[22], 110,row2)
-        spr(sprites[23], 115,row2)
-        spr(sprites[24], 115,row2)
-        spr(sprites[25], 75,row2)
-        spr(sprites[26], 85,row2)
-        spr(sprites[27], 48,row2)
-        spr(sprites[28], 58,row2)
-        spr(sprites[29], 68,row2)
-        spr(sprites[30], 110,row2)
-        spr(sprites[31], 88,row2)
-        spr(sprites[32], 98,row2)
-        ]]
-
-    --spr(110, 45, 7)
-    --spr(109, 45, 1)
-
-        print("", 0, 0, 7)
-    --print("\^w\^thop32", 46, 56)
-    --print("\^w\^thop32", 44, 12)
-
-    rectfill(0, 5*8, 128, 128, 1)
-
-end

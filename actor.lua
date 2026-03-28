@@ -158,7 +158,7 @@ function bounceActor(actor) -- or actor?
         actor.vx = jump_x_velocity  * 8
         actor.vy = jump_velocity  * 8
         actor.bounce_charge = 0
-        sfx(0)
+        sfx(sfx_hop)
         d_last_time = time()
     end
 end

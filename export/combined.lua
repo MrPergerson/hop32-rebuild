@@ -1,10 +1,9 @@
--- === globalvars.lua ===
 debug_mode = false
 debug_fast_travel = false
 debug_player_cannon = false
 debug_camera_x = 0 --??
 debug_camera_y = 0
-keyboard_input = 1 -- 1 or 0
+keyboard_input = 0 -- 0=gamepad, 1=any key, 2=strict
 gstate = {
     mainMenu = 0,
     playerSelect = 1,
@@ -115,7 +114,6 @@ BIOME_DIST_UNIT = {
 -- SFX
 sfx_hop = 23
 sfx_player_death_to_zombie = 24
--- === helper.lua ===
 
 -- Tables
 function contains(table, value)
@@ -187,7 +185,6 @@ function lerp(a, b, t)
 end
 
 
--- === vector.lua ===
 function isInsidePolygon(vertices, xp, yp)
     local count = 0
 
@@ -237,7 +234,6 @@ function drawRayCast(point, direction, color)
     line(point.x, point.y, point.x + direction.x * 100, point.y + direction.y * 100, color)
 
 end
--- === playerspriteindex.lua ===
 player_sprite_index = { ["a"] = 33,
     ["b"] = 34, 
     ["c"] = 35, 
@@ -272,7 +268,6 @@ player_sprite_index = { ["a"] = 33,
     ["7"] = 64,
     ["8"] = 65,
 }
--- === proceduralgen.lua ===
 poke(0x5F2D, 0x1) -- enable keyboard input
 chunks = {} -- 2 or 3 chunk tables
 local TERRAIN_Y_OFFSET = 0
@@ -630,7 +625,6 @@ function debug_draw_asteroid_polys()
     end
 
 end
--- === chunkload.lua ===
 local loaded_chunks = {}
 
 local chunk_x_size = 16
@@ -885,7 +879,6 @@ function checkTileCollision(new_x, new_y, x,y, is_player)
 
     return {x = new_x, y = new_y, onGround = onGround, hit_wall = hit_wall} -- this is returning nil for some reason
 end
--- === actor.lua ===
 
 -- player variables
 local playerWonCount = 0
@@ -1132,7 +1125,6 @@ function get_edges(obj)
         bottom = center_y + half_h
     }
 end
--- === zombies.lua ===
 local SPEED = 5
 
 function initZombiePool(max_zombies)
@@ -1187,7 +1179,6 @@ function update_zombies(dt)
         end
     end
 end
--- === ufo.lua ===
 
 local SPEED = 500
 local MIN_SPEED = 50
@@ -1469,7 +1460,6 @@ function drawHearts(heart_count)
     -- end
     
 end
--- === respawnbirds.lua ===
 -- perserve: Queue
 
 local respawnQueue = Queue.new()
@@ -1535,7 +1525,6 @@ function draw_respawn_birds()
         spr(respawn.bird.sprite, respawn.bird.xpos, respawn.bird.ypos)
     end
 end
--- === players.lua ===
 poke(0x5F2D, 0x1) -- enable keyboard input
 
 -- game variables
@@ -1591,7 +1580,7 @@ end
 function createPlayer(xpos, ypos, keyInput)
     local spr = nil
 
-    if keyboard_input == 1 then
+    if keyboard_input == 0 or keyboard_input == 1 then
         local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
         spr = sprites[playerCount + 1]
     else
@@ -1603,13 +1592,29 @@ function createPlayer(xpos, ypos, keyInput)
     end
 
     playerCount = playerCount + 1
-    local p = players[playerCount]
+    local p = nil
+    if keyboard_input == 0 then
+        for i = 6, 32 do
+            if players[i] ~= nil and players[i].enabled == false then
+                p = players[i]
+                players[i] = nil
+                break
+            end
+        end
+    else
+        p = players[playerCount]
+        players[playerCount] = nil
+    end
+
+    if p == nil then
+        return nil
+    end
+
     p.id = keyInput
     p.sprite = spr
     p.xpos = xpos
     p.ypos = ypos
-    players[playerCount] = nil
-    players[keyInput] = p     
+    players[keyInput] = p
 
     enableActor(players, keyInput, xpos, posy)
     add(keys, keyInput)
@@ -1618,51 +1623,48 @@ function createPlayer(xpos, ypos, keyInput)
 end
 
 function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
-
-    if ready and stat(30) then 
-        local keyInput = stat(31)
-        
-        if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then 
-
-            if not players[keyInput] then
-                start_timer = 5.9 -- plus .9 so the players see "5"
-
-                local p = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)    
-                if p == nil then
-                    return
-                end
-                p.startPosition = posy
-
-                posx = posx + 9
-                if (posx >= 100) then
-                    
-                    if xOffset >= 8 then
-                        xOffset = 0
-                    else
-                        xOffset = xOffset + 2
-                    end
-
-                    posx = xOffset
-
-                    posy = posy + 9
-                end
-            end
-            
-            players[keyInput].ypos = players[keyInput].startPosition - 2
+    local function joinPlayer(keyInput)
+        start_timer = 5.9
+        local p = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)
+        if p == nil then return nil end
+        p.startPosition = posy
+        posx = posx + 9
+        if posx >= 100 then
+            xOffset = xOffset >= 8 and 0 or xOffset + 2
+            posx = xOffset
+            posy = posy + 9
         end
-    
-        -- exit player selection and start the game
-        if (keyInput == "\32" and playerCount > 0) then            
-            return true
-        end  
-        
+        return p
     end
 
-    -- bounce affect 
-    for key, player in pairs(players) do
-            if player.ypos < player.startPosition then
-                player.ypos = min(player.startPosition, player.ypos + (20 * dt))
+    if keyboard_input ~= 0 then
+        if ready and stat(30) then
+            local keyInput = stat(31)
+            if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then
+                if not players[keyInput] then
+                    if joinPlayer(keyInput) == nil then return end
+                end
+                players[keyInput].ypos = players[keyInput].startPosition - 2
             end
+            if keyInput == "\32" and playerCount > 0 then return true end
+        end
+    else
+        if ready then
+            for b = 0, 5 do
+                local joined = players[b] ~= nil and players[b].enabled == true
+                if btnp(b, 0) and not joined and playerCount < 6 then
+                    joinPlayer(b)
+                elseif joined then
+                    players[b].ypos = players[b].startPosition - 2
+                end
+            end
+        end
+    end
+
+    for key, player in pairs(players) do
+        if player.ypos < player.startPosition then
+            player.ypos = min(player.startPosition, player.ypos + (20 * dt))
+        end
     end
 
     return false
@@ -1769,7 +1771,6 @@ function setRespawnTimer()
 
 end
 
--- === menu.lua ===
 
 
 local menu_option = {
@@ -1920,7 +1921,7 @@ end
 
 function changeInputMode()
     local nextMode = keyboard_input + 1
-    if nextMode > 1 then
+    if nextMode > 2 then
         nextMode = 0
     end
 
@@ -1938,11 +1939,11 @@ end
 
 function showInputModeText()
     if keyboard_input == 0 then
-        return {title = "strict" , description = "characters are \nassigned to \nspecific keys."}
+        return {title = "gamepad" , description = "each button is\nassigned to a\nunique player."}
     elseif keyboard_input == 1 then
-        return  {title = "any key" , description = "characters can be \nassigned to \nany key."}
+        return {title = "any key" , description = "characters can be \nassigned to \nany key."}
     elseif keyboard_input == 2 then
-        return  {title = "controller" , description = "characters are \nassigned to \ncontroller buttons."}
+        return {title = "strict" , description = "characters are \nassigned to \nspecific keys."}
     end
 end
 
@@ -1988,7 +1989,6 @@ function draw_winners(x, y)
 end
 
 
--- === main.lua ===
 poke(0x5F2D, 0x1) -- enable keyboard input
 local delta_time
 local last_time
@@ -2174,14 +2174,22 @@ function _update()
 
 
         -- Process key input
-        while stat(30) do
-            keyInput = stat(31)
+        if keyboard_input ~= 0 then
+            while stat(30) do
+                keyInput = stat(31)
 
-            if (keyInput == "れ") then
-                toggleDebugMode()
+                if (keyInput == "れ") then
+                    toggleDebugMode()
+                end
+
+                bouncePlayer(keyInput)
             end
-
-            bouncePlayer(keyInput)       
+        else
+            for b = 0, 5 do
+                if btnp(b, 0) then
+                    bouncePlayer(b)
+                end
+            end
         end
     elseif gameState == gstate.gameover then
 
@@ -2354,8 +2362,9 @@ end
 function appendLosersToWinOrder()
     local lose_order = {}
 
-    for key, player in pairs(players) do
-        if player.enabled == false and type(player.id) ~= "number" then
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player and player.enabled == false then
             add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
         end
     end

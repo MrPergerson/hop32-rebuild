@@ -46,11 +46,9 @@ end
 
 
 function updateUFO(dt)
-
     local ufo = ufos[1]
 
     if ufo.enabled and ufo.ai_enabled then
-
         if ufo.state == 1 then
             
             moveLeftRight(ufo, 50)
