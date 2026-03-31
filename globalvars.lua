@@ -3,7 +3,7 @@ debug_fast_travel = false
 debug_player_cannon = false
 debug_camera_x = 0 --??
 debug_camera_y = 0
-keyboard_input = 1 -- 1 or 0
+keyboard_input = 0 -- 0=any key, 1=strict, 2=gamepad
 gstate = {
     mainMenu = 0,
     playerSelect = 1,

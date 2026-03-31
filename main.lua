@@ -199,14 +199,22 @@ function _update()
 
 
         -- Process key input
-        while stat(30) do
-            keyInput = stat(31)
+        if keyboard_input ~= 2 then
+            while stat(30) do
+                keyInput = stat(31)
 
-            if (keyInput == "れ") then
-                toggleDebugMode()
+                if (keyInput == "れ") then
+                    toggleDebugMode()
+                end
+
+                bouncePlayer(keyInput)
             end
-
-            bouncePlayer(keyInput)       
+        else
+            for b = 0, 5 do
+                if btnp(b, 0) then
+                    bouncePlayer(b)
+                end
+            end
         end
     elseif gameState == gstate.gameover then
 
@@ -379,8 +387,9 @@ end
 function appendLosersToWinOrder()
     local lose_order = {}
 
-    for key, player in pairs(players) do
-        if player.enabled == false and type(player.id) ~= "number" then
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player and player.enabled == false then
             add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
         end
     end

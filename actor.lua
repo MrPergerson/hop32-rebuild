@@ -49,8 +49,6 @@ function createActor(actor_data, id)
         move_dir = -1,
         width = actor_data.width,
         height = actor_data.height,
-        boundsOffsetX = 0,
-        boundsOffsetY = 0,
         onGround = false, 
         bounce_charge = 0,
         jump_height = min_jump_height,

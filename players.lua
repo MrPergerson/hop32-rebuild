@@ -65,7 +65,7 @@ end
 function createPlayer(xpos, ypos, keyInput)
     local spr = nil
 
-    if keyboard_input == 1 then
+    if keyboard_input == 0 or keyboard_input == 2 then
         local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
         spr = sprites[playerCount + 1]
     else
@@ -77,13 +77,29 @@ function createPlayer(xpos, ypos, keyInput)
     end
 
     playerCount = playerCount + 1
-    local p = players[playerCount]
+    local p = nil
+    if keyboard_input == 2 then
+        for i = 6, 32 do
+            if players[i] ~= nil and players[i].enabled == false then
+                p = players[i]
+                players[i] = nil
+                break
+            end
+        end
+    else
+        p = players[playerCount]
+        players[playerCount] = nil
+    end
+
+    if p == nil then
+        return nil
+    end
+
     p.id = keyInput
     p.sprite = spr
     p.xpos = xpos
     p.ypos = ypos
-    players[playerCount] = nil
-    players[keyInput] = p     
+    players[keyInput] = p
 
     enableActor(players, keyInput, xpos, posy)
     add(keys, keyInput)
@@ -92,51 +108,48 @@ function createPlayer(xpos, ypos, keyInput)
 end
 
 function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
-
-    if ready and stat(30) then 
-        local keyInput = stat(31)
-        
-        if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then 
-
-            if not players[keyInput] then
-                start_timer = 5.9 -- plus .9 so the players see "5"
-
-                local p = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)    
-                if p == nil then
-                    return
-                end
-                p.startPosition = posy
-
-                posx = posx + 9
-                if (posx >= 100) then
-                    
-                    if xOffset >= 8 then
-                        xOffset = 0
-                    else
-                        xOffset = xOffset + 2
-                    end
-
-                    posx = xOffset
-
-                    posy = posy + 9
-                end
-            end
-            
-            players[keyInput].ypos = players[keyInput].startPosition - 2
+    local function joinPlayer(keyInput)
+        start_timer = 5.9
+        local p = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)
+        if p == nil then return nil end
+        p.startPosition = posy
+        posx = posx + 9
+        if posx >= 100 then
+            xOffset = xOffset >= 8 and 0 or xOffset + 2
+            posx = xOffset
+            posy = posy + 9
         end
-    
-        -- exit player selection and start the game
-        if (keyInput == "\32" and playerCount > 0) then            
-            return true
-        end  
-        
+        return p
     end
 
-    -- bounce affect 
-    for key, player in pairs(players) do
-            if player.ypos < player.startPosition then
-                player.ypos = min(player.startPosition, player.ypos + (20 * dt))
+    if keyboard_input ~= 2 then
+        if ready and stat(30) then
+            local keyInput = stat(31)
+            if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then
+                if not players[keyInput] then
+                    if joinPlayer(keyInput) == nil then return end
+                end
+                players[keyInput].ypos = players[keyInput].startPosition - 2
             end
+            if keyInput == "\32" and playerCount > 0 then return true end
+        end
+    else
+        if ready then
+            for b = 0, 5 do
+                local joined = players[b] ~= nil and players[b].enabled == true
+                if btnp(b, 0) and not joined and playerCount < 6 then
+                    joinPlayer(b)
+                elseif joined then
+                    players[b].ypos = players[b].startPosition - 2
+                end
+            end
+        end
+    end
+
+    for key, player in pairs(players) do
+        if player.ypos < player.startPosition then
+            player.ypos = min(player.startPosition, player.ypos + (20 * dt))
+        end
     end
 
     return false

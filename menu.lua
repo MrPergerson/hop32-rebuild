@@ -148,7 +148,7 @@ end
 
 function changeInputMode()
     local nextMode = keyboard_input + 1
-    if nextMode > 1 then
+    if nextMode > 2 then
         nextMode = 0
     end
 
@@ -166,11 +166,11 @@ end
 
 function showInputModeText()
     if keyboard_input == 0 then
-        return {title = "strict" , description = "characters are \nassigned to \nspecific keys."}
+        return {title = "any key" , description = "characters can be \nassigned to \nany key."}
     elseif keyboard_input == 1 then
-        return  {title = "any key" , description = "characters can be \nassigned to \nany key."}
+        return {title = "strict" , description = "characters are \nassigned to \nspecific keys."}
     elseif keyboard_input == 2 then
-        return  {title = "controller" , description = "characters are \nassigned to \ncontroller buttons."}
+        return {title = "gamepad" , description = "each button is\nassigned to a\nunique player."}
     end
 end
 
