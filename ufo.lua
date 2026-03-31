@@ -17,6 +17,8 @@ function initKing()
     ufos = {}
     final_boss_health = max(playerCount, 3)
     initActorPool(1, ufos, {type = "king", width = 16, height = 16, sprite = 12, sprite2 = 122})
+    ufos[1].boundsOffsetX = 8
+    ufos[1].boundsOffsetY = 8
 end
 
 function initVulture()
