@@ -51,7 +51,8 @@ function initPlayers()
     initActorPool(32, players, {type = "player", width = 8, height = 8, sprite = 0, sprite2 = 0})
 end
 
-function disablePlayer(player)
+function disablePlayer(player, left)
+    add(death_icons,{player.xpos,player.ypos,3,player.sprite,left})
     queue_respawn_bird(player.id)
     disableActor(player)
     setDisabledPlayerCount(disabledPlayerCount + 1)
@@ -185,7 +186,7 @@ function update_players(game_progress_x, game_progress_y, dt)
             player.ypos = checked_position.y
 
             if checkActorOutOfBounds(player) then
-                disablePlayer(player)
+                disablePlayer(player, player.xpos+8<camera_x)
                 player.xpos = -8
                 player.ypos = -8
                 break;

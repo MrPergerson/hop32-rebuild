@@ -117,3 +117,9 @@ BIOME_DIST_UNIT = {
 -- SFX
 sfx_hop = 23
 sfx_player_death_to_zombie = 24
+
+-- death icons
+death_icons={}
+icon_x_spr=128
+icon_arrow_spr=129
+icon_arrow_left_spr=130

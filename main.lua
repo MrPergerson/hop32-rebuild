@@ -59,6 +59,7 @@ function switchGameState(state)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
         win_order = {}
+        death_icons={}
         timer_2 = .4
         menuitem(2, "set gamemode", function ()
             changeGameMode()
@@ -127,8 +128,6 @@ function _update()
 
             if debug_fast_travel then
                 debugUpdateQuickTravel()
-            elseif debug_player_cannon then
-                debugUpdatePlayerCannon()
             end
         else
             if timer_1 < timeUntilCameraMoves then
@@ -162,6 +161,11 @@ function _update()
             update_players(camera_x, camera_y, delta_time)
             update_zombies(delta_time)
             update_respawns()
+
+            for d in all(death_icons) do
+              d[3]-=delta_time
+              if d[3]<=0 then del(death_icons,d) end
+            end
 
             -- cool but it looks like the asteroid are falling
             if new_camera_y_lerp_t < 1 then
@@ -227,8 +231,16 @@ function _draw()
         --draw_zombies()
         drawActors(zombies)
         drawActors(players)
-        
-    
+        local li=camera_y+112
+        for d in all(death_icons) do
+          local x,y=mid(d[1],camera_x,camera_x+112),mid(d[2],camera_y,camera_y+112)
+          if d[5] then y,li=li,li-16 end
+          spr(d[4],x,y)
+          spr(icon_x_spr,x,y-8)
+          if d[5] then spr(icon_arrow_left_spr,x-8,y)
+          else spr(icon_arrow_spr,x,y+8) end
+        end
+
         -- UI
         if gameState == gstate.mainMenu then
             drawMenu()
@@ -324,43 +336,6 @@ function debug_controls()
     if stat(34) == 1 then
         printh(flr(mouse_x/8) .. ", " .. flr(mouse_y/8))
     end
-end
-
-function debugToggleQuickTravel()
-    --debug_mode = true
-    debug_fast_travel = not(debug_fast_travel)
-end
-
-function debugUpdateQuickTravel()
-    for key, player in pairs(players) do
-        if not player.enabled then
-            player.xpos = camera_x + 56
-            player.ypos = camera_y + 8
-        end
-    end
-end
-
-function debugTogglePlayerCannon()
-    debug_player_cannon = not(debug_player_cannon)
-end
-
-function debugUpdatePlayerCannon()
-
-    if stat(34) == 1 then
-        --printh(flr(mouse_x/8) .. ", " .. flr(mouse_y/8))
-
-        local p = players[keys[key_index]]
-        if p.enabled then enablePlayer(p) end
-        p.xpos = flr(mouse_x)
-        p.ypos = flr(mouse_y)
-
-        p.vx = 100
-        p.vy = 100
-
-    end
-    
-    update_players(camera_x, camera_y, delta_time)
-
 end
 
 function appendLosersToWinOrder()
