@@ -1,18 +1,7 @@
 poke(0x5F2D, 0x1) -- enable keyboard input
-local delta_time
-local last_time
-local timeUntilCameraMoves = 1.5
-local timeUntilRestart = 2
-local timer_1 = 0
-local timer_2 = 0 -- input delay when player select starts
---local camera_pos_y_offset = 128
-local new_chunk_threshold = 0
-local mouse_x = 0
-local mouse_y = 0
-
-
-
-local debug_tile_flags = {}
+local delta_time,last_time
+local timeUntilCameraMoves,timeUntilRestart = 1.5,2
+local timer_1,timer_2,new_chunk_threshold,mouse_x,mouse_y = 0,0,0,0,0
 
 function updatePlayerPushedCamera(dt)
     local lead = getLeadPlayer()
@@ -32,9 +21,7 @@ function updatePlayerPushedCamera(dt)
 end
 
 function _init()
-    delta_time = 0
-    last_time = 0
-    timer_1 = 0
+    delta_time,last_time,timer_1 = 0,0,0
     if gameState == gstate.complete or gameState == gstate.gameover then
         gameState = gstate.playerSelect
     else
@@ -55,7 +42,7 @@ function switchGameState(state)
     if gameState == gstate.mainMenu then
         camera_x = 0
         camera_y = 0
-        initMenu(startGameFromMainMenu)
+        initMenu(function() switchGameState(gstate.playerSelect) end)
         music(0, 1000, 1)
     elseif gameState == gstate.playerSelect then
         chunk_progress_x = 0
@@ -94,7 +81,7 @@ function switchGameState(state)
         music(0, 2000)
 
         for key, player in pairs(players) do
-            if player.enabled == true then
+            if player.enabled then
                 add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
             end
         end
@@ -104,10 +91,6 @@ function switchGameState(state)
 
 
     
-end
-
-startGameFromMainMenu = function ()
-    switchGameState(gstate.playerSelect)
 end
 
 function _update()
@@ -246,11 +229,6 @@ function _draw()
         drawActors(players)
         
     
-        if debug_mode then
-            debug_draw_asteroid_polys()
-            
-        end
-
         -- UI
         if gameState == gstate.mainMenu then
             drawMenu()
@@ -281,7 +259,8 @@ function _draw()
             end
         end
 
-        if (debug_mode) then
+        if debug_mode then
+            debug_draw_asteroid_polys()
             rect(camera_x, camera_y, camera_x + 127, camera_y + 127, 7)
             print(camera_x/8 .. "," .. camera_y/8, camera_x+4, camera_y+4)
             print(camera_x/8+16 .. "," .. camera_y/8+16, camera_x + 128 + 4, camera_y + 128 + 4)
@@ -289,7 +268,7 @@ function _draw()
             mouse_x = stat(32) + camera_x
             mouse_y = stat(33) + camera_y
             rect(mouse_x, mouse_y, mouse_x + 2, mouse_y + 2)
-        end       
+        end
 end
 
 function resetGameAfterTimer()
@@ -310,8 +289,8 @@ function toggleDebugMode()
     debug_mode = not(debug_mode)
 
     if debug_mode then
-        menuitem(2, "toggle fast travel", function() debugToggleQuickTravel() end)
-        menuitem(3, "toggle pcannon", function() debugTogglePlayerCannon() end)
+        menuitem(2, "toggle fast travel", debugToggleQuickTravel)
+        menuitem(3, "toggle pcannon", debugTogglePlayerCannon)
     else
         menuitem(2)
         menuitem(3)
@@ -354,7 +333,7 @@ end
 
 function debugUpdateQuickTravel()
     for key, player in pairs(players) do
-        if player.enabled == false then
+        if not player.enabled then
             player.xpos = camera_x + 56
             player.ypos = camera_y + 8
         end
@@ -389,14 +368,13 @@ function appendLosersToWinOrder()
 
     for _, key in ipairs(keys) do
         local player = players[key]
-        if player and player.enabled == false then
+        if player and not player.enabled then
             add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
         end
     end
 
-    local n = #lose_order
-    for i = 1, n - 1 do
-        for j = 1, n - i do
+    for i = 1, #lose_order - 1 do
+        for j = 1, #lose_order - i do
             local a = lose_order[j]
             local b = lose_order[j + 1]
             -- Compare by disabledCount (ascending)
