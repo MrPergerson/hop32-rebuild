@@ -3,7 +3,7 @@ debug_fast_travel = false
 debug_player_cannon = false
 debug_camera_x = 0 --??
 debug_camera_y = 0
-keyboard_input = 0 -- 0=gamepad, 1=any key, 2=strict
+keyboard_input = 0 -- 0=any key, 1=strict, 2=gamepad
 gstate = {
     mainMenu = 0,
     playerSelect = 1,
@@ -27,6 +27,9 @@ old_camera_y_pos = 0
 new_camera_y_pos = 0
 new_camera_y_lerp_t = 1
 new_camera_y_lerp_r = 0
+camera_push_cells = 7   
+camera_ease_speed = 1.5 
+camera_min_speed  = 8    
 
 function setCameraYPos(y_pos)
     old_camera_y_pos = camera_y
@@ -42,6 +45,9 @@ gameover_menu_timer = 3
 
 -- players
 win_order = {}
+revive_order = {}
+game_start_time = 0
+game_elapsed_time = 0
 playerCount = 0
 disabledPlayerCount = 0
 keys = {}
@@ -115,6 +121,12 @@ BIOME_DIST_UNIT = {
 sfx_hop = 23
 sfx_player_death_to_zombie = 24
 
+-- death icons
+death_icons={}
+icon_x_spr=128
+icon_arrow_spr=129
+icon_arrow_left_spr=130
+
 -- Tables
 function contains(table, value)
     for _, v in ipairs(table) do
@@ -184,6 +196,14 @@ function lerp(a, b, t)
     return a + (b - a) * t
 end
 
+function format_time(seconds)
+    local m = flr(seconds / 60)
+    local s = flr(seconds % 60)
+    local ss = tostr(s)
+    if s < 10 then ss = "0" .. ss end
+    return m .. ":" .. ss
+end
+
 
 function isInsidePolygon(vertices, xp, yp)
     local count = 0
@@ -245,10 +265,10 @@ player_sprite_index = { ["a"] = 33,
     ["i"] = 41, 
     ["j"] = 42,
     ["k"] = 43,
-    ["l"] = 44,
-    ["m"] = 45,
-    ["n"] = 46,
-    ["o"] = 47,
+    ["l"] = 26,
+    ["m"] = 27,
+    ["n"] = 22,
+    ["o"] = 20,
     ["q"] = 48,
     ["r"] = 49,
     ["s"] = 50,
@@ -261,10 +281,10 @@ player_sprite_index = { ["a"] = 33,
     ["z"] = 57,
     ["1"] = 58,
     ["2"] = 59,
-    ["3"] = 60,
-    ["4"] = 61,
-    ["5"] = 62,
-    ["6"] = 63,
+    ["3"] = 27,
+    ["4"] = 24,
+    ["5"] = 23,
+    ["6"] = 21,
     ["7"] = 64,
     ["8"] = 65,
 }
@@ -629,12 +649,9 @@ local loaded_chunks = {}
 
 local chunk_x_size = 16
 local chunk_y_size = 16
-local chunk_pos_x_size = chunk_x_size * 8
-local chunk_pos_y_size = chunk_y_size * 8
 
 local x_offset = 0
 local y_offset = 0
-local land_progress = 0
 
 local startingAsteroidSize = 8
 
@@ -676,7 +693,7 @@ end
 
 -- Note: using distance to check biome won't work for secret areas
 function loadChunk()
-    local new_chunk = {}
+    local new_chunk
     
     if x_offset >= BIOME_DIST_UNIT.VOID then
         new_chunk = generateCloudChunk(x_offset, y_offset)
@@ -703,18 +720,13 @@ function loadChunk()
     else
         new_chunk = generateChunk(x_offset)
 
-        if new_chunk.x == chunk_progress_x * 16 and gameState == gstate.playerSelect then
-
-        else 
-            
+        if new_chunk.x ~= chunk_progress_x * 16 or gameState ~= gstate.playerSelect then
             local zombie_spawn_point = getRndSurfaceTile(new_chunk.surface_tiles)
             enableActor(zombies, -1, zombie_spawn_point.x * 8, (zombie_spawn_point.y-1) * 8)
         end
 
         if x_offset == 64 then
-           -- printh(#ufos)
-            local ufo = enableUFO(64 * 8, 2 * 8)
-            --printh(ufo.xpos)
+            enableUFO(512, 16)
         end
 
     end
@@ -738,11 +750,11 @@ function drawChunks()
                 if tile.sprite > 0 then -- no error was returned
                     spr(tile.sprite, tile.x * 8, tile.y * 8)
                     --Debug
-                    if (debug_mode) then
+                    if debug_mode then
                         rect(tile.x * 8, tile.y * 8, tile.x * 8 + 8, tile.y * 8 + 8, 9)                      
                     end
                 else
-                    if (debug_mode) then
+                    if debug_mode then
                         rect(tile.x * 8, tile.y * 8, tile.x * 8 + 8, tile.y * 8 + 8, 2)
                     end
                 end
@@ -838,24 +850,24 @@ function checkTileCollision(new_x, new_y, x,y, is_player)
     local cornerCount = 0
 
     -- X
-    if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
-        if is_player == false then -- HACK, for players this stops collisions in beyond the grid in the -y direction
-            new_x_unit = flr(new_x_unit) + 1 
-        end 
+    if tile_x_1 and tile_x_2 and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
+        if not is_player then -- HACK, for players this stops collisions in beyond the grid in the -y direction
+            new_x_unit = flr(new_x_unit) + 1
+        end
         hit_wall = true
-    elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
+    elseif tile_x_3 and tile_x_4 and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
         new_x_unit = flr(new_x_unit)
         cornerCount += 1
         hit_wall = true
     end
 
     -- Y
-    if (tile_y_1 ~= nil and tile_y_2 ~= nil) and (tile_y_1.sprite ~= TILE.NONE or tile_y_2.sprite ~= TILE.NONE) then
-        if new_y > 0 or is_player == false then -- HACK, this stops collisions in beyond the grid in the -y direction
+    if tile_y_1 and tile_y_2 and (tile_y_1.sprite ~= TILE.NONE or tile_y_2.sprite ~= TILE.NONE) then
+        if new_y > 0 or not is_player then -- HACK, this stops collisions in beyond the grid in the -y direction
             new_y_unit = flr(new_y_unit) + 1
         end
         cornerCount += 1
-    elseif (tile_y_3 ~= nil and tile_y_4 ~= nil) and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then
+    elseif tile_y_3 and tile_y_4 and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then
         new_y_unit = flr(new_y_unit)
         
         onGround = true
@@ -901,14 +913,10 @@ local jump_x_velocity = 4
 local bounceCharge = 0 -- [0-1]
 local maxChargeTime = 4 -- seconds
 local HOVER_DOWN_SPEED = 30 -- UFO
-local debug = false
-local players_can_release_others = false
-
-local d_last_time = 0 -- ??
 
 
 function initActorPool(actor_count, actor_table, actor_data)
-    for i = 1, actor_count, 1 do
+    for i = 1, actor_count do
         actor_table[i] = createActor(actor_data, i)
     end
 end
@@ -930,8 +938,6 @@ function createActor(actor_data, id)
         move_dir = -1,
         width = actor_data.width,
         height = actor_data.height,
-        boundsOffsetX = 0,
-        boundsOffsetY = 0,
         onGround = false, 
         bounce_charge = 0,
         jump_height = min_jump_height,
@@ -944,6 +950,8 @@ function createActor(actor_data, id)
         ai_enabled = false,
         state = 1,
         totalTimeEnabled = 0,
+        reviveCount = 0,
+        last_enabled_time = 0,
         won = false,
         timer_1 = 0,
         capture_tracker = {},
@@ -964,30 +972,31 @@ function createActor(actor_data, id)
 end
 
 function enableActor(actor_table, id, xpos, ypos)
-    local actor = nil
+    local actor
 
     if id == -1 then -- if id -1, then enable first available inactive
         for key, a in pairs(actor_table) do
-            if a.enabled == false then
+            if not a.enabled then
                 actor = a
                 break;
             end
         end
 
-        if actor == nil then
+        if not actor then
             printh("no more actors available")
             return
         end
     else
         actor = actor_table[id]
 
-        if actor == nil then
+        if not actor then
             printh("can't find actor with id " .. id)
             return
         end
     end
 
     actor.enabled = true
+    actor.last_enabled_time = time()
     actor.ai_enabled = true
     actor.inputDisabled = false
     actor.state = 1
@@ -1001,8 +1010,8 @@ end
 function disableActor(actor)
     actor.enabled = false
     actor.ai_enabled = false
-    actor.disabledCount = actor.disabledCount + 1 -- player
-    actor.totalTimeEnabled = actor.totalTimeEnabled + (time() - actor.totalTimeEnabled)  -- player
+    actor.disabledCount += 1 -- player
+    actor.totalTimeEnabled += time() - actor.last_enabled_time  -- player
     --actor.xpos = -8
     --actor.ypos = -8
     actor.vx = 0
@@ -1030,7 +1039,7 @@ function getNewActorPosition(zombie, dt)
 end
 
 function bounceActor(actor) -- or actor?
-    if actor.onGround and not(actor.won) then
+    if actor.onGround and not actor.won then
         local jump_dist_p1 = actor.jump_distance * .6
         local jump_dist_p2 = actor.jump_distance * .4
         local jump_velocity = (-2 * actor.jump_height * jump_x_velocity) / jump_dist_p1
@@ -1040,7 +1049,6 @@ function bounceActor(actor) -- or actor?
         actor.vy = jump_velocity  * 8
         actor.bounce_charge = 0
         sfx(sfx_hop)
-        d_last_time = time()
     end
 end
 
@@ -1066,15 +1074,8 @@ function moveLeftRight(actor, speed)
 end
 
 function checkActorOutOfBounds(actor)
-    if actor.xpos + 8 < camera_x - 16
-    --or actor.xpos > camera_x + 200 -- we don't care about right bounds
-    --or actor.ypos < camera_y  
-    or actor.ypos > camera_y + 200 then
-        --printh(actor.type .. " " .. actor.id .. " out of bounds")
-        return true
-    end
-
-    return false
+    return actor.xpos + 8 < camera_x - 16
+        or actor.ypos > camera_y + 200
 end
 
 function drawActors(actor_table)
@@ -1185,8 +1186,6 @@ local MIN_SPEED = 50
 local MAX_SPEED = 65 -- camera speed is 15
 local HOVER_DOWN_SPEED = 30
 local VULTURE_DOWN_SPEED = 10
-local debug = false
-local players_can_release_others = false
 
 function initUFOPool()
     ufos = {}
@@ -1197,14 +1196,18 @@ end
 function initKing()
     ufos = {}
     final_boss_health = max(playerCount, 3)
-    initActorPool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
+    initActorPool(1, ufos, {type = "king", width = 16, height = 16, sprite = 12, sprite2 = 122})
+    ufos[1].boundsOffsetX = 8
+    ufos[1].boundsOffsetY = 8
 end
 
 function initVulture()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 126})
+    initActorPool(1, ufos, {type = "vulture", width = 16, height = 16, sprite = 14, sprite2 = 126})
 
+    ufos[1].boundsOffsetX = 8
+    ufos[1].boundsOffsetY = 8
     ufos[1].tracker_beam.width = 8
     ufos[1].tracker_beam.height = 8
     ufos[1].tracker_beam.boundsOffsetX = 4
@@ -1216,8 +1219,8 @@ end
 function enableUFO(xpos, ypos)
 
     local ufo = enableActor(ufos, 1, xpos, ypos)
-    ufo.boundsOffsetX = 4
-    ufo.boundsOffsetY = 4
+    --ufo.boundsOffsetX = 4
+    --ufo.boundsOffsetY = 4
 
     resetUFO(ufo, xpos, ypos)
 
@@ -1321,11 +1324,8 @@ function updateUFO(dt)
            attractPlayers(dt)
         end
 
-        local self_new_x = ufo.xpos + ufo.vx * dt
-        local self_new_y = ufo.ypos + ufo.vy * dt
-        
-        ufo.xpos = self_new_x
-        ufo.ypos = self_new_y
+        ufo.xpos += ufo.vx * dt
+        ufo.ypos += ufo.vy * dt
 
     end
     
@@ -1342,7 +1342,7 @@ function resetUFO(ufo, xpos, ypos)
 end
 
 function hideCapturedActors(ufo)
-    for key, captured in pairs(ufo.capture_tracker) do
+    for _, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = -8
         captured.player.ypos = -8
     end
@@ -1352,7 +1352,7 @@ function capturePlayer(player)
 
     local ufo = ufos[1]
 
-    if ufo.capture_tracker[player.id] == nil then
+    if not ufo.capture_tracker[player.id] then
        
         ufo.capture_tracker[player.id] = {
             player = player,
@@ -1371,7 +1371,7 @@ function attractPlayers(dt)
     local ufo = ufos[1]
     --local captured = ufo.capture_tracker[player.id] 
 
-    for key, captured in pairs(ufo.capture_tracker) do
+    for _, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = captured.player.xpos + (ufo.xpos - captured.player.xpos) * min(captured.t,.2)
         captured.player.ypos = captured.player.ypos + ((ufo.ypos+8) - captured.player.ypos) * min(captured.t,.2)
 
@@ -1390,7 +1390,11 @@ function drawUFO()
 
     if ufo and ufo.enabled then
         
-        spr(ufo.sprite, ufo.xpos, ufo.ypos)
+        if ufo.type ~= "ufo" then
+            spr(ufo.sprite, ufo.xpos, ufo.ypos, 2, 2)
+        else
+            spr(ufo.sprite, ufo.xpos, ufo.ypos, 1, 1)
+        end
 
         if  ufo.state == 3 or ufo.state == 4 or (ufo.type == "vulture" and ufo.state == 2) then
             
@@ -1423,26 +1427,23 @@ function drawUFO()
 end
 
 function drawHearts(heart_count)
-    local heart_size = 10
     local rows = ceil((heart_count * 10) / 128)
     local hearts_left_to_draw = heart_count
 
-    for i = 1, rows, 1 do
+    for i = 1, rows do
 
         local xpos = camera_x + 4
         local ypos = camera_y + 4 + (10 *(i-1))
-        local offset = 10
         local hearts = 12
 
         if i == rows then
             hearts = hearts_left_to_draw
-            --local xpos = camera_x
         end
 
-        for j = 1, hearts, 1 do
+        for j = 1, hearts do
             spr(8, xpos, ypos)
             hearts_left_to_draw -= 1
-            xpos += offset
+            xpos += 10
         end
         
     end
@@ -1553,6 +1554,18 @@ local posy = 0
 local xOffset = 0
 local row = 1
 
+function getLeadPlayer()
+    local lead = nil
+    for key, player in pairs(players) do
+        if player.enabled then
+            if lead == nil or player.xpos > lead.xpos then
+                lead = player
+            end
+        end
+    end
+    return lead
+end
+
 function initPlayers()
     players = {}
     playerCount = 0
@@ -1566,7 +1579,8 @@ function initPlayers()
     initActorPool(32, players, {type = "player", width = 8, height = 8, sprite = 0, sprite2 = 0})
 end
 
-function disablePlayer(player)
+function disablePlayer(player, left)
+    add(death_icons,{player.xpos,player.ypos,3,player.sprite,left})
     queue_respawn_bird(player.id)
     disableActor(player)
     setDisabledPlayerCount(disabledPlayerCount + 1)
@@ -1580,7 +1594,7 @@ end
 function createPlayer(xpos, ypos, keyInput)
     local spr = nil
 
-    if keyboard_input == 0 or keyboard_input == 1 then
+    if keyboard_input == 0 or keyboard_input == 2 then
         local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
         spr = sprites[playerCount + 1]
     else
@@ -1593,7 +1607,7 @@ function createPlayer(xpos, ypos, keyInput)
 
     playerCount = playerCount + 1
     local p = nil
-    if keyboard_input == 0 then
+    if keyboard_input == 2 then
         for i = 6, 32 do
             if players[i] ~= nil and players[i].enabled == false then
                 p = players[i]
@@ -1637,7 +1651,7 @@ function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
         return p
     end
 
-    if keyboard_input ~= 0 then
+    if keyboard_input ~= 2 then
         if ready and stat(30) then
             local keyInput = stat(31)
             if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then
@@ -1700,7 +1714,7 @@ function update_players(game_progress_x, game_progress_y, dt)
             player.ypos = checked_position.y
 
             if checkActorOutOfBounds(player) then
-                disablePlayer(player)
+                disablePlayer(player, player.xpos+8<camera_x)
                 player.xpos = -8
                 player.ypos = -8
                 break;
@@ -1712,6 +1726,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                     enableActor(players, respawn.playerKey, player.xpos, player.ypos) -- update this
                     setDisabledPlayerCount(disabledPlayerCount - 1)
                     del(activeBirdList, respawn)
+                    player.reviveCount = player.reviveCount + 1
                     break;
                 end
             end   
@@ -1783,17 +1798,17 @@ local startGameFunction = nil
 
 local menus = {
     [menu_option.main] = {
-            [1] = {text = "start", active = false, color = 6, action = function() changeMenu(menu_option.settings) end},
-            [2] = {text = "credits", active = false, color = 6, action = function() changeMenu(menu_option.credits) end}
+            [1] = {text = "start", color = 6, action = function() changeMenu(menu_option.settings) end},
+            [2] = {text = "credits", color = 6, action = function() changeMenu(menu_option.credits) end}
     },
-    [menu_option.settings] = { 
-        [1] = {text = "play", active = false, color = 6, action = function() startGameFunction() end},
-        [2] = {text = "gamemode", active = false, color = 6, action = function() changeGameMode() end},
-        [3] = {text = "input mode", active = false, color = 6, action = function() changeInputMode() end},
-        [4] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end}
+    [menu_option.settings] = {
+        [1] = {text = "play", color = 6, action = function() startGameFunction() end},
+        [2] = {text = "gamemode", color = 6, action = function() changeGameMode() end},
+        [3] = {text = "input mode", color = 6, action = function() changeInputMode() end},
+        [4] = {text = "back", color = 6, action = function() changeMenu(menu_option.main) end}
     },
-    [menu_option.credits] = { 
-        [1] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end},
+    [menu_option.credits] = {
+        [1] = {text = "back", color = 6, action = function() changeMenu(menu_option.main) end},
     }
 }
 
@@ -1844,7 +1859,6 @@ function drawMenu()
     if active_menu == menu_option.main then
         print("\^w\^thop32", 46,16, 7)
     elseif active_menu == menu_option.settings then
-        x_pos = 16
         print("\^w\^thop32", 46,16, 7)
         if active_option == 2 then
             gmodetext = showGameModeText()
@@ -1879,15 +1893,9 @@ end
 
 function changeOption(option, previous_menu)
 
-    local previous_m = active_menu
-    if previous_menu ~= nil then
-        previous_m = previous_menu
-    end
+    local previous_m = previous_menu or active_menu
 
-    menus[previous_m][active_option].active = false
     menus[previous_m][active_option].color = 6
-
-    menus[active_menu][option].active = true
     menus[active_menu][option].color = 7
     active_option = option
 end
@@ -1895,24 +1903,12 @@ end
 
 function changeMenu(menu)
     local previous_menu = active_menu
-    if menu == menu_option.main then      
-       active_menu = menu_option.main     
-    elseif menu == menu_option.settings then
-        active_menu = menu_option.settings
-    elseif menu == menu_option.credits then
-        active_menu = menu_option.credits
-    end
-
+    active_menu = menu
     changeOption(1, previous_menu)
 end
 
 function changeGameMode()
-    local nextMode = gameMode + 1
-    if nextMode > 1 then
-        nextMode = 0
-    end
-
-    gameMode = nextMode
+    gameMode = (gameMode + 1) % 2
 
     if gameMode == gstate.playerSelect or gameMode == gstate.game then
         gamemode_timer = 3
@@ -1920,12 +1916,7 @@ function changeGameMode()
 end
 
 function changeInputMode()
-    local nextMode = keyboard_input + 1
-    if nextMode > 2 then
-        nextMode = 0
-    end
-
-    keyboard_input = nextMode
+    keyboard_input = (keyboard_input + 1) % 3
 end
 
 
@@ -1939,11 +1930,11 @@ end
 
 function showInputModeText()
     if keyboard_input == 0 then
-        return {title = "gamepad" , description = "each button is\nassigned to a\nunique player."}
-    elseif keyboard_input == 1 then
         return {title = "any key" , description = "characters can be \nassigned to \nany key."}
-    elseif keyboard_input == 2 then
+    elseif keyboard_input == 1 then
         return {title = "strict" , description = "characters are \nassigned to \nspecific keys."}
+    elseif keyboard_input == 2 then
+        return {title = "gamepad" , description = "each button is\nassigned to a\nunique player."}
     end
 end
 
@@ -1967,49 +1958,158 @@ function drawCompleteMenu()
 end
 
 function draw_winners(x, y)
-    local indent = ""
-    local line_height = 10
-    local current_y = y + 16
-    
-    print("players\n", x + 45, current_y, 10)
-    current_y = current_y + line_height
-    leftCounter = 0
-    for i = 1, #win_order do
-        xOffset = leftCounter * 32
-        spr(win_order[i][1], x + 12 + xOffset, current_y)
-        print(tostr(i)..indent.."\n", x + 4 + xOffset, current_y, 10)
-        if leftCounter == 3 then
-            current_y = current_y + line_height
+
+    -- game time
+    local time_str = "time: " .. format_time(game_elapsed_time)
+    print(time_str, x + flr((128 - #time_str * 4) / 2), y + 2, 10)
+
+    -- top 3 revivers
+    print("most revives", x + 40, y + 9, 7)
+    local reviver_xs = {x + 16, x + 56, x + 96}
+    for i = 1, 3 do
+        if revive_order[i] and revive_order[i][2] > 0 then
+            local rx = reviver_xs[i]
+            spr(revive_order[i][1], rx, y + 15)
+            local count_str = tostr(revive_order[i][2])
+            local cx = rx + 4 - (#count_str * 2)
+            print(count_str, cx, y + 24, 10)
         end
-        leftCounter = (leftCounter + 1) % 4
-        --end
     end
-    
-    print("\t\tcontinue in " .. flr(score_timer) .. "\n", x, y + 116, 10)
+
+    -- top 3 survivors
+    print("leaderboard", x + 42, y + 30, 7)
+    local survivor_xs = {x + 16, x + 56, x + 96}
+    for i = 1, 3 do
+        if win_order[i] then
+            local sx = survivor_xs[i]
+            spr(win_order[i][1], sx, y + 36)
+            print(tostr(i) .. ".", sx, y + 45, 7)
+            print(format_time(win_order[i][3]), sx, y + 52, 10)
+        end
+    end
+
+    -- rest (players 4+)
+    if #win_order > 3 then
+        ---print("rest", x + 2, y + 62, 7)
+        local per_row = 13
+        for i = 4, #win_order do
+            local slot = i - 4
+            local col = slot % per_row
+            local row = flr(slot / per_row)
+            local rx = x + 6 + col * 9
+            local ry = y + 68 + row * 8
+            if ry < y + 110 then
+                spr(win_order[i][1], rx, ry)
+            end
+        end
+    end
+
+    -- countdown footer
+    local countdown_str = "continue in " .. flr(score_timer)
+    local cw = #countdown_str * 4
+    print(countdown_str, x + flr((128 - cw) / 2), y + 120, 10)
+
 end
 
+function appendLosersToWinOrder()
+    local lose_order = {}
 
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player and player.enabled == false then
+            add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
+        end
+    end
+
+    local n = #lose_order
+    for i = 1, n - 1 do
+        for j = 1, n - i do
+            local a = lose_order[j]
+            local b = lose_order[j + 1]
+            -- Compare by disabledCount (ascending)
+            -- If disabledCount is the same, compare by totalTimeEnabled (descending)
+            if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
+                lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
+            end
+            
+        end
+    end
+
+    for i = 1, #lose_order do 
+        add(win_order, lose_order[i])    
+    end
+
+end
+
+function initCompleteMenu()
+    -- Compute total game time
+    game_elapsed_time = time() - game_start_time
+
+    -- Finalize totalTimeEnabled for still-enabled players
+    for key, player in pairs(players) do
+        if player.enabled == true then
+            player.totalTimeEnabled = player.totalTimeEnabled + (time() - player.last_enabled_time)
+        end
+    end
+
+    -- Build win_order: ALL players sorted by totalTimeEnabled descending
+    win_order = {}
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player then
+            add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled, player.reviveCount})
+        end
+    end
+    local n = #win_order
+    for i = 1, n - 1 do
+        for j = 1, n - i do
+            if win_order[j][3] < win_order[j+1][3] then
+                win_order[j], win_order[j+1] = win_order[j+1], win_order[j]
+            end
+        end
+    end
+
+    -- Build revive_order: ALL players sorted by reviveCount descending
+    revive_order = {}
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player then
+            add(revive_order, {player.sprite, player.reviveCount})
+        end
+    end
+    local m = #revive_order
+    for i = 1, m - 1 do
+        for j = 1, m - i do
+            if revive_order[j][2] < revive_order[j+1][2] then
+                revive_order[j], revive_order[j+1] = revive_order[j+1], revive_order[j]
+            end
+        end
+    end
+end
 poke(0x5F2D, 0x1) -- enable keyboard input
-local delta_time
-local last_time
-local timeUntilCameraMoves = 1.5
-local timeUntilRestart = 2
-local timer_1 = 0
-local timer_2 = 0 -- input delay when player select starts
-local camera_speed = 15
---local camera_pos_y_offset = 128
-local new_chunk_threshold = 0
-local mouse_x = 0
-local mouse_y = 0
+local delta_time,last_time
+local timeUntilCameraMoves,timeUntilRestart = 1.5,2
+local timer_1,timer_2,new_chunk_threshold,mouse_x,mouse_y = 0,0,0,0,0
 
+function updatePlayerPushedCamera(dt)
+    local lead = getLeadPlayer()
+    local min_advance = camera_x + camera_min_speed * dt
 
+    local target_x
+    if lead ~= nil then
+        target_x = lead.xpos - (128 - camera_push_cells * 8)
+    else
+        target_x = min_advance
+    end
 
-local debug_tile_flags = {}
+    -- never go backward; always apply minimum pressure
+    target_x = max(target_x, min_advance)
+
+    camera_x = camera_x + (target_x - camera_x) * min(camera_ease_speed * dt, 1)
+end
 
 function _init()
-    delta_time = 0
-    last_time = 0
-    timer_1 = 0
+    delta_time,last_time,timer_1 = 0,0,0
     if gameState == gstate.complete or gameState == gstate.gameover then
         gameState = gstate.playerSelect
     else
@@ -2030,7 +2130,7 @@ function switchGameState(state)
     if gameState == gstate.mainMenu then
         camera_x = 0
         camera_y = 0
-        initMenu(startGameFromMainMenu)
+        initMenu(function() switchGameState(gstate.playerSelect) end)
         music(0, 1000, 1)
     elseif gameState == gstate.playerSelect then
         chunk_progress_x = 0
@@ -2047,10 +2147,9 @@ function switchGameState(state)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
         win_order = {}
+        death_icons={}
         timer_2 = .4
-        menuitem(2, "set gamemode", function ()
-            changeGameMode()
-        end)
+        menuitem(2, "set gamemode", changeGameMode)
         score_timer = 15
         actors = {
             [1] = players,
@@ -2062,27 +2161,18 @@ function switchGameState(state)
         music(-1, 1000, 2)
         music(6, 1000, 3)
         setRespawnTimer()
+        game_start_time = time()
     elseif gameState == gstate.complete or gameState == gstate.gameover then
-        
-        gameover_menu_timer = 3
 
+        gameover_menu_timer = 3
         music(0, 2000)
 
-        for key, player in pairs(players) do
-            if player.enabled == true then
-                add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
-            end
-        end
+        initCompleteMenu()
 
-        appendLosersToWinOrder()
     end
 
 
     
-end
-
-startGameFromMainMenu = function ()
-    switchGameState(gstate.playerSelect)
 end
 
 function _update()
@@ -2093,9 +2183,7 @@ function _update()
     if gameState == gstate.mainMenu then
         updateMenu(delta_time)
     elseif gameState == gstate.playerSelect then
-        local complete = false
-
-        complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
+        local complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
 
         if timer_2 > 0 then
             stat(31)
@@ -2119,15 +2207,13 @@ function _update()
 
             if debug_fast_travel then
                 debugUpdateQuickTravel()
-            elseif debug_player_cannon then
-                debugUpdatePlayerCannon()
             end
         else
             if timer_1 < timeUntilCameraMoves then
                 timer_1 += delta_time
             else 
                 
-                camera_x = camera_x + camera_speed * delta_time
+                updatePlayerPushedCamera(delta_time)
                 --printh(chunk_progress_x)
             end
 
@@ -2155,6 +2241,11 @@ function _update()
             update_zombies(delta_time)
             update_respawns()
 
+            for d in all(death_icons) do
+              d[3]-=delta_time
+              if d[3]<=0 then del(death_icons,d) end
+            end
+
             -- cool but it looks like the asteroid are falling
             if new_camera_y_lerp_t < 1 then
                 new_camera_y_lerp_t = (camera_x - (new_chunk_threshold - 128)) / 128
@@ -2174,7 +2265,7 @@ function _update()
 
 
         -- Process key input
-        if keyboard_input ~= 0 then
+        if keyboard_input ~= 2 then
             while stat(30) do
                 keyInput = stat(31)
 
@@ -2216,14 +2307,17 @@ function _draw()
         drawChunks()
         drawUFO()
         draw_respawn_birds()
-        --draw_zombies()
         drawActors(zombies)
         drawActors(players)
         
-    
-        if debug_mode then
-            debug_draw_asteroid_polys()
-            
+        local li=camera_y+112
+        for d in all(death_icons) do
+          local x,y=mid(d[1],camera_x,camera_x+112),mid(d[2],camera_y,camera_y+112)
+          if d[5] then y,li=li,li-16 end
+          spr(d[4],x,y)
+          spr(icon_x_spr,x,y-8)
+          if d[5] then spr(icon_arrow_left_spr,x-8,y)
+          else spr(icon_arrow_spr,x,y+8) end
         end
 
         -- UI
@@ -2256,7 +2350,8 @@ function _draw()
             end
         end
 
-        if (debug_mode) then
+        if debug_mode then
+            debug_draw_asteroid_polys()
             rect(camera_x, camera_y, camera_x + 127, camera_y + 127, 7)
             print(camera_x/8 .. "," .. camera_y/8, camera_x+4, camera_y+4)
             print(camera_x/8+16 .. "," .. camera_y/8+16, camera_x + 128 + 4, camera_y + 128 + 4)
@@ -2264,7 +2359,7 @@ function _draw()
             mouse_x = stat(32) + camera_x
             mouse_y = stat(33) + camera_y
             rect(mouse_x, mouse_y, mouse_x + 2, mouse_y + 2)
-        end       
+        end
 end
 
 function resetGameAfterTimer()
@@ -2285,8 +2380,8 @@ function toggleDebugMode()
     debug_mode = not(debug_mode)
 
     if debug_mode then
-        menuitem(2, "toggle fast travel", function() debugToggleQuickTravel() end)
-        menuitem(3, "toggle pcannon", function() debugTogglePlayerCannon() end)
+        menuitem(2, "toggle fast travel", debugToggleQuickTravel)
+        menuitem(3, "toggle pcannon", debugTogglePlayerCannon)
     else
         menuitem(2)
         menuitem(3)
@@ -2322,70 +2417,4 @@ function debug_controls()
     end
 end
 
-function debugToggleQuickTravel()
-    --debug_mode = true
-    debug_fast_travel = not(debug_fast_travel)
-end
-
-function debugUpdateQuickTravel()
-    for key, player in pairs(players) do
-        if player.enabled == false then
-            player.xpos = camera_x + 56
-            player.ypos = camera_y + 8
-        end
-    end
-end
-
-function debugTogglePlayerCannon()
-    debug_player_cannon = not(debug_player_cannon)
-end
-
-function debugUpdatePlayerCannon()
-
-    if stat(34) == 1 then
-        --printh(flr(mouse_x/8) .. ", " .. flr(mouse_y/8))
-
-        local p = players[keys[key_index]]
-        if p.enabled then enablePlayer(p) end
-        p.xpos = flr(mouse_x)
-        p.ypos = flr(mouse_y)
-
-        p.vx = 100
-        p.vy = 100
-
-    end
-    
-    update_players(camera_x, camera_y, delta_time)
-
-end
-
-function appendLosersToWinOrder()
-    local lose_order = {}
-
-    for _, key in ipairs(keys) do
-        local player = players[key]
-        if player and player.enabled == false then
-            add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
-        end
-    end
-
-    local n = #lose_order
-    for i = 1, n - 1 do
-        for j = 1, n - i do
-            local a = lose_order[j]
-            local b = lose_order[j + 1]
-            -- Compare by disabledCount (ascending)
-            -- If disabledCount is the same, compare by totalTimeEnabled (descending)
-            if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
-                lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
-            end
-            
-        end
-    end
-
-    for i = 1, #lose_order do 
-        add(win_order, lose_order[i])    
-    end
-
-end
 
