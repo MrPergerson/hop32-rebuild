@@ -4,8 +4,6 @@ local MIN_SPEED = 50
 local MAX_SPEED = 65 -- camera speed is 15
 local HOVER_DOWN_SPEED = 30
 local VULTURE_DOWN_SPEED = 10
-local debug = false
-local players_can_release_others = false
 
 function initUFOPool()
     ufos = {}
@@ -144,11 +142,8 @@ function updateUFO(dt)
            attractPlayers(dt)
         end
 
-        local self_new_x = ufo.xpos + ufo.vx * dt
-        local self_new_y = ufo.ypos + ufo.vy * dt
-        
-        ufo.xpos = self_new_x
-        ufo.ypos = self_new_y
+        ufo.xpos += ufo.vx * dt
+        ufo.ypos += ufo.vy * dt
 
     end
     
@@ -165,7 +160,7 @@ function resetUFO(ufo, xpos, ypos)
 end
 
 function hideCapturedActors(ufo)
-    for key, captured in pairs(ufo.capture_tracker) do
+    for _, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = -8
         captured.player.ypos = -8
     end
@@ -175,7 +170,7 @@ function capturePlayer(player)
 
     local ufo = ufos[1]
 
-    if ufo.capture_tracker[player.id] == nil then
+    if not ufo.capture_tracker[player.id] then
        
         ufo.capture_tracker[player.id] = {
             player = player,
@@ -194,7 +189,7 @@ function attractPlayers(dt)
     local ufo = ufos[1]
     --local captured = ufo.capture_tracker[player.id] 
 
-    for key, captured in pairs(ufo.capture_tracker) do
+    for _, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = captured.player.xpos + (ufo.xpos - captured.player.xpos) * min(captured.t,.2)
         captured.player.ypos = captured.player.ypos + ((ufo.ypos+8) - captured.player.ypos) * min(captured.t,.2)
 
@@ -246,26 +241,23 @@ function drawUFO()
 end
 
 function drawHearts(heart_count)
-    local heart_size = 10
     local rows = ceil((heart_count * 10) / 128)
     local hearts_left_to_draw = heart_count
 
-    for i = 1, rows, 1 do
+    for i = 1, rows do
 
         local xpos = camera_x + 4
         local ypos = camera_y + 4 + (10 *(i-1))
-        local offset = 10
         local hearts = 12
 
         if i == rows then
             hearts = hearts_left_to_draw
-            --local xpos = camera_x
         end
 
-        for j = 1, hearts, 1 do
+        for j = 1, hearts do
             spr(8, xpos, ypos)
             hearts_left_to_draw -= 1
-            xpos += offset
+            xpos += 10
         end
         
     end

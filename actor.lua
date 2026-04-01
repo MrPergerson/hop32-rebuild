@@ -61,6 +61,8 @@ function createActor(actor_data, id)
         ai_enabled = false,
         state = 1,
         totalTimeEnabled = 0,
+        reviveCount = 0,
+        last_enabled_time = 0,
         won = false,
         timer_1 = 0,
         capture_tracker = {},
@@ -105,6 +107,7 @@ function enableActor(actor_table, id, xpos, ypos)
     end
 
     actor.enabled = true
+    actor.last_enabled_time = time()
     actor.ai_enabled = true
     actor.inputDisabled = false
     actor.state = 1
@@ -119,7 +122,7 @@ function disableActor(actor)
     actor.enabled = false
     actor.ai_enabled = false
     actor.disabledCount = actor.disabledCount + 1 -- player
-    actor.totalTimeEnabled = actor.totalTimeEnabled + (time() - actor.totalTimeEnabled)  -- player
+    actor.totalTimeEnabled = actor.totalTimeEnabled + (time() - actor.last_enabled_time)  -- player
     --actor.xpos = -8
     --actor.ypos = -8
     actor.vx = 0

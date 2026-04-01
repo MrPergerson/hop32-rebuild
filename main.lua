@@ -13,10 +13,7 @@ local mouse_y = 0
 
 
 
-local debug_tile_flags = {}
-
 function _init()
-    delta_time = 0
     last_time = 0
     timer_1 = 0
     if gameState == gstate.complete or gameState == gstate.gameover then
@@ -57,9 +54,7 @@ function switchGameState(state)
         initPlayers()
         win_order = {}
         timer_2 = .4
-        menuitem(2, "set gamemode", function ()
-            changeGameMode()
-        end)
+        menuitem(2, "set gamemode", changeGameMode)
         score_timer = 15
         actors = {
             [1] = players,
@@ -71,19 +66,13 @@ function switchGameState(state)
         music(-1, 1000, 2)
         music(6, 1000, 3)
         setRespawnTimer()
+        game_start_time = time()
     elseif gameState == gstate.complete or gameState == gstate.gameover then
-        
-        gameover_menu_timer = 3
 
+        gameover_menu_timer = 3
         music(0, 2000)
 
-        for key, player in pairs(players) do
-            if player.enabled == true then
-                add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
-            end
-        end
-
-        appendLosersToWinOrder()
+        initCompleteMenu()
     end
 
 
@@ -102,9 +91,7 @@ function _update()
     if gameState == gstate.mainMenu then
         updateMenu(delta_time)
     elseif gameState == gstate.playerSelect then
-        local complete = false
-
-        complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
+        local complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
 
         if timer_2 > 0 then
             stat(31)
@@ -225,16 +212,10 @@ function _draw()
         drawChunks()
         drawUFO()
         draw_respawn_birds()
-        --draw_zombies()
         drawActors(zombies)
         drawActors(players)
         
     
-        if debug_mode then
-            debug_draw_asteroid_polys()
-            
-        end
-
         -- UI
         if gameState == gstate.mainMenu then
             drawMenu()
@@ -265,7 +246,8 @@ function _draw()
             end
         end
 
-        if (debug_mode) then
+        if debug_mode then
+            debug_draw_asteroid_polys()
             rect(camera_x, camera_y, camera_x + 127, camera_y + 127, 7)
             print(camera_x/8 .. "," .. camera_y/8, camera_x+4, camera_y+4)
             print(camera_x/8+16 .. "," .. camera_y/8+16, camera_x + 128 + 4, camera_y + 128 + 4)
@@ -291,16 +273,7 @@ function resetGameAfterTimer()
 end
 
 function toggleDebugMode()
-    debug_mode = not(debug_mode)
-
-    if debug_mode then
-        menuitem(2, "toggle fast travel", function() debugToggleQuickTravel() end)
-        menuitem(3, "toggle pcannon", function() debugTogglePlayerCannon() end)
-    else
-        menuitem(2)
-        menuitem(3)
-    end
-
+    debug_mode = not debug_mode
 end
 
 function debug_controls()
@@ -331,70 +304,5 @@ function debug_controls()
     end
 end
 
-function debugToggleQuickTravel()
-    --debug_mode = true
-    debug_fast_travel = not(debug_fast_travel)
-end
 
-function debugUpdateQuickTravel()
-    for key, player in pairs(players) do
-        if player.enabled == false then
-            player.xpos = camera_x + 56
-            player.ypos = camera_y + 8
-        end
-    end
-end
-
-function debugTogglePlayerCannon()
-    debug_player_cannon = not(debug_player_cannon)
-end
-
-function debugUpdatePlayerCannon()
-
-    if stat(34) == 1 then
-        --printh(flr(mouse_x/8) .. ", " .. flr(mouse_y/8))
-
-        local p = players[keys[key_index]]
-        if p.enabled then enablePlayer(p) end
-        p.xpos = flr(mouse_x)
-        p.ypos = flr(mouse_y)
-
-        p.vx = 100
-        p.vy = 100
-
-    end
-    
-    update_players(camera_x, camera_y, delta_time)
-
-end
-
-function appendLosersToWinOrder()
-    local lose_order = {}
-
-    for _, key in ipairs(keys) do
-        local player = players[key]
-        if player and player.enabled == false then
-            add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
-        end
-    end
-
-    local n = #lose_order
-    for i = 1, n - 1 do
-        for j = 1, n - i do
-            local a = lose_order[j]
-            local b = lose_order[j + 1]
-            -- Compare by disabledCount (ascending)
-            -- If disabledCount is the same, compare by totalTimeEnabled (descending)
-            if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
-                lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
-            end
-            
-        end
-    end
-
-    for i = 1, #lose_order do 
-        add(win_order, lose_order[i])    
-    end
-
-end
 

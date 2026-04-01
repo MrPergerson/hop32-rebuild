@@ -10,17 +10,17 @@ local startGameFunction = nil
 
 local menus = {
     [menu_option.main] = {
-            [1] = {text = "start", active = false, color = 6, action = function() changeMenu(menu_option.settings) end},
-            [2] = {text = "credits", active = false, color = 6, action = function() changeMenu(menu_option.credits) end}
+            [1] = {text = "start", color = 6, action = function() changeMenu(menu_option.settings) end},
+            [2] = {text = "credits", color = 6, action = function() changeMenu(menu_option.credits) end}
     },
-    [menu_option.settings] = { 
-        [1] = {text = "play", active = false, color = 6, action = function() startGameFunction() end},
-        [2] = {text = "gamemode", active = false, color = 6, action = function() changeGameMode() end},
-        [3] = {text = "input mode", active = false, color = 6, action = function() changeInputMode() end},
-        [4] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end}
+    [menu_option.settings] = {
+        [1] = {text = "play", color = 6, action = function() startGameFunction() end},
+        [2] = {text = "gamemode", color = 6, action = function() changeGameMode() end},
+        [3] = {text = "input mode", color = 6, action = function() changeInputMode() end},
+        [4] = {text = "back", color = 6, action = function() changeMenu(menu_option.main) end}
     },
-    [menu_option.credits] = { 
-        [1] = {text = "back", active = false, color = 6, action = function() changeMenu(menu_option.main) end},
+    [menu_option.credits] = {
+        [1] = {text = "back", color = 6, action = function() changeMenu(menu_option.main) end},
     }
 }
 
@@ -71,7 +71,6 @@ function drawMenu()
     if active_menu == menu_option.main then
         print("\^w\^thop32", 46,16, 7)
     elseif active_menu == menu_option.settings then
-        x_pos = 16
         print("\^w\^thop32", 46,16, 7)
         if active_option == 2 then
             gmodetext = showGameModeText()
@@ -106,15 +105,9 @@ end
 
 function changeOption(option, previous_menu)
 
-    local previous_m = active_menu
-    if previous_menu ~= nil then
-        previous_m = previous_menu
-    end
+    local previous_m = previous_menu or active_menu
 
-    menus[previous_m][active_option].active = false
     menus[previous_m][active_option].color = 6
-
-    menus[active_menu][option].active = true
     menus[active_menu][option].color = 7
     active_option = option
 end
@@ -122,24 +115,12 @@ end
 
 function changeMenu(menu)
     local previous_menu = active_menu
-    if menu == menu_option.main then      
-       active_menu = menu_option.main     
-    elseif menu == menu_option.settings then
-        active_menu = menu_option.settings
-    elseif menu == menu_option.credits then
-        active_menu = menu_option.credits
-    end
-
+    active_menu = menu
     changeOption(1, previous_menu)
 end
 
 function changeGameMode()
-    local nextMode = gameMode + 1
-    if nextMode > 1 then
-        nextMode = 0
-    end
-
-    gameMode = nextMode
+    gameMode = (gameMode + 1) % 2
 
     if gameMode == gstate.playerSelect or gameMode == gstate.game then
         gamemode_timer = 3
@@ -147,12 +128,7 @@ function changeGameMode()
 end
 
 function changeInputMode()
-    local nextMode = keyboard_input + 1
-    if nextMode > 2 then
-        nextMode = 0
-    end
-
-    keyboard_input = nextMode
+    keyboard_input = (keyboard_input + 1) % 3
 end
 
 
@@ -194,24 +170,131 @@ function drawCompleteMenu()
 end
 
 function draw_winners(x, y)
-    local indent = ""
-    local line_height = 10
-    local current_y = y + 16
-    
-    print("players\n", x + 45, current_y, 10)
-    current_y = current_y + line_height
-    leftCounter = 0
-    for i = 1, #win_order do
-        xOffset = leftCounter * 32
-        spr(win_order[i][1], x + 12 + xOffset, current_y)
-        print(tostr(i)..indent.."\n", x + 4 + xOffset, current_y, 10)
-        if leftCounter == 3 then
-            current_y = current_y + line_height
+
+    -- game time
+    local time_str = "time: " .. format_time(game_elapsed_time)
+    print(time_str, x + flr((128 - #time_str * 4) / 2), y + 2, 10)
+
+    -- top 3 revivers
+    print("most revives", x + 40, y + 9, 7)
+    local reviver_xs = {x + 16, x + 56, x + 96}
+    for i = 1, 3 do
+        if revive_order[i] and revive_order[i][2] > 0 then
+            local rx = reviver_xs[i]
+            spr(revive_order[i][1], rx, y + 15)
+            local count_str = tostr(revive_order[i][2])
+            local cx = rx + 4 - (#count_str * 2)
+            print(count_str, cx, y + 24, 10)
         end
-        leftCounter = (leftCounter + 1) % 4
-        --end
     end
-    
-    print("\t\tcontinue in " .. flr(score_timer) .. "\n", x, y + 116, 10)
+
+    -- top 3 survivors
+    print("leaderboard", x + 42, y + 30, 7)
+    local survivor_xs = {x + 16, x + 56, x + 96}
+    for i = 1, 3 do
+        if win_order[i] then
+            local sx = survivor_xs[i]
+            spr(win_order[i][1], sx, y + 36)
+            print(tostr(i) .. ".", sx, y + 45, 7)
+            print(format_time(win_order[i][3]), sx, y + 52, 10)
+        end
+    end
+
+    -- rest (players 4+)
+    if #win_order > 3 then
+        ---print("rest", x + 2, y + 62, 7)
+        local per_row = 13
+        for i = 4, #win_order do
+            local slot = i - 4
+            local col = slot % per_row
+            local row = flr(slot / per_row)
+            local rx = x + 6 + col * 9
+            local ry = y + 68 + row * 8
+            if ry < y + 110 then
+                spr(win_order[i][1], rx, ry)
+            end
+        end
+    end
+
+    -- countdown footer
+    local countdown_str = "continue in " .. flr(score_timer)
+    local cw = #countdown_str * 4
+    print(countdown_str, x + flr((128 - cw) / 2), y + 120, 10)
+
 end
 
+function appendLosersToWinOrder()
+    local lose_order = {}
+
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player and player.enabled == false then
+            add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
+        end
+    end
+
+    local n = #lose_order
+    for i = 1, n - 1 do
+        for j = 1, n - i do
+            local a = lose_order[j]
+            local b = lose_order[j + 1]
+            -- Compare by disabledCount (ascending)
+            -- If disabledCount is the same, compare by totalTimeEnabled (descending)
+            if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
+                lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
+            end
+            
+        end
+    end
+
+    for i = 1, #lose_order do 
+        add(win_order, lose_order[i])    
+    end
+
+end
+
+function initCompleteMenu()
+    -- Compute total game time
+    game_elapsed_time = time() - game_start_time
+
+    -- Finalize totalTimeEnabled for still-enabled players
+    for key, player in pairs(players) do
+        if player.enabled == true then
+            player.totalTimeEnabled = player.totalTimeEnabled + (time() - player.last_enabled_time)
+        end
+    end
+
+    -- Build win_order: ALL players sorted by totalTimeEnabled descending
+    win_order = {}
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player then
+            add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled, player.reviveCount})
+        end
+    end
+    local n = #win_order
+    for i = 1, n - 1 do
+        for j = 1, n - i do
+            if win_order[j][3] < win_order[j+1][3] then
+                win_order[j], win_order[j+1] = win_order[j+1], win_order[j]
+            end
+        end
+    end
+
+    -- Build revive_order: ALL players sorted by reviveCount descending
+    revive_order = {}
+    for _, key in ipairs(keys) do
+        local player = players[key]
+        if player then
+            add(revive_order, {player.sprite, player.reviveCount})
+        end
+    end
+    local m = #revive_order
+    for i = 1, m - 1 do
+        for j = 1, m - i do
+            if revive_order[j][2] < revive_order[j+1][2] then
+                revive_order[j], revive_order[j+1] = revive_order[j+1], revive_order[j]
+            end
+        end
+    end
+end
