@@ -68,3 +68,11 @@ function lerp(a, b, t)
     return a + (b - a) * t
 end
 
+function format_time(seconds)
+    local m = flr(seconds / 60)
+    local s = flr(seconds % 60)
+    local ss = tostr(s)
+    if s < 10 then ss = "0" .. ss end
+    return m .. ":" .. ss
+end
+

@@ -198,6 +198,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                     enableActor(players, respawn.playerKey, player.xpos, player.ypos) -- update this
                     setDisabledPlayerCount(disabledPlayerCount - 1)
                     del(activeBirdList, respawn)
+                    player.reviveCount = player.reviveCount + 1
                     break;
                 end
             end   

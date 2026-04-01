@@ -45,6 +45,9 @@ gameover_menu_timer = 3
 
 -- players
 win_order = {}
+revive_order = {}
+game_start_time = 0
+game_elapsed_time = 0
 playerCount = 0
 disabledPlayerCount = 0
 keys = {}
