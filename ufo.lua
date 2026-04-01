@@ -213,7 +213,11 @@ function drawUFO()
 
     if ufo and ufo.enabled then
         
-        spr(ufo.sprite, ufo.xpos, ufo.ypos, 2, 2)
+        if ufo.type ~= "ufo" then
+            spr(ufo.sprite, ufo.xpos, ufo.ypos, 2, 2)
+        else
+            spr(ufo.sprite, ufo.xpos, ufo.ypos, 1, 1)
+        end
 
         if  ufo.state == 3 or ufo.state == 4 or (ufo.type == "vulture" and ufo.state == 2) then
             
