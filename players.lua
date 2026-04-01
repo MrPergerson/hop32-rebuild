@@ -40,6 +40,7 @@ end
 
 function initPlayers()
     players = {}
+    keys = {}
     playerCount = 0
     playerWonCount = 0
     init_respawn_birds()
