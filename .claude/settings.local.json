@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(./hop32.p8)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(grep -E \"\\\\.lua$|^d\")"
     ]
   }
 }

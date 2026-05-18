@@ -2315,10 +2315,10 @@ function _draw()
         for d in all(death_icons) do
           local x,y=mid(d[1],camera_x,camera_x+112),mid(d[2],camera_y,camera_y+112)
           if d[5] then y,li=li,li-16 end
-          spr(d[4],x,y)
-          spr(icon_x_spr,x,y-8)
-          if d[5] then spr(icon_arrow_left_spr,x-8,y)
-          else spr(icon_arrow_spr,x,y+8) end
+          spr(d[4],x,y-8)
+          spr(icon_x_spr,x,y-16)
+          if d[5] then spr(icon_arrow_left_spr,x-8,y-8)
+          else spr(icon_arrow_spr,x,y) end
         end
 
         -- UI

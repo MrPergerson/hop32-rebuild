@@ -129,7 +129,7 @@ end if(i>=d)x+=1d+=128nU(x)
 if k~=2do while stat(30)do nw=stat(31)if(nw=="れ")e7()
 nb(nw)end else for n=0,5do if(btnp(n,0))nb(n)
 end end elseif h==c.gameover do n5(n)nk(i,a,n)n3(n)nx()F=P(F,n)elseif h==c.complete do nx()F=P(F,n)end end function _draw()cls()camera(i,a)map(0,0,0,a,128,16)map(0,0,1024,a,128,16)map(0,0,2048,a,128,16)map(0,0,3072,a,128,16)nX()el()ea()n6(w)n6(r)local d=a+112for n in all(G)do local o,e=mid(n[1],i,i+112),mid(n[2],a,a+112)if(n[5])e,d=d,d-16
-spr(n[4],o,e)spr(nA,o,e-8)if(n[5])spr(nC,o-8,e)else spr(nB,o,e+8)
+spr(n[4],o,e-8)spr(nA,o,e-16)if(n[5])spr(nC,o-8,e-8)else spr(nB,o,e)
 end if h==c.mainMenu do e8()elseif h==c.playerSelect do rectfill(i,0,i+128,a+5,a)?"press any button to join",i+4,a,7
 if(s>0)?"starting in "..flr(B),i+4,a+8,7
 ?"⁶w⁶thop"..s,i+46,a+56,7
