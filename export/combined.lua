@@ -1004,6 +1004,7 @@ function enableActor(actor_table, id, xpos, ypos)
     actor.ypos = ypos
     actor.xpos = xpos
     actor.bounce_charge = 0
+    actor.jump_gravity = GRAVITY
     return actor
 end
 
@@ -1076,6 +1077,7 @@ end
 function checkActorOutOfBounds(actor)
     return actor.xpos + 8 < camera_x - 16
         or actor.ypos > camera_y + 200
+        or actor.ypos < camera_y - 64
 end
 
 function drawActors(actor_table)
@@ -1752,6 +1754,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                             final_boss_health -= 1
                         end
                         player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
+                        player.vx = 0
                         player.vy = -100
                     end       
                 end

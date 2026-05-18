@@ -111,6 +111,7 @@ function enableActor(actor_table, id, xpos, ypos)
     actor.ypos = ypos
     actor.xpos = xpos
     actor.bounce_charge = 0
+    actor.jump_gravity = GRAVITY
     return actor
 end
 
@@ -183,6 +184,7 @@ end
 function checkActorOutOfBounds(actor)
     return actor.xpos + 8 < camera_x - 16
         or actor.ypos > camera_y + 200
+        or actor.ypos < camera_y - 64
 end
 
 function drawActors(actor_table)
