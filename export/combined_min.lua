@@ -78,7 +78,7 @@ n.xpos=min(d.x,t+128-n.width)n.ypos=d.y if(ns(n))ng(n,n.xpos+8<i)n.xpos=-8n.ypos
 for d,o in ipairs(e)do if(T(n,o.bird))q(r,o.playerKey,n.xpos,n.ypos)E(D-1)del(e,o)n.reviveCount=n.reviveCount+1break
 end for o,e in ipairs(w)do if(T(n,e))ng(n)n.xpos=-8n.ypos=-8sfx(nq)break
 end for d,e in ipairs(u)do if T(n,e)do if n_(n,e)do sfx(nc)if(e.type=="king")O-=1
-n.ypos=e.ypos-8n.vx=0n.vy=-100end end if((e.state==3or e.type=="vulture"and e.state==2)and T(n,e.tracker_beam))ed(n,o)
+n.ypos=e.ypos-8n.vx=50n.vy=-100end end if((e.state==3or e.type=="vulture"and e.state==2)and T(n,e.tracker_beam))ed(n,o)
 end end end end function nb(e)local n=r[e]if not(n==nil)and not n.inputDisabled and n.enabled do n2(n)elseif n==nil and j==L.freeplay and s<32do nm(i+64,a,e)np()end end function np()local n=Q(10,1,s/32)nn=nE(n)end local e,o={main=1,settings=2,credits=3},nil local d,n,l={[e.main]={[1]={text="start",color=6,action=function()U(e.settings)end},[2]={text="credits",color=6,action=function()U(e.credits)end}},[e.settings]={[1]={text="play",color=6,action=function()o()end},[2]={text="gamemode",color=6,action=function()ny()end},[3]={text="input mode",color=6,action=function()eh()end},[4]={text="back",color=6,action=function()U(e.main)end}},[e.credits]={[1]={text="back",color=6,action=function()U(e.main)end}}},e.main,1function eu(d)n=e.main V(1)o=d end function e2(e)if(btnp(5))d[n][l].action()
 if btnp(2)do local e=l-1if(e<1)e=#d[n]
 V(e)end if btnp(3)do local e=l+1if(e>#d[n])e=1
@@ -116,7 +116,7 @@ end end m={}for e,n in ipairs(C)do local n=r[n]if(n)add(m,{n.sprite,n.reviveCoun
 end local n=#m for e=1,n-1do for n=1,n-e do if(m[n][2]<m[n+1][2])m[n],m[n+1]=m[n+1],m[n]
 end end end poke(24365,1)local e,o,d,l,t,n,f=0,0,0,0,0function e5(e)local o,d,n=ec(),i+nF*e if(o~=nil)n=o.xpos-(128-nj*8)else n=d
 n=max(n,d)i=i+(n-i)*min(nz*e,1)end function _init()n,f,e=0,0,0if(h==c.complete or h==c.gameover)h=c.playerSelect else h=c.mainMenu
-K(h)end function nv()cls()_init()end function K(n)h=n if h==c.mainMenu do i=0a=0eu(function()K(c.playerSelect)end)music(0,1000,1)elseif h==c.playerSelect do x=0na=0d=(x+1)*128i=x*16*8a=na*16*8W=false ee()en(5)n7()nK()nT(x)ez=X*8-128+80e0()g={}G,o={},.4menuitem(2,"set gamemode",ny)N=15nD={[1]=r,[2]=w}music(-1,1000,1)music(4,1000,2)elseif h==c.game do music(-1,1000,2)music(6,1000,3)np()nt=time()elseif h==c.complete or h==c.gameover do F=3music(0,2000)e4()end end function _update()local l=time()n,f=l-f,l if h==c.mainMenu do e2(n)elseif h==c.playerSelect do local e=er(i,a,n,o==0)if(o>0)stat(31)
+K(h)end function nv()cls()_init()end function K(n)h=n if h==c.mainMenu do i=0a=0eu(function()K(c.playerSelect)end)music(0,1000,1)elseif h==c.playerSelect do x=4na=0d=(x+1)*128i=x*16*8a=na*16*8W=false ee()en(5)n7()nK()nT(x)ez=X*8-128+80e0()g={}G,o={},.4menuitem(2,"set gamemode",ny)N=15nD={[1]=r,[2]=w}music(-1,1000,1)music(4,1000,2)elseif h==c.game do music(-1,1000,2)music(6,1000,3)np()nt=time()elseif h==c.complete or h==c.gameover do F=3music(0,2000)e4()end end function _update()local l=time()n,f=l-f,l if h==c.mainMenu do e2(n)elseif h==c.playerSelect do local e=er(i,a,n,o==0)if(o>0)stat(31)
 o=max(0,o-n)if(s>0)B=max(0,B-n)if(B==0)e=true
 if(e)K(c.game)
 elseif h==c.game do if y do e9()if(no)eF()

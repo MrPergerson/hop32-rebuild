@@ -254,7 +254,8 @@ function drawRayCast(point, direction, color)
     line(point.x, point.y, point.x + direction.x * 100, point.y + direction.y * 100, color)
 
 end
-player_sprite_index = { ["a"] = 33,
+player_sprite_index = { 
+    ["a"] = 33,
     ["b"] = 34, 
     ["c"] = 35, 
     ["d"] = 36,  
@@ -1754,7 +1755,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                             final_boss_health -= 1
                         end
                         player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
-                        player.vx = 0
+                        player.vx = 50
                         player.vy = -100
                     end       
                 end
@@ -2137,7 +2138,7 @@ function switchGameState(state)
         initMenu(function() switchGameState(gstate.playerSelect) end)
         music(0, 1000, 1)
     elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 0
+        chunk_progress_x = 4
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8

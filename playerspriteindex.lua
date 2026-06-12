@@ -1,4 +1,5 @@
-player_sprite_index = { ["a"] = 33,
+player_sprite_index = { 
+    ["a"] = 33,
     ["b"] = 34, 
     ["c"] = 35, 
     ["d"] = 36,  

@@ -224,7 +224,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                             final_boss_health -= 1
                         end
                         player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
-                        player.vx = 0
+                        player.vx = 50
                         player.vy = -100
                     end       
                 end
