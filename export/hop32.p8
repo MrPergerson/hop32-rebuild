@@ -2,28 +2,28 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
 y=false no=false n=false o=0eg=0k=0c={mainMenu=0,playerSelect=1,game=2,gameover=3,complete=4}h=c.mainMenu L={tournament=0,freeplay=1}j=L.tournament i=0a=0nd=0nl=0M=1em=0nj=7nz=1.5nF=8function ek(n)nd=a nl=n M=0end B=5.9z=0N=15F=3g={}m={}nt=0nf=0s=0D=0C={}eb=1function E(n)if(n>s)n=s
-D=n end u={}w={}r={}nD={}ni={GREEN_LANDS=0,CLOUD_KINGDOM=10}n1=-1x=0na=0W=false O=4b={NONE=0,GRASS=2,GROUND=3,WALL=4,SAND_1=93,SAND_2=94,SAND_3=95,MOUNTAIN_1=96,MOUNTAIN_2=97,MOUNTAIN_3=99,SNOW_1=99,SNOW_2=100,SNOW_3=101,ORELAND_1=102,ORELAND_2=103,ORELAND_3=104,HELL_1=105,HELL_2=106,HELL_3=107,CLOUD_1=89,CLOUD_2=90,CLOUD_3=91,CLOUD_4=92,GLITCH=88}f={GRASS=48,DESERT=96,MOUNTAIN=144,SNOW=192,CITY=240,VOID=336,KINGDOM=384}nc=23nq=24G={}nA=128nB=129nC=130function e(n,e)for o,n in ipairs(n)do if(n==e)return true
+D=n end u={}w={}r={}nD={}n1={GREEN_LANDS=0,CLOUD_KINGDOM=10}ni=-1x=0na=0W=false O=4b={NONE=0,GRASS=96,GROUND=97,SAND_1=98,SAND_2=99,MOUNTAIN_1=100,MOUNTAIN_2=101,SNOW_1=102,ORELAND_1=104,ORELAND_2=105,ORELAND_3=106,GLITCH=107,CLOUD_1=108}f={GRASS=48,DESERT=96,MOUNTAIN=144,SNOW=192,CITY=240,VOID=336,KINGDOM=384}nc=23nq=24G={}nA=128nB=129nC=130function e(n,e)for o,n in ipairs(n)do if(n==e)return true
 end return false end v={}v.__index=v function v.new()local n=setmetatable({items={},head=1,tail=1},v)return n end function v:enqueue_unique(n)if(not e(self.items,n))self.items[self.tail]=n self.tail=self.tail+1
 end function v:dequeue()if(self:isempty())return nil
 local n=self.items[self.head]self.items[self.head]=nil self.head=self.head+1return n end function v:isempty()return self.head==self.tail end function nE(o)local n=t()return function()local e=t()if(e-n>=o)n=e return true
 return false end end function P(n,e)return max(n-e,0)end function Q(n,e,o)return n+(e-n)*o end function n0(n)local o,e=flr(n/60),flr(n%60)local n=tostr(e)if(e<10)n="0"..n
 return o..":"..n end function R(n,t,d)local l=0for e=1,#n do local o=e+1if(o>#n)o=1
 if(d<n[e].y~=(d<n[o].y)and t<n[e].x+(d-n[e].y)/(n[o].y-n[e].y)*(n[o].x-n[e].x))l+=1
-end return not(l%2==0)end function nG(n,e,o,d)local l,t,f,i=n+rnd(o),n+rnd(o),e+rnd(d),e+rnd(d)return{{x=l,y=e},{x=n+o,y=i},{x=t,y=e+d},{x=n,y=f}}end function l(n)line()for e=1,#n do line(n[e].x,n[e].y,11)end line(n[1].x,n[1].y,11)end function ep(n,e,o)line()line(n.x,n.y,n.x+e.x*100,n.y+e.y*100,o)end nH={["a"]=33,["b"]=34,["c"]=35,["d"]=36,["e"]=37,["f"]=38,["g"]=39,["h"]=40,["i"]=41,["j"]=42,["k"]=43,["l"]=26,["m"]=27,["n"]=22,["o"]=20,["q"]=48,["r"]=49,["s"]=50,["t"]=51,["u"]=52,["v"]=53,["w"]=54,["x"]=55,["y"]=56,["z"]=57,["1"]=58,["2"]=59,["3"]=27,["4"]=24,["5"]=23,["6"]=21,["7"]=64,["8"]=65}poke(24365,1)ey={}nI=48d=16X=0H=32local o,e=128,0Y={}nJ=11function nK()X=f.VOID e=flr(rnd(128))end function nL(n)local e={x=n,y=0,tiles={},surface_tiles={}}for n=n,n+d-1do e.tiles[n]={}for o=0,H-1do if n<f.GRASS do e.tiles[n][o]={x=n,y=o,sprite=b.GROUND}elseif n<f.DESERT do e.tiles[n][o]={x=n,y=o,sprite=b.SAND_1}elseif n<f.MOUNTAIN do e.tiles[n][o]={x=n,y=o,sprite=b.MOUNTAIN_2}elseif n<f.SNOW do e.tiles[n][o]={x=n,y=o,sprite=b.SNOW_2}elseif n<f.CITY do e.tiles[n][o]={x=n,y=o,sprite=b.ORELAND_1}elseif n<f.VOID do e.tiles[n][o]={x=n,y=o,sprite=b.HELL_2}else e.tiles[n][o]={x=n,y=o,sprite=b.GROUND}end end end for n=n,n+d-1do for o=0,H-1do local d=nM(n)+0if(o-nJ<d)e.tiles[n][o].sprite=b.NONE
+end return not(l%2==0)end function nG(n,e,o,d)local l,t,f,i=n+rnd(o),n+rnd(o),e+rnd(d),e+rnd(d)return{{x=l,y=e},{x=n+o,y=i},{x=t,y=e+d},{x=n,y=f}}end function l(n)line()for e=1,#n do line(n[e].x,n[e].y,11)end line(n[1].x,n[1].y,11)end function ep(n,e,o)line()line(n.x,n.y,n.x+e.x*100,n.y+e.y*100,o)end nH={["a"]=1,["b"]=2,["c"]=3,["d"]=4,["e"]=5,["f"]=6,["g"]=7,["h"]=8,["i"]=9,["j"]=10,["k"]=11,["l"]=26,["m"]=25,["n"]=28,["o"]=29,["q"]=12,["r"]=13,["s"]=14,["t"]=15,["u"]=16,["v"]=17,["w"]=18,["x"]=19,["y"]=20,["z"]=21,["1"]=22,["2"]=23,["3"]=27,["4"]=24,["5"]=30,["6"]=31,["7"]=32}poke(24365,1)ey={}nI=48d=16X=0H=32local o,e=128,0Y={}nJ=11function nK()X=f.VOID e=flr(rnd(128))end function nL(n)local e={x=n,y=0,tiles={},surface_tiles={}}for n=n,n+d-1do e.tiles[n]={}for o=0,H-1do if n<f.GRASS do e.tiles[n][o]={x=n,y=o,sprite=b.GROUND}elseif n<f.DESERT do e.tiles[n][o]={x=n,y=o,sprite=b.SAND_1}elseif n<f.MOUNTAIN do e.tiles[n][o]={x=n,y=o,sprite=b.MOUNTAIN_2}elseif n<f.SNOW do e.tiles[n][o]={x=n,y=o,sprite=b.SNOW_1}elseif n<f.CITY do e.tiles[n][o]={x=n,y=o,sprite=b.ORELAND_1}elseif n<f.VOID do e.tiles[n][o]={x=n,y=o,sprite=b.GLITCH}else e.tiles[n][o]={x=n,y=o,sprite=b.GROUND}end end end for n=n,n+d-1do for o=0,H-1do local d=nM(n)+0if(o-nJ<d)e.tiles[n][o].sprite=b.NONE
 end end if n==x*16and h==c.playerSelect do else if(n>0and n<X-nI and rnd(1)>=.5)local o=flr(rnd(d-2-1))local n=n+o+1for n=n,n+2,1do for o=0,H-1,1do e.tiles[n][o].sprite=b.NONE end end
 end for n=n,n+d-1do for o=1,H-1do local d,o=e.tiles[n][o-1],e.tiles[n][o]if(d.sprite==b.NONE and o.sprite~=b.NONE)add(e.surface_tiles,o)if n<f.GRASS do o.sprite=b.GRASS elseif n<f.DESERT do elseif n<f.MOUNTAIN do o.sprite=b.MOUNTAIN_1 elseif n<f.SNOW do end
 end end return e end function nN(e,o)local n={x=e,y=o,tiles={},surface_tiles={}}for e=e,e+15do n.tiles[e]={}for o=o,o+15do n.tiles[e][o]={x=e,y=o,sprite=b.NONE}end end local l,t,d=0,0,true for f=e,e+15do if(l==4)d,l=not d,0
 l+=1t=flr(rnd(4))-2for e=o,o+15do if d and e==10+t do n.tiles[f][e].sprite=b.ORELAND_3 elseif d and e>9+t do n.tiles[f][e].sprite=b.ORELAND_1 end if(e>14)n.tiles[f][e].sprite=b.ORELAND_2
 end end for e=e,e+15do for o=o+1,o+15do local d,e=n.tiles[e][o-1],n.tiles[e][o]if(d.sprite==b.NONE and e.sprite~=b.NONE)add(n.surface_tiles,e)
 end end return n end function nO(n,e,l)local o={x=n,y=e,tiles={},surface_tiles={}}for n=n,n+15do o.tiles[n]={}for e=e,e+15do o.tiles[n][e]={x=n,y=e,sprite=b.NONE}end end local d,l=0,l for t=1,3do local f=d d=d+4+flr(rnd(2))local d,i,a=flr(rnd(8))+7,flr(rnd(2)),flr(rnd(2))nP(l,n+f+i,e+d+a,n,e,o.tiles)if(t&2==0)l=max(3,l-1)
-end nr(o,n,e,88)return o end function nQ(n,e)local o={x=n,y=e,tiles={},surface_tiles={}}for n=n,n+15do o.tiles[n]={}for e=e,e+15do o.tiles[n][e]={x=n,y=e,sprite=b.CLOUD_1}end end for n=n,n+15do for e=e,e+15do if(e<sin((n-1)/8)+13and e>sin((n-5)/8)+2)o.tiles[n][e].sprite=b.NONE
+end nr(o,n,e,b.GLITCH)return o end function nQ(n,e)local o={x=n,y=e,tiles={},surface_tiles={}}for n=n,n+15do o.tiles[n]={}for e=e,e+15do o.tiles[n][e]={x=n,y=e,sprite=b.CLOUD_1}end end for n=n,n+15do for e=e,e+15do if(e<sin((n-1)/8)+13and e>sin((n-5)/8)+2)o.tiles[n][e].sprite=b.NONE
 end end nr(o,n,e,-1)return o end function nP(o,n,e,t,l,d)n,e=min(n,t+14-o),min(e,l+14-o+1)local l=nG(n*8,e*8,o*8,o*8)add(Y,l)local f=0for t=0,o-1,1do for o=0,o-1,1do local n,e,o=n+t,e+o,0if(R(l,n*8,e*8))o+=1
 if(R(l,(n+1)*8,e*8))o+=1
 if(R(l,(n+1)*8,(e+1)*8))o+=1
 if(R(l,n*8,(e+1)*8))o+=1
-if(o>=2)d[n][e].sprite=88f+=1
-end end if f==0do d[n][e].sprite=88if(n+1==t+15+o-1)d[n-1][e].sprite=88else d[n+1][e].sprite=88
-d[n][e+1].sprite=88end end function nM(n)if n<=f.GRASS do return sin((n-1+e)/16)elseif n<=f.DESERT do return sin((n-1+e)/8)elseif n<=f.MOUNTAIN do return sin((n-1+e)/16)+4*sin((n-1+e)/16*1.5)elseif n<=f.SNOW do return sin((n-1+e)/16)else return sin((n-1+e)/16)end end function nr(n,e,o,d)for e=e,e+15do for o=o+1,o+15do local l,e=n.tiles[e][o-1],n.tiles[e][o]if l.sprite==b.NONE and e.sprite~=b.NONE do if(d>0)e.sprite=d
+if(o>=2)d[n][e].sprite=b.GLITCH f+=1
+end end if f==0do d[n][e].sprite=b.GLITCH if(n+1==t+15+o-1)d[n-1][e].sprite=b.GLITCH else d[n+1][e].sprite=b.GLITCH
+d[n][e+1].sprite=b.GLITCH end end function nM(n)if n<=f.GRASS do return sin((n-1+e)/16)elseif n<=f.DESERT do return sin((n-1+e)/8)elseif n<=f.MOUNTAIN do return sin((n-1+e)/16)+4*sin((n-1+e)/16*1.5)elseif n<=f.SNOW do return sin((n-1+e)/16)else return sin((n-1+e)/16)end end function nr(n,e,o,d)for e=e,e+15do for o=o+1,o+15do local l,e=n.tiles[e][o-1],n.tiles[e][o]if l.sprite==b.NONE and e.sprite~=b.NONE do if(d>0)e.sprite=d
 add(n.surface_tiles,e)end end end end function nR(n)return n[flr(rnd(#n))+1]end function ev(n)local n=flr(n/8)for e=1,15do local o,n=p(n,e-1),p(n,e)if(o.tile==b.NONE and n.tile~=b.NONE)return n
 end end function nS()for e,n in ipairs(Y)do l(n)end end local e,n,d,l={},0,0,8function nT(o)e,l={},8Y={}n,d=o*16,0Z()Z()end function nU(d)local n=Z(n,0)add(e,n)o+=1local n=n for e in all(e)do if(e.x<n.x)n=e
 end del(e,n)end function Z()local o if n>=f.VOID do o=nQ(n,d)if(n==f.VOID+16)nV()_(3008,40)W=true
@@ -44,9 +44,9 @@ end if(not n)printh"no more actors available"return
 else n=o[e]if(not n)printh("can't find actor with id "..e)return
 end n.enabled=true n.last_enabled_time=time()n.ai_enabled=true n.inputDisabled=false n.state=1n.search_timer=5+flr(rnd(5))n.ypos=l n.xpos=d n.bounce_charge=0n.jump_gravity=15return n end function S(n)n.enabled=false n.ai_enabled=false n.disabledCount+=1n.totalTimeEnabled+=time()-n.last_enabled_time n.vx=0n.vy=0end function nu(n,e)if(n.vy>=0)o=n.fall_gravity*8else o=n.jump_gravity*8
 local d,l=n.xpos+n.vx*e+5*e*e,n.ypos+n.vy*e+.5*o*e*e n.vx+=10*e n.vy+=o*e n.vy=min(n.vy,200)return{xpos=d,ypos=l}end function n2(n)if(n.onGround and not n.won)local e,o=n.jump_distance*.6,n.jump_distance*.4local d=-2*n.jump_height*4/e n.jump_gravity=2*n.jump_height*4*4/(e*e)n.fall_gravity=2*n.jump_height*4*4/(o*o)n.vx=32n.vy=d*8n.bounce_charge=0sfx(nc)
-end function n8(n,e)n.vx=n.move_dir*e if n.xpos<i+8do n.move_dir=abs(n.move_dir)n.xpos=i+8elseif n.xpos>i+110do n.move_dir=-abs(n.move_dir)n.xpos=i+110end end function ns(n)return n.xpos+8<i-16or n.ypos>a+200or n.ypos<a-64end function n6(n)for e,n in pairs(n)do spr(n.sprite,n.xpos,n.ypos)end end function T(n,e)local n,e=A(n),A(e)return n.left<e.right and n.right>e.left and n.top<e.bottom and n.bottom>e.top end function n_(n,e)local o,d=A(n),A(e)return o.bottom>d.top and n.ypos<e.ypos and n.vy>0end function A(n)local e,o,d,n=n.xpos+n.boundsOffsetX,n.ypos+n.boundsOffsetY,n.width/2,n.height/2return{left=e-d,right=e+d,top=o-n,bottom=o+n}end function en(n)w={}I(n,w,{type="zombie",width=1,height=1,sprite=108,sprite2=0})end function ew(n,e)end function n3(e)for o,n in ipairs(w)do if n.enabled and n.ai_enabled do if(ns(n))S(n)break
+end function n8(n,e)n.vx=n.move_dir*e if n.xpos<i+8do n.move_dir=abs(n.move_dir)n.xpos=i+8elseif n.xpos>i+110do n.move_dir=-abs(n.move_dir)n.xpos=i+110end end function ns(n)return n.xpos+8<i-16or n.ypos>a+200or n.ypos<a-64end function n6(n)for e,n in pairs(n)do spr(n.sprite,n.xpos,n.ypos)end end function T(n,e)local n,e=A(n),A(e)return n.left<e.right and n.right>e.left and n.top<e.bottom and n.bottom>e.top end function n_(n,e)local o,d=A(n),A(e)return o.bottom>d.top and n.ypos<e.ypos and n.vy>0end function A(n)local e,o,d,n=n.xpos+n.boundsOffsetX,n.ypos+n.boundsOffsetY,n.width/2,n.height/2return{left=e-d,right=e+d,top=o-n,bottom=o+n}end function en(n)w={}I(n,w,{type="zombie",width=1,height=1,sprite=135,sprite2=0})end function ew(n,e)end function n3(e)for o,n in ipairs(w)do if n.enabled and n.ai_enabled do if(ns(n))S(n)break
 n.vx=n.move_dir*5local e=nu(n,e)local e=nh(e.xpos,e.ypos,n.xpos,n.ypos,false)n.onGround=e.onGround if(n.onGround)n.vx=0n.vy=0if(e.hit_wall)n2(n)
-n.xpos=e.x n.ypos=e.y end end end function ee()u={}I(1,u,{type="ufo",width=8,height=8,sprite=109,sprite2=110})end function nV()u={}O=max(s,3)I(1,u,{type="king",width=16,height=16,sprite=12,sprite2=122})u[1].boundsOffsetX=8u[1].boundsOffsetY=8end function nW()u={}I(1,u,{type="vulture",width=16,height=16,sprite=14,sprite2=126})u[1].boundsOffsetX=8u[1].boundsOffsetY=8u[1].tracker_beam.width=8u[1].tracker_beam.height=8u[1].tracker_beam.boundsOffsetX=4u[1].tracker_beam.boundsOffsetY=6end function _(n,e)local o=q(u,1,n,e)n4(o,n,e)return o end function n5(e)local n=u[1]if n.enabled and n.ai_enabled do if n.state==1do n8(n,50)if(n.type=="king")if n.timer_1==0do q(w,-1,n.xpos,n.ypos)n.timer_1=5elseif O<=0do n.state=4end else if(n.timer_1==0and n.xpos>i+70)n.vx=0n.state=2
+n.xpos=e.x n.ypos=e.y end end end function ee()u={}I(1,u,{type="ufo",width=8,height=8,sprite=133,sprite2=134})end function nV()u={}O=max(s,3)I(1,u,{type="king",width=16,height=16,sprite=34,sprite2=139})u[1].boundsOffsetX=8u[1].boundsOffsetY=8end function nW()u={}I(1,u,{type="vulture",width=16,height=16,sprite=36,sprite2=137})u[1].boundsOffsetX=8u[1].boundsOffsetY=8u[1].tracker_beam.width=8u[1].tracker_beam.height=8u[1].tracker_beam.boundsOffsetX=4u[1].tracker_beam.boundsOffsetY=6end function _(n,e)local o=q(u,1,n,e)n4(o,n,e)return o end function n5(e)local n=u[1]if n.enabled and n.ai_enabled do if n.state==1do n8(n,50)if(n.type=="king")if n.timer_1==0do q(w,-1,n.xpos,n.ypos)n.timer_1=5elseif O<=0do n.state=4end else if(n.timer_1==0and n.xpos>i+70)n.vx=0n.state=2
 n.timer_1=P(n.timer_1,e)elseif n.state==2do if n.type=="ufo"do local e=nY(n.xpos)if(e)if(n.ypos<(e.y-4)*8)n.vy=30else n.vy=0n.state=3n.timer_1=5sfx(3,1)else n.state=1
 elseif n.type=="vulture"do n8(n,65)if(n.ypos<56)n.vy=10n.tracker_beam.xpos=n.xpos n.tracker_beam.ypos=n.ypos else n.vy=-10n.state=4n9(n)
 end elseif n.state==3do n.timer_1=P(n.timer_1,e)n.tracker_beam.xpos=n.xpos n.tracker_beam.ypos=n.ypos if(n.timer_1==0)n9(n)n.state=4
@@ -61,11 +61,11 @@ if(y)local n=A(n.tracker_beam)rect(n.left,n.top,n.right,n.bottom,8)
 end if(n.type=="king")et(O)
 if(y)local n=A(n)rect(n.left,n.top,n.right,n.bottom,8)
 end end function et(n)local e,n=ceil(n*10/128),n for o=1,e do local d,t,l=i+4,a+4+10*(o-1),12if(o==e)l=n
-for e=1,l do spr(8,d,t)n-=1d+=10end end end local n,e=v.new(),{}nn=nil function n7()n,e=v.new(),{}nn=nil end function ef(e)n:enqueue_unique({bird={xpos=-8,ypos=-8,width=8,height=16,boundsOffsetX=0,boundsOffsetY=4,sprite=1},playerKey=e})end function ei()local n=n:dequeue()local o,d,l,t=r[n.playerKey],n.bird,i+128,a+20+flr(rnd(10))d.xpos=l d.ypos=t o.xpos=l o.ypos=t+8add(e,n)end function e1()if(nn()and not n:isempty())ei()
+for e=1,l do spr(131,d,t)n-=1d+=10end end end local n,e=v.new(),{}nn=nil function n7()n,e=v.new(),{}nn=nil end function ef(e)n:enqueue_unique({bird={xpos=-8,ypos=-8,width=8,height=16,boundsOffsetX=0,boundsOffsetY=4,sprite=132},playerKey=e})end function e1()local n=n:dequeue()local o,d,l,t=r[n.playerKey],n.bird,i+128,a+20+flr(rnd(10))d.xpos=l d.ypos=t o.xpos=l o.ypos=t+8add(e,n)end function ei()if(nn()and not n:isempty())e1()
 local o=nil for e,n in ipairs(e)do local e=n.bird.xpos-.8n.bird.xpos=e local d=r[n.playerKey]d.xpos=e if(e<i-8)o=n
 end if(not(o==nil))n:enqueue_unique(o)del(e,o)
 end function ea()for e,n in ipairs(e)do spr(n.bird.sprite,n.bird.xpos,n.bird.ypos)end end poke(24365,1)local t,l,n,o,d,f=0,10,0,0,0,1function ec()local n=nil for o,e in pairs(r)do if(e.enabled)if(n==nil or e.xpos>n.xpos)n=e
-end return n end function e0()r={}C={}s,t=0,0n7()E(0)n,o,d,f=0,16,0,1I(32,r,{type="player",width=8,height=8,sprite=0,sprite2=0})end function ng(n,e)add(G,{n.xpos,n.ypos,3,n.sprite,e})ef(n.id)S(n)E(D+1)end function ex(n)q(r,n.key,n.xpos,n.ypos)E(D-1)end function nm(l,t,e)local d=nil if(k==0or k==2)local n={32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63}d=n[s+1]else d=nH[e]
+end return n end function e0()r={}C={}s,t=0,0n7()E(0)n,o,d,f=0,16,0,1I(32,r,{type="player",width=8,height=8,sprite=0,sprite2=0})end function ng(n,e)add(G,{n.xpos,n.ypos,3,n.sprite,e})ef(n.id)S(n)E(D+1)end function ex(n)q(r,n.key,n.xpos,n.ypos)E(D-1)end function nm(l,t,e)local d=nil if(k==0or k==2)local n={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}d=n[s+1]else d=nH[e]
 if(d==nil)return nil
 s=s+1local n=nil if k==2do for e=6,32do if(r[e]~=nil and r[e].enabled==false)n,r[e]=r[e],nil break
 end else n,r[s]=r[s],nil end if(n==nil)return nil
@@ -119,14 +119,14 @@ end end m={}for e,n in ipairs(C)do local n=r[n]if(n)add(m,{n.sprite,n.reviveCoun
 end local n=#m for e=1,n-1do for n=1,n-e do if(m[n][2]<m[n+1][2])m[n],m[n+1]=m[n+1],m[n]
 end end end poke(24365,1)local e,o,d,l,t,n,f=0,0,0,0,0function e5(e)local o,d,n=ec(),i+nF*e if(o~=nil)n=o.xpos-(128-nj*8)else n=d
 n=max(n,d)i=i+(n-i)*min(nz*e,1)end function _init()n,f,e=0,0,0if(h==c.complete or h==c.gameover)h=c.playerSelect else h=c.mainMenu
-K(h)end function nv()cls()_init()end function K(n)h=n if h==c.mainMenu do i=0a=0eu(function()K(c.playerSelect)end)music(0,1000,1)elseif h==c.playerSelect do x=4na=0d=(x+1)*128i=x*16*8a=na*16*8W=false ee()en(5)n7()nK()nT(x)ez=X*8-128+80e0()g={}G,o={},.4menuitem(2,"set gamemode",ny)N=15nD={[1]=r,[2]=w}music(-1,1000,1)music(4,1000,2)elseif h==c.game do music(-1,1000,2)music(6,1000,3)np()nt=time()elseif h==c.complete or h==c.gameover do F=3music(0,2000)e4()end end function _update()local l=time()n,f=l-f,l if h==c.mainMenu do e2(n)elseif h==c.playerSelect do local e=er(i,a,n,o==0)if(o>0)stat(31)
+K(h)end function nv()cls()_init()end function K(n)h=n if h==c.mainMenu do i=0a=0eu(function()K(c.playerSelect)end)music(0,1000,1)elseif h==c.playerSelect do x=0na=0d=(x+1)*128i=x*16*8a=na*16*8W=false ee()en(5)n7()nK()nT(x)ez=X*8-128+80e0()g={}G,o={},.4menuitem(2,"set gamemode",ny)N=15nD={[1]=r,[2]=w}music(-1,1000,1)music(4,1000,2)elseif h==c.game do music(-1,1000,2)music(6,1000,3)np()nt=time()elseif h==c.complete or h==c.gameover do F=3music(0,2000)e4()end end function _update()local l=time()n,f=l-f,l if h==c.mainMenu do e2(n)elseif h==c.playerSelect do local e=er(i,a,n,o==0)if(o>0)stat(31)
 o=max(0,o-n)if(s>0)B=max(0,B-n)if(B==0)e=true
 if(e)K(c.game)
 elseif h==c.game do if y do e9()if(no)eF()
 else if(e<1.5)e+=n else e5(n)
-if(n1~=ni.CLOUD_KINGDOM)n1=ni.CLOUD_KINGDOM else if(W and not u[1].enabled)K(c.complete)
+if(ni~=n1.CLOUD_KINGDOM)ni=n1.CLOUD_KINGDOM else if(W and not u[1].enabled)K(c.complete)
 if(D==s)K(c.gameover)e=0
-n5(n)nk(i,a,n)n3(n)e1()for e in all(G)do e[3]-=n if(e[3]<=0)del(G,e)
+n5(n)nk(i,a,n)n3(n)ei()for e in all(G)do e[3]-=n if(e[3]<=0)del(G,e)
 end if(M<1)M=(i-(d-128))/128a=Q(nd,nl,min(M,1))
 end if(i>=d)x+=1d+=128nU(x)
 if k~=2do while stat(30)do nw=stat(31)if(nw=="れ")e7()
@@ -164,30 +164,30 @@ __gfx__
 00dddd00885588550042200000066660040bb700004444000ccccc0008cccca000422200067a776000ccc0000005500006555560657777565456655477d5d777
 00009000558855880000100006600000040b0000040400000ccccc000c5cc5c0000022000666666000c0c0000005500006666660655555565545544577d5d777
 0009900055885588000101000000000040b0b0000004400000ccc00044444444000222220000000004404400000550000066660066666666124ef42176667777
-0a00a00aa00a00a00000000055000000000000000000000080000000000088880000000000000000000000000000000000000000000000000000000000000000
-0aaaaaaaaaaaaaa00000000555500000000000000000000008000000000880000000000000000000000000000000000000000000000000000000000000000000
-0aabbbbaabbbbaa0000000057caa00000000ccccccc0000000880000000800000000000000000000000000000000000000000000000000000000000000000000
-0abbbbbbbbbbbba055000005e5500055000cc000000ccc0000088000008800000000000000000000000000000000000000000000000000000000000000000000
-00b7777bb7777b00055550055e50055000cc000000000cc000008800088000000000000000000000000000000000000000000000000000000000000000000000
-00b7007bb7007b00007eeeee550eee0000c00000000000c000000880880000000000000000000000000000000000000000000000000000000000000000000000
-00bbbbbbbbbbbb00555557775577755500c00000000000c000000088800000000000000000000000000000000000000000000000000000000000000000000000
-0b3bb000000bb3b0007ee111111eee0000c00000000000c000000008800000000000000000000000000000000000000000000000000000000000000000000000
-bb3b0aaaaaa0b3bb55555777557755550cc00000000000c000000088880000000000000000000000000000000000000000000000000000000000000000000000
-bb3bbaaaaaabb3bb0000eee5555ee0000c000000000000c000000880080000000000000000000000000000000000000000000000000000000000000000000000
-0b77ba777a7bb37000555005ee5000000c000000000000c000008000008800000000000000000000000000000000000000000000000000000000000000000000
-b776b7666a6737b705500005ee5000000cc00000000000c000080000000800000000000000000000000000000000000000000000000000000000000000000000
-7777766aab77777700000055ee55500000ccc00000000cc000880000000880000000000000000000000000000000000000000000000000000000000000000000
-77777777b777777700000555e0a055000000cccc000ccc0008800000000008000000000000000000000000000000000000000000000000000000000000000000
-07667766776666700000550a000a05000000000ccccc000088000000000000800000000000000000000000000000000000000000000000000000000000000000
-0006600660066000000000a0a0a0a000000000000000000080000000000000880000000000000000000000000000000000000000000000000000000000000000
-0000000000000000bbbbbbbb0171000000aa0a00000000000000000000c77c00000b3000002bb200666666660000000000000000000000000000000000000000
-0000000088888888b4bbbbbb016710000a9900a000000000000990000cccccc000b3330000bbbb00888888880000000000000000000000000000000000000000
-cccccccc99999999b42bb4b201677100a909000a00bb0b0000077000cb7bb77b00bb330000bbbb00999999990000000000000000000000000000000000000000
-eeeeeeeeaaaaaaaa4422442201677710a99990000b00b0b000999900b73c73bb0bb3b330b03bb30baaaaaaaa0000000000000000000000000000000000000000
-77777777bbbbbbbb2244224401677771a999999a0000b00000777700bcccbbbb0b3333300bbbbbb0bbbbbbbb0000000000000000000000000000000000000000
-eeeeeeeecccccccc2244224401677777a990099a0244444007777770bbc77bccbbbb3333003bb300cccccccc0000000000000000000000000000000000000000
-cccccccc1111111144224422016667110a0990a002444440099999900cccccc00005500000bbbb00111111110000000000000000000000000000000000000000
-0000000000000000442244220161167100aaaa00002444009999999900777700000550000bb33bb0666666660000000000000000000000000000000000000000
+00000000800000080a00a00aa00a00a0000000005500000000000000000000008000000000008888000000000000000080000000000088880000000000000000
+00000000080000800aaaaaaaaaaaaaa0000000055550000000000000000000000800000000088000000000000000000008000000000880000000000000000000
+cccccccc008008000aabbbbaabbbbaa0000000057caa00000000ccccccc0000000880000000800000000ccccccc0000000880000000800000000ccccccc00000
+eeeeeeee000880000abbbbbbbbbbbba055000005e5500055000cc000000ccc000008800000880000000cc000000ccc000008800000880000000cc000000ccc00
+777777770008800000b7777bb7777b00055550055e50055000cc000000000cc0000088000880000000cc000000000cc0000088000880000000cc000000000cc0
+eeeeeeee0080080000b7007bb7007b00007eeeee550eee0000c00000000000c0000008808800000000c00000000000c0000008808800000000c00000000000c0
+cccccccc0800008000bbbbbbbbbbbb00555557775577755500c00000000000c0000000888000000000c00000000000c0000000888000000000c00000000000c0
+00000000800000080b3bb000000bb3b0007ee111111eee0000c00000000000c0000000088000000000c00000000000c0000000088000000000c00000000000c0
+8000000880000008bb3b0aaaaaa0b3bb55555777557755550cc00000000000c000000088880000000cc00000000000c000000088880000000cc00000000000c0
+0800008008000080bb3bbaaaaaabb3bb0000eee5555ee0000c000000000000c000000880080000000c000000000000c000000880080000000c000000000000c0
+00800800008008000b77ba777a7bb37000555005ee5000000c000000000000c000008000008800000c000000000000c000008000008800000c000000000000c0
+0008800000088000b776b7666a6737b705500005ee5000000cc00000000000c000080000000800000cc00000000000c000080000000800000cc00000000000c0
+00088000000880007777766aab77777700000055ee55500000ccc00000000cc0008800000008800000ccc00000000cc0008800000008800000ccc00000000cc0
+008008000080080077777777b777777700000555e0a055000000cccc000ccc0008800000000008000000cccc000ccc0008800000000008000000cccc000ccc00
+080000800800008007667766776666700000550a000a05000000000ccccc000088000000000000800000000ccccc000088000000000000800000000ccccc0000
+80000008800000080006600660066000000000a0a0a0a00000000000000000008000000000000088000000000000000080000000000000880000000000000000
+00000000bbbbbbbb0171000000aa0a00000000000000000000c77c00000b3000002bb20066666666000000000000000000000000000000000000000000000000
+88888888b4bbbbbb016710000a9900a000000000000990000cccccc000b3330000bbbb0088888888000000000000000000000000000000000000000000000000
+99999999b42bb4b201677100a909000a00bb0b0000077000cb7bb77b00bb330000bbbb0099999999000000000000000000000000000000000000000000000000
+aaaaaaaa4422442201677710a99990000b00b0b000999900b73c73bb0bb3b330b03bb30baaaaaaaa000000000000000000000000000000000000000000000000
+bbbbbbbb2244224401677771a999999a0000b00000777700bcccbbbb0b3333300bbbbbb0bbbbbbbb000000000000000000000000000000000000000000000000
+cccccccc2244224401677777a990099a0244444007777770bbc77bccbbbb3333003bb300cccccccc000000000000000000000000000000000000000000000000
+1111111144224422016667110a0990a002444440099999900cccccc00005500000bbbb0011111111000000000000000000000000000000000000000000000000
+00000000442244220161167100aaaa00002444009999999900777700000550000bb33bb066666666000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

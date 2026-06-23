@@ -4,7 +4,7 @@ function initZombiePool(max_zombies)
 
     zombies = {}
 
-    initActorPool(max_zombies, zombies, {type = "zombie", width = 1, height = 1, sprite = 108, sprite2 = 0})
+    initActorPool(max_zombies, zombies, {type = "zombie", width = 1, height = 1, sprite = 135, sprite2 = 0})
     
 end
 

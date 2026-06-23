@@ -8,13 +8,13 @@ local VULTURE_DOWN_SPEED = 10
 function initUFOPool()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 109, sprite2 = 110})
+    initActorPool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 133, sprite2 = 134})
 end
 
 function initKing()
     ufos = {}
     final_boss_health = max(playerCount, 3)
-    initActorPool(1, ufos, {type = "king", width = 16, height = 16, sprite = 12, sprite2 = 122})
+    initActorPool(1, ufos, {type = "king", width = 16, height = 16, sprite = 34, sprite2 = 139})
     ufos[1].boundsOffsetX = 8
     ufos[1].boundsOffsetY = 8
 end
@@ -22,7 +22,7 @@ end
 function initVulture()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "vulture", width = 16, height = 16, sprite = 14, sprite2 = 126})
+    initActorPool(1, ufos, {type = "vulture", width = 16, height = 16, sprite = 36, sprite2 = 137})
 
     ufos[1].boundsOffsetX = 8
     ufos[1].boundsOffsetY = 8
@@ -259,7 +259,7 @@ function drawHearts(heart_count)
         end
 
         for j = 1, hearts do
-            spr(8, xpos, ypos)
+            spr(131, xpos, ypos)
             hearts_left_to_draw -= 1
             xpos += 10
         end

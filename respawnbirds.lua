@@ -13,7 +13,7 @@ function init_respawn_birds()
 end
 
 function queue_respawn_bird(player_key)
-    respawnQueue:enqueue_unique({bird = {xpos = -8, ypos = -8, width = 8, height = 16, boundsOffsetX = 0, boundsOffsetY = 4, sprite = 1}, playerKey = player_key})
+    respawnQueue:enqueue_unique({bird = {xpos = -8, ypos = -8, width = 8, height = 16, boundsOffsetX = 0, boundsOffsetY = 4, sprite = 132}, playerKey = player_key})
 end
 
 function addRespawnBird()

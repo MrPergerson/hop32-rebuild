@@ -82,29 +82,18 @@ final_boss_health = 4
 
 TILE = {
     NONE = 0,
-    GRASS = 2,
-    GROUND = 3,
-    WALL = 4,
-    SAND_1 = 93,
-    SAND_2 = 94,
-    SAND_3 = 95,
-    MOUNTAIN_1 = 96,
-    MOUNTAIN_2 = 97,
-    MOUNTAIN_3 = 99,
-    SNOW_1 = 99,
-    SNOW_2 = 100,
-    SNOW_3 = 101,
-    ORELAND_1 = 102,
-    ORELAND_2 = 103,
-    ORELAND_3 = 104,
-    HELL_1 = 105,
-    HELL_2 = 106,
-    HELL_3 = 107,
-    CLOUD_1 = 89,
-    CLOUD_2 = 90,
-    CLOUD_3 = 91,
-    CLOUD_4 = 92,
-    GLITCH = 88
+    GRASS = 96,
+    GROUND = 97,
+    SAND_1 = 98,
+    SAND_2 = 99,
+    MOUNTAIN_1 = 100,
+    MOUNTAIN_2 = 101,
+    SNOW_1 = 102,
+    ORELAND_1 = 104,
+    ORELAND_2 = 105,
+    ORELAND_3 = 106,
+    GLITCH = 107,
+    CLOUD_1 = 108
 }
 
 BIOME_DIST_UNIT = {
@@ -255,39 +244,38 @@ function drawRayCast(point, direction, color)
 
 end
 player_sprite_index = { 
-    ["a"] = 33,
-    ["b"] = 34, 
-    ["c"] = 35, 
-    ["d"] = 36,  
-    ["e"] = 37,  
-    ["f"] = 38,  
-    ["g"] = 39,
-    ["h"] = 40, 
-    ["i"] = 41, 
-    ["j"] = 42,
-    ["k"] = 43,
+    ["a"] = 1,
+    ["b"] = 2, 
+    ["c"] = 3, 
+    ["d"] = 4,  
+    ["e"] = 5,  
+    ["f"] = 6,  
+    ["g"] = 7,
+    ["h"] = 8, 
+    ["i"] = 9, 
+    ["j"] = 10,
+    ["k"] = 11,
     ["l"] = 26,
-    ["m"] = 27,
-    ["n"] = 22,
-    ["o"] = 20,
-    ["q"] = 48,
-    ["r"] = 49,
-    ["s"] = 50,
-    ["t"] = 51,
-    ["u"] = 52,
-    ["v"] = 53,
-    ["w"] = 54,
-    ["x"] = 55,
-    ["y"] = 56,
-    ["z"] = 57,
-    ["1"] = 58,
-    ["2"] = 59,
+    ["m"] = 25,
+    ["n"] = 28,
+    ["o"] = 29,
+    ["q"] = 12,
+    ["r"] = 13,
+    ["s"] = 14,
+    ["t"] = 15,
+    ["u"] = 16,
+    ["v"] = 17,
+    ["w"] = 18,
+    ["x"] = 19,
+    ["y"] = 20,
+    ["z"] = 21,
+    ["1"] = 22,
+    ["2"] = 23,
     ["3"] = 27,
     ["4"] = 24,
-    ["5"] = 23,
-    ["6"] = 21,
-    ["7"] = 64,
-    ["8"] = 65,
+    ["5"] = 30,
+    ["6"] = 31,
+    ["7"] = 32
 }
 poke(0x5F2D, 0x1) -- enable keyboard input
 chunks = {} -- 2 or 3 chunk tables
@@ -329,11 +317,11 @@ function generateChunk(x_offset)
             elseif x < BIOME_DIST_UNIT.MOUNTAIN then
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.MOUNTAIN_2}
             elseif x < BIOME_DIST_UNIT.SNOW then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SNOW_2}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SNOW_1}
             elseif x < BIOME_DIST_UNIT.CITY then
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.ORELAND_1}
             elseif x < BIOME_DIST_UNIT.VOID then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.HELL_2}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GLITCH}
             else
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GROUND}
             end  
@@ -487,7 +475,7 @@ function generateVoidChunk(x_offset, y_offset, startingSize)
 
     end
 
-    getSurfaceTiles(chunk, x_offset, y_offset, 88)
+    getSurfaceTiles(chunk, x_offset, y_offset, TILE.GLITCH)
 
     return chunk
 
@@ -556,7 +544,7 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
             end
 
             if inPolyCount >= 2 then
-                tiles[tile_x][tile_y].sprite = 88
+                tiles[tile_x][tile_y].sprite = TILE.GLITCH
                 tileCount += 1
             end
 
@@ -565,16 +553,16 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
 
 
     if tileCount == 0 then
-       tiles[origin_x][origin_y].sprite = 88
+       tiles[origin_x][origin_y].sprite = TILE.GLITCH
 
        if origin_x + 1 == x_offset + 15 + size - 1 then
-        tiles[origin_x-1][origin_y].sprite = 88
+        tiles[origin_x-1][origin_y].sprite = TILE.GLITCH
        else
-        tiles[origin_x+1][origin_y].sprite = 88
+        tiles[origin_x+1][origin_y].sprite = TILE.GLITCH
        end
        
        
-       tiles[origin_x][origin_y+1].sprite = 88
+       tiles[origin_x][origin_y+1].sprite = TILE.GLITCH
 
     end
 
@@ -1135,7 +1123,7 @@ function initZombiePool(max_zombies)
 
     zombies = {}
 
-    initActorPool(max_zombies, zombies, {type = "zombie", width = 1, height = 1, sprite = 108, sprite2 = 0})
+    initActorPool(max_zombies, zombies, {type = "zombie", width = 1, height = 1, sprite = 135, sprite2 = 0})
     
 end
 
@@ -1193,13 +1181,13 @@ local VULTURE_DOWN_SPEED = 10
 function initUFOPool()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 109, sprite2 = 110})
+    initActorPool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 133, sprite2 = 134})
 end
 
 function initKing()
     ufos = {}
     final_boss_health = max(playerCount, 3)
-    initActorPool(1, ufos, {type = "king", width = 16, height = 16, sprite = 12, sprite2 = 122})
+    initActorPool(1, ufos, {type = "king", width = 16, height = 16, sprite = 34, sprite2 = 139})
     ufos[1].boundsOffsetX = 8
     ufos[1].boundsOffsetY = 8
 end
@@ -1207,7 +1195,7 @@ end
 function initVulture()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "vulture", width = 16, height = 16, sprite = 14, sprite2 = 126})
+    initActorPool(1, ufos, {type = "vulture", width = 16, height = 16, sprite = 36, sprite2 = 137})
 
     ufos[1].boundsOffsetX = 8
     ufos[1].boundsOffsetY = 8
@@ -1444,7 +1432,7 @@ function drawHearts(heart_count)
         end
 
         for j = 1, hearts do
-            spr(8, xpos, ypos)
+            spr(131, xpos, ypos)
             hearts_left_to_draw -= 1
             xpos += 10
         end
@@ -1479,7 +1467,7 @@ function init_respawn_birds()
 end
 
 function queue_respawn_bird(player_key)
-    respawnQueue:enqueue_unique({bird = {xpos = -8, ypos = -8, width = 8, height = 16, boundsOffsetX = 0, boundsOffsetY = 4, sprite = 1}, playerKey = player_key})
+    respawnQueue:enqueue_unique({bird = {xpos = -8, ypos = -8, width = 8, height = 16, boundsOffsetX = 0, boundsOffsetY = 4, sprite = 132}, playerKey = player_key})
 end
 
 function addRespawnBird()
@@ -1599,7 +1587,7 @@ function createPlayer(xpos, ypos, keyInput)
     local spr = nil
 
     if keyboard_input == 0 or keyboard_input == 2 then
-        local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
+        local sprites = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}
         spr = sprites[playerCount + 1]
     else
         spr = player_sprite_index[keyInput]
@@ -2138,7 +2126,7 @@ function switchGameState(state)
         initMenu(function() switchGameState(gstate.playerSelect) end)
         music(0, 1000, 1)
     elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 4
+        chunk_progress_x = 0
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
