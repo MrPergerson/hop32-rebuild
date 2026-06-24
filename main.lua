@@ -5,7 +5,7 @@ local timer_1,timer_2,new_chunk_threshold,mouse_x,mouse_y = 0,0,0,0,0
 
 function updatePlayerPushedCamera(dt)
     local lead = getLeadPlayer()
-    local min_advance = camera_x + camera_min_speed * dt
+    local min_advance = camera_x + tournament_mode_base_camera_speed * dt
 
     local target_x
     if lead ~= nil then
@@ -15,7 +15,11 @@ function updatePlayerPushedCamera(dt)
     end
 
     -- never go backward; always apply minimum pressure
-    target_x = max(target_x, min_advance)
+    if gameMode == gMode.tournament then
+        target_x = max(target_x, min_advance)
+    else
+        target_x = max(target_x, 0)
+    end
 
     camera_x = camera_x + (target_x - camera_x) * min(camera_ease_speed * dt, 1)
 end

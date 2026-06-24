@@ -17,7 +17,7 @@ gMode = {
     tournament = 0,
     freeplay = 1
 }
-gameMode = gMode.tournament
+gameMode = gMode.freeplay
 
 
 --camera
@@ -30,6 +30,7 @@ new_camera_y_lerp_r = 0
 camera_push_cells = 7   
 camera_ease_speed = 1.5 
 camera_min_speed  = 8    
+tournament_mode_base_camera_speed = 250
 
 function setCameraYPos(y_pos)
     old_camera_y_pos = camera_y

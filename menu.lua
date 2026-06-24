@@ -134,9 +134,9 @@ end
 
 function showGameModeText()
     if gameMode == gMode.tournament then
-        return {title = "tournament" , description = "players cannot \njoin once the game \nhas started."}
+        return {title = "tournament" , description = "auto scrolling \ncamera. \nplayers cannot \njoin after the \ngame has started."}
     elseif gameMode == gMode.freeplay then
-        return  {title = "freeplay" , description = "players are free \nto join after the game \nhas started."}
+        return  {title = "freeplay" , description = "camera follows \nplayers. \nplayers can \njoin after the \ngame has started."}
     end
 end
 
