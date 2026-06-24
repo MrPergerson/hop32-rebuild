@@ -1296,6 +1296,7 @@ function updateUFO(dt)
                     ufo.disabledCount = ufo.disabledCount + 1
                     resetUFO(ufo, camera_x + 8, 8)
                 else    
+
                     disableActor(ufo)
                     --printh("complete")
                 end
@@ -1336,6 +1337,7 @@ function hideCapturedActors(ufo)
     for _, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = -8
         captured.player.ypos = -8
+        queue_respawn_bird(captured.player.id)
     end
 end
 
