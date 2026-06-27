@@ -1,0 +1,6 @@
+editing assets: 
+./hop32.p8
+
+testing/production:
+python build.py hop32.p8 export/hop32.p8
+export/hop32.p8
