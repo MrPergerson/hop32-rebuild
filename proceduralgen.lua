@@ -38,11 +38,11 @@ function generateChunk(x_offset)
             elseif x < BIOME_DIST_UNIT.MOUNTAIN then
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.MOUNTAIN_2}
             elseif x < BIOME_DIST_UNIT.SNOW then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SNOW_2}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.SNOW_1}
             elseif x < BIOME_DIST_UNIT.CITY then
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.ORELAND_1}
             elseif x < BIOME_DIST_UNIT.VOID then
-                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.HELL_2}
+                chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GLITCH}
             else
                 chunk.tiles[x][y] = {x = x, y = y, sprite = TILE.GROUND}
             end  
@@ -196,7 +196,7 @@ function generateVoidChunk(x_offset, y_offset, startingSize)
 
     end
 
-    getSurfaceTiles(chunk, x_offset, y_offset, 88)
+    getSurfaceTiles(chunk, x_offset, y_offset, TILE.GLITCH)
 
     return chunk
 
@@ -265,7 +265,7 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
             end
 
             if inPolyCount >= 2 then
-                tiles[tile_x][tile_y].sprite = 88
+                tiles[tile_x][tile_y].sprite = TILE.GLITCH
                 tileCount += 1
             end
 
@@ -274,16 +274,16 @@ function createAsteroid(size, origin_x, origin_y, x_offset, y_offset, tiles)
 
 
     if tileCount == 0 then
-       tiles[origin_x][origin_y].sprite = 88
+       tiles[origin_x][origin_y].sprite = TILE.GLITCH
 
        if origin_x + 1 == x_offset + 15 + size - 1 then
-        tiles[origin_x-1][origin_y].sprite = 88
+        tiles[origin_x-1][origin_y].sprite = TILE.GLITCH
        else
-        tiles[origin_x+1][origin_y].sprite = 88
+        tiles[origin_x+1][origin_y].sprite = TILE.GLITCH
        end
        
        
-       tiles[origin_x][origin_y+1].sprite = 88
+       tiles[origin_x][origin_y+1].sprite = TILE.GLITCH
 
     end
 

@@ -2,12 +2,9 @@ local loaded_chunks = {}
 
 local chunk_x_size = 16
 local chunk_y_size = 16
-local chunk_pos_x_size = chunk_x_size * 8
-local chunk_pos_y_size = chunk_y_size * 8
 
 local x_offset = 0
 local y_offset = 0
-local land_progress = 0
 
 local startingAsteroidSize = 8
 
@@ -49,7 +46,7 @@ end
 
 -- Note: using distance to check biome won't work for secret areas
 function loadChunk()
-    local new_chunk = {}
+    local new_chunk
     
     if x_offset >= BIOME_DIST_UNIT.VOID then
         new_chunk = generateCloudChunk(x_offset, y_offset)
@@ -76,18 +73,13 @@ function loadChunk()
     else
         new_chunk = generateChunk(x_offset)
 
-        if new_chunk.x == chunk_progress_x * 16 and gameState == gstate.playerSelect then
-
-        else 
-            
+        if new_chunk.x ~= chunk_progress_x * 16 or gameState ~= gstate.playerSelect then
             local zombie_spawn_point = getRndSurfaceTile(new_chunk.surface_tiles)
             enableActor(zombies, -1, zombie_spawn_point.x * 8, (zombie_spawn_point.y-1) * 8)
         end
 
         if x_offset == 64 then
-            printh(#ufos)
-            local ufo = enableUFO(64 * 8, 2 * 8)
-            printh(ufo.xpos)
+            enableUFO(512, 16)
         end
 
     end
@@ -111,11 +103,11 @@ function drawChunks()
                 if tile.sprite > 0 then -- no error was returned
                     spr(tile.sprite, tile.x * 8, tile.y * 8)
                     --Debug
-                    if (debug_mode) then
+                    if debug_mode then
                         rect(tile.x * 8, tile.y * 8, tile.x * 8 + 8, tile.y * 8 + 8, 9)                      
                     end
                 else
-                    if (debug_mode) then
+                    if debug_mode then
                         rect(tile.x * 8, tile.y * 8, tile.x * 8 + 8, tile.y * 8 + 8, 2)
                     end
                 end
@@ -211,24 +203,24 @@ function checkTileCollision(new_x, new_y, x,y, is_player)
     local cornerCount = 0
 
     -- X
-    if (tile_x_1 ~= nil and tile_x_2 ~= nil) and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
-        if is_player == false then -- HACK, for players this stops collisions in beyond the grid in the -y direction
-            new_x_unit = flr(new_x_unit) + 1 
-        end 
+    if tile_x_1 and tile_x_2 and (tile_x_1.sprite ~= TILE.NONE or tile_x_2.sprite ~= TILE.NONE) then
+        if not is_player then -- HACK, for players this stops collisions in beyond the grid in the -y direction
+            new_x_unit = flr(new_x_unit) + 1
+        end
         hit_wall = true
-    elseif (tile_x_3 ~= nil and tile_x_4 ~= nil) and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
+    elseif tile_x_3 and tile_x_4 and (tile_x_3.sprite ~= TILE.NONE or tile_x_4.sprite ~= TILE.NONE) then
         new_x_unit = flr(new_x_unit)
         cornerCount += 1
         hit_wall = true
     end
 
     -- Y
-    if (tile_y_1 ~= nil and tile_y_2 ~= nil) and (tile_y_1.sprite ~= TILE.NONE or tile_y_2.sprite ~= TILE.NONE) then
-        if new_y > 0 or is_player == false then -- HACK, this stops collisions in beyond the grid in the -y direction
+    if tile_y_1 and tile_y_2 and (tile_y_1.sprite ~= TILE.NONE or tile_y_2.sprite ~= TILE.NONE) then
+        if new_y > 0 or not is_player then -- HACK, this stops collisions in beyond the grid in the -y direction
             new_y_unit = flr(new_y_unit) + 1
         end
         cornerCount += 1
-    elseif (tile_y_3 ~= nil and tile_y_4 ~= nil) and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then
+    elseif tile_y_3 and tile_y_4 and (tile_y_3.sprite ~= TILE.NONE or tile_y_4.sprite ~= TILE.NONE) then
         new_y_unit = flr(new_y_unit)
         
         onGround = true

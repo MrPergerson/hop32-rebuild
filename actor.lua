@@ -1,13 +1,8 @@
 
 -- player variables
-players = {}
-keys = {}
-key_index = 1 -- used for sorting through keys
-playerCount = 0
 local playerWonCount = 0
 local maxPlayers = 32
 local maxFallVelocity = 200
-disabledPlayerCount = 0
 
 -- movement
 local GRAVITY = 15  -- Gravity value
@@ -25,14 +20,10 @@ local jump_x_velocity = 4
 local bounceCharge = 0 -- [0-1]
 local maxChargeTime = 4 -- seconds
 local HOVER_DOWN_SPEED = 30 -- UFO
-local debug = false
-local players_can_release_others = false
-
-local d_last_time = 0 -- ??
 
 
 function initActorPool(actor_count, actor_table, actor_data)
-    for i = 1, actor_count, 1 do
+    for i = 1, actor_count do
         actor_table[i] = createActor(actor_data, i)
     end
 end
@@ -44,8 +35,8 @@ function createActor(actor_data, id)
         type = actor_data.type,
         enabled = false,
         inputDisabled = false,
-        xpos = 0, 
-        ypos = 0, 
+        xpos = -8, 
+        ypos = -8, 
         startPosition = 0,
         boundsOffsetX = 0, 
         boundsOffsetY = 0, 
@@ -54,8 +45,6 @@ function createActor(actor_data, id)
         move_dir = -1,
         width = actor_data.width,
         height = actor_data.height,
-        boundsOffsetX = 0,
-        boundsOffsetY = 0,
         onGround = false, 
         bounce_charge = 0,
         jump_height = min_jump_height,
@@ -68,6 +57,8 @@ function createActor(actor_data, id)
         ai_enabled = false,
         state = 1,
         totalTimeEnabled = 0,
+        reviveCount = 0,
+        last_enabled_time = 0,
         won = false,
         timer_1 = 0,
         capture_tracker = {},
@@ -88,30 +79,31 @@ function createActor(actor_data, id)
 end
 
 function enableActor(actor_table, id, xpos, ypos)
-    local actor = nil
+    local actor
 
     if id == -1 then -- if id -1, then enable first available inactive
         for key, a in pairs(actor_table) do
-            if a.enabled == false then
+            if not a.enabled then
                 actor = a
                 break;
             end
         end
 
-        if actor == nil then
+        if not actor then
             printh("no more actors available")
             return
         end
     else
         actor = actor_table[id]
 
-        if actor == nil then
+        if not actor then
             printh("can't find actor with id " .. id)
             return
         end
     end
 
     actor.enabled = true
+    actor.last_enabled_time = time()
     actor.ai_enabled = true
     actor.inputDisabled = false
     actor.state = 1
@@ -119,14 +111,15 @@ function enableActor(actor_table, id, xpos, ypos)
     actor.ypos = ypos
     actor.xpos = xpos
     actor.bounce_charge = 0
+    actor.jump_gravity = GRAVITY
     return actor
 end
 
 function disableActor(actor)
     actor.enabled = false
     actor.ai_enabled = false
-    actor.disabledCount = actor.disabledCount + 1 -- player
-    actor.totalTimeEnabled = actor.totalTimeEnabled + (time() - actor.totalTimeEnabled)  -- player
+    actor.disabledCount += 1 -- player
+    actor.totalTimeEnabled += time() - actor.last_enabled_time  -- player
     --actor.xpos = -8
     --actor.ypos = -8
     actor.vx = 0
@@ -154,7 +147,7 @@ function getNewActorPosition(zombie, dt)
 end
 
 function bounceActor(actor) -- or actor?
-    if actor.onGround and not(actor.won) then
+    if actor.onGround and not actor.won then
         local jump_dist_p1 = actor.jump_distance * .6
         local jump_dist_p2 = actor.jump_distance * .4
         local jump_velocity = (-2 * actor.jump_height * jump_x_velocity) / jump_dist_p1
@@ -163,8 +156,7 @@ function bounceActor(actor) -- or actor?
         actor.vx = jump_x_velocity  * 8
         actor.vy = jump_velocity  * 8
         actor.bounce_charge = 0
-        sfx(0)
-        d_last_time = time()
+        sfx(sfx_hop)
     end
 end
 
@@ -190,15 +182,9 @@ function moveLeftRight(actor, speed)
 end
 
 function checkActorOutOfBounds(actor)
-    if actor.xpos + 8 < camera_x - 16
-    --or actor.xpos > camera_x + 200 -- we don't care about right bounds
-    --or actor.ypos < camera_y  
-    or actor.ypos > camera_y + 200 then
-        --printh(actor.type .. " " .. actor.id .. " out of bounds")
-        return true
-    end
-
-    return false
+    return actor.xpos + 8 < camera_x - 16
+        or actor.ypos > camera_y + 200
+        or actor.ypos < camera_y - 64
 end
 
 function drawActors(actor_table)

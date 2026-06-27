@@ -1,24 +1,31 @@
 poke(0x5F2D, 0x1) -- enable keyboard input
-local delta_time
-local last_time
-local timeUntilCameraMoves = 1.5
-local timeUntilRestart = 2
-local timer_1 = 0
-local timer_2 = 0 -- input delay when player select starts
-local camera_speed = 15
---local camera_pos_y_offset = 128
-local new_chunk_threshold = 0
-local mouse_x = 0
-local mouse_y = 0
+local delta_time,last_time
+local timeUntilCameraMoves,timeUntilRestart = 1.5,2
+local timer_1,timer_2,new_chunk_threshold,mouse_x,mouse_y = 0,0,0,0,0
 
+function updatePlayerPushedCamera(dt)
+    local lead = getLeadPlayer()
+    local min_advance = camera_x + tournament_mode_base_camera_speed * dt
 
+    local target_x
+    if lead ~= nil then
+        target_x = lead.xpos - (128 - camera_push_cells * 8)
+    else
+        target_x = min_advance
+    end
 
-local debug_tile_flags = {}
+    -- never go backward; always apply minimum pressure
+    if gameMode == gMode.tournament then
+        target_x = max(target_x, min_advance)
+    else
+        target_x = max(target_x, 0)
+    end
+
+    camera_x = camera_x + (target_x - camera_x) * min(camera_ease_speed * dt, 1)
+end
 
 function _init()
-    delta_time = 0
-    last_time = 0
-    timer_1 = 0
+    delta_time,last_time,timer_1 = 0,0,0
     if gameState == gstate.complete or gameState == gstate.gameover then
         gameState = gstate.playerSelect
     else
@@ -39,15 +46,16 @@ function switchGameState(state)
     if gameState == gstate.mainMenu then
         camera_x = 0
         camera_y = 0
-        initMenu(startGameFromMainMenu)
-        initUFOPool()
+        initMenu(function() switchGameState(gstate.playerSelect) end)
+        music(0, 1000, 1)
     elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 20
+        chunk_progress_x = 0
         chunk_progress_y = 0
         new_chunk_threshold = (chunk_progress_x + 1) * 128
         camera_x = chunk_progress_x * 16 * 8
         camera_y = chunk_progress_y * 16 * 8
-        
+        finalBossEnabled = false
+        initUFOPool()
         initZombiePool(5)
         init_respawn_birds()
         initProceduralGen()
@@ -55,36 +63,32 @@ function switchGameState(state)
         max_distance = map_x_size * 8 - 128 + 80
         initPlayers()
         win_order = {}
+        death_icons={}
         timer_2 = .4
-        menuitem(2, "set gamemode", function ()
-            changeGameMode()
-        end)
+        menuitem(2, "set gamemode", changeGameMode)
         score_timer = 15
         actors = {
             [1] = players,
             [2] = zombies
         }
+        music(-1, 1000, 1)
+        music(4, 1000, 2)
     elseif gameState == gstate.game then
+        music(-1, 1000, 2)
+        music(6, 1000, 3)
         setRespawnTimer()
+        game_start_time = time()
     elseif gameState == gstate.complete or gameState == gstate.gameover then
 
         gameover_menu_timer = 3
+        music(0, 2000)
 
-        for key, player in pairs(players) do
-            if player.enabled == true then
-                add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
-            end
-        end
+        initCompleteMenu()
 
-        appendLosersToWinOrder()
     end
 
 
     
-end
-
-startGameFromMainMenu = function ()
-    switchGameState(gstate.playerSelect)
 end
 
 function _update()
@@ -95,9 +99,7 @@ function _update()
     if gameState == gstate.mainMenu then
         updateMenu(delta_time)
     elseif gameState == gstate.playerSelect then
-        local complete = false
-
-        complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
+        local complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
 
         if timer_2 > 0 then
             stat(31)
@@ -121,15 +123,13 @@ function _update()
 
             if debug_fast_travel then
                 debugUpdateQuickTravel()
-            elseif debug_player_cannon then
-                debugUpdatePlayerCannon()
             end
         else
             if timer_1 < timeUntilCameraMoves then
                 timer_1 += delta_time
             else 
                 
-                camera_x = camera_x + camera_speed * delta_time
+                updatePlayerPushedCamera(delta_time)
                 --printh(chunk_progress_x)
             end
 
@@ -157,6 +157,11 @@ function _update()
             update_zombies(delta_time)
             update_respawns()
 
+            for d in all(death_icons) do
+              d[3]-=delta_time
+              if d[3]<=0 then del(death_icons,d) end
+            end
+
             -- cool but it looks like the asteroid are falling
             if new_camera_y_lerp_t < 1 then
                 new_camera_y_lerp_t = (camera_x - (new_chunk_threshold - 128)) / 128
@@ -176,14 +181,22 @@ function _update()
 
 
         -- Process key input
-        while stat(30) do
-            keyInput = stat(31)
+        if keyboard_input ~= 2 then
+            while stat(30) do
+                keyInput = stat(31)
 
-            if (keyInput == "れ") then
-                toggleDebugMode()
+                if (keyInput == "れ") then
+                    toggleDebugMode()
+                end
+
+                bouncePlayer(keyInput)
             end
-
-            bouncePlayer(keyInput)       
+        else
+            for b = 0, 5 do
+                if btnp(b, 0) then
+                    bouncePlayer(b)
+                end
+            end
         end
     elseif gameState == gstate.gameover then
 
@@ -210,14 +223,17 @@ function _draw()
         drawChunks()
         drawUFO()
         draw_respawn_birds()
-        --draw_zombies()
         drawActors(zombies)
         drawActors(players)
         
-    
-        if debug_mode then
-            debug_draw_asteroid_polys()
-            
+        local li=camera_y+112
+        for d in all(death_icons) do
+          local x,y=mid(d[1],camera_x,camera_x+112),mid(d[2],camera_y,camera_y+112)
+          if d[5] then y,li=li,li-16 end
+          spr(d[4],x,y-8)
+          spr(icon_x_spr,x,y-16)
+          if d[5] then spr(icon_arrow_left_spr,x-8,y-8)
+          else spr(icon_arrow_spr,x,y) end
         end
 
         -- UI
@@ -234,7 +250,7 @@ function _draw()
                 print("starting in " .. flr(start_timer), camera_x + 4, camera_y+8, 7)
             end
 
-            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56)
+            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56, 7)
 
         elseif gameState == gstate.game then
 
@@ -250,7 +266,8 @@ function _draw()
             end
         end
 
-        if (debug_mode) then
+        if debug_mode then
+            debug_draw_asteroid_polys()
             rect(camera_x, camera_y, camera_x + 127, camera_y + 127, 7)
             print(camera_x/8 .. "," .. camera_y/8, camera_x+4, camera_y+4)
             print(camera_x/8+16 .. "," .. camera_y/8+16, camera_x + 128 + 4, camera_y + 128 + 4)
@@ -258,7 +275,7 @@ function _draw()
             mouse_x = stat(32) + camera_x
             mouse_y = stat(33) + camera_y
             rect(mouse_x, mouse_y, mouse_x + 2, mouse_y + 2)
-        end       
+        end
 end
 
 function resetGameAfterTimer()
@@ -279,8 +296,8 @@ function toggleDebugMode()
     debug_mode = not(debug_mode)
 
     if debug_mode then
-        menuitem(2, "toggle fast travel", function() debugToggleQuickTravel() end)
-        menuitem(3, "toggle pcannon", function() debugTogglePlayerCannon() end)
+        menuitem(2, "toggle fast travel", debugToggleQuickTravel)
+        menuitem(3, "toggle pcannon", debugTogglePlayerCannon)
     else
         menuitem(2)
         menuitem(3)
@@ -316,69 +333,4 @@ function debug_controls()
     end
 end
 
-function debugToggleQuickTravel()
-    --debug_mode = true
-    debug_fast_travel = not(debug_fast_travel)
-end
-
-function debugUpdateQuickTravel()
-    for key, player in pairs(players) do
-        if player.enabled == false then
-            player.xpos = camera_x + 56
-            player.ypos = camera_y + 8
-        end
-    end
-end
-
-function debugTogglePlayerCannon()
-    debug_player_cannon = not(debug_player_cannon)
-end
-
-function debugUpdatePlayerCannon()
-
-    if stat(34) == 1 then
-        --printh(flr(mouse_x/8) .. ", " .. flr(mouse_y/8))
-
-        local p = players[keys[key_index]]
-        if p.enabled then enablePlayer(p) end
-        p.xpos = flr(mouse_x)
-        p.ypos = flr(mouse_y)
-
-        p.vx = 100
-        p.vy = 100
-
-    end
-    
-    update_players(camera_x, camera_y, delta_time)
-
-end
-
-function appendLosersToWinOrder()
-    local lose_order = {}
-
-    for key, player in pairs(players) do
-        if player.enabled == false and type(player.id) ~= "number" then
-            add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
-        end
-    end
-
-    local n = #lose_order
-    for i = 1, n - 1 do
-        for j = 1, n - i do
-            local a = lose_order[j]
-            local b = lose_order[j + 1]
-            -- Compare by disabledCount (ascending)
-            -- If disabledCount is the same, compare by totalTimeEnabled (descending)
-            if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
-                lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
-            end
-            
-        end
-    end
-
-    for i = 1, #lose_order do 
-        add(win_order, lose_order[i])    
-    end
-
-end
 

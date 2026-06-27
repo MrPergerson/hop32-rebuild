@@ -4,26 +4,28 @@ local MIN_SPEED = 50
 local MAX_SPEED = 65 -- camera speed is 15
 local HOVER_DOWN_SPEED = 30
 local VULTURE_DOWN_SPEED = 10
-local debug = false
-local players_can_release_others = false
 
 function initUFOPool()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 109, sprite2 = 110})
+    initActorPool(1, ufos, {type = "ufo", width = 8, height = 8, sprite = 133, sprite2 = 134})
 end
 
 function initKing()
     ufos = {}
     final_boss_health = max(playerCount, 3)
-    initActorPool(1, ufos, {type = "king", width = 8, height = 8, sprite = 121, sprite2 = 122})
+    initActorPool(1, ufos, {type = "king", width = 16, height = 16, sprite = 34, sprite2 = 139})
+    ufos[1].boundsOffsetX = 8
+    ufos[1].boundsOffsetY = 8
 end
 
 function initVulture()
     ufos = {}
 
-    initActorPool(1, ufos, {type = "vulture", width = 8, height = 8, sprite = 125, sprite2 = 126})
+    initActorPool(1, ufos, {type = "vulture", width = 16, height = 16, sprite = 36, sprite2 = 137})
 
+    ufos[1].boundsOffsetX = 8
+    ufos[1].boundsOffsetY = 8
     ufos[1].tracker_beam.width = 8
     ufos[1].tracker_beam.height = 8
     ufos[1].tracker_beam.boundsOffsetX = 4
@@ -35,8 +37,8 @@ end
 function enableUFO(xpos, ypos)
 
     local ufo = enableActor(ufos, 1, xpos, ypos)
-    ufo.boundsOffsetX = 4
-    ufo.boundsOffsetY = 4
+    --ufo.boundsOffsetX = 4
+    --ufo.boundsOffsetY = 4
 
     resetUFO(ufo, xpos, ypos)
 
@@ -46,11 +48,9 @@ end
 
 
 function updateUFO(dt)
-
     local ufo = ufos[1]
 
     if ufo.enabled and ufo.ai_enabled then
-
         if ufo.state == 1 then
             
             moveLeftRight(ufo, 50)
@@ -123,6 +123,7 @@ function updateUFO(dt)
                     ufo.disabledCount = ufo.disabledCount + 1
                     resetUFO(ufo, camera_x + 8, 8)
                 else    
+
                     disableActor(ufo)
                     --printh("complete")
                 end
@@ -139,14 +140,11 @@ function updateUFO(dt)
         end
         
         if ufo.type == "ufo" then
-            attractPlayers()
+           attractPlayers(dt)
         end
 
-        local self_new_x = ufo.xpos + ufo.vx * dt
-        local self_new_y = ufo.ypos + ufo.vy * dt
-        
-        ufo.xpos = self_new_x
-        ufo.ypos = self_new_y
+        ufo.xpos += ufo.vx * dt
+        ufo.ypos += ufo.vy * dt
 
     end
     
@@ -163,9 +161,10 @@ function resetUFO(ufo, xpos, ypos)
 end
 
 function hideCapturedActors(ufo)
-    for key, captured in pairs(ufo.capture_tracker) do
+    for _, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = -8
         captured.player.ypos = -8
+        queue_respawn_bird(captured.player.id)
     end
 end
 
@@ -173,7 +172,7 @@ function capturePlayer(player)
 
     local ufo = ufos[1]
 
-    if ufo.capture_tracker[player.id] == nil then
+    if not ufo.capture_tracker[player.id] then
        
         ufo.capture_tracker[player.id] = {
             player = player,
@@ -181,18 +180,18 @@ function capturePlayer(player)
         }
 
         disableActor(player)
-        disabledPlayerCount = disabledPlayerCount + 1
+        setDisabledPlayerCount(disabledPlayerCount + 1)
 
     end
 
 end
 
-function attractPlayers()
+function attractPlayers(dt)
 
     local ufo = ufos[1]
-    local captured = ufo.capture_tracker[player.id] 
+    --local captured = ufo.capture_tracker[player.id] 
 
-    for key, captured in pairs(ufo.capture_tracker) do
+    for _, captured in pairs(ufo.capture_tracker) do
         captured.player.xpos = captured.player.xpos + (ufo.xpos - captured.player.xpos) * min(captured.t,.2)
         captured.player.ypos = captured.player.ypos + ((ufo.ypos+8) - captured.player.ypos) * min(captured.t,.2)
 
@@ -209,9 +208,13 @@ function drawUFO()
 
     local ufo = ufos[1]
 
-    if ufo.enabled then
+    if ufo and ufo.enabled then
         
-        spr(ufo.sprite, ufo.xpos, ufo.ypos)
+        if ufo.type ~= "ufo" then
+            spr(ufo.sprite, ufo.xpos, ufo.ypos, 2, 2)
+        else
+            spr(ufo.sprite, ufo.xpos, ufo.ypos, 1, 1)
+        end
 
         if  ufo.state == 3 or ufo.state == 4 or (ufo.type == "vulture" and ufo.state == 2) then
             
@@ -244,26 +247,23 @@ function drawUFO()
 end
 
 function drawHearts(heart_count)
-    local heart_size = 10
     local rows = ceil((heart_count * 10) / 128)
     local hearts_left_to_draw = heart_count
 
-    for i = 1, rows, 1 do
+    for i = 1, rows do
 
         local xpos = camera_x + 4
         local ypos = camera_y + 4 + (10 *(i-1))
-        local offset = 10
         local hearts = 12
 
         if i == rows then
             hearts = hearts_left_to_draw
-            --local xpos = camera_x
         end
 
-        for j = 1, hearts, 1 do
-            spr(8, xpos, ypos)
+        for j = 1, hearts do
+            spr(131, xpos, ypos)
             hearts_left_to_draw -= 1
-            xpos += offset
+            xpos += 10
         end
         
     end

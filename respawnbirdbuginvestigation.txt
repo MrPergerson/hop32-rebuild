@@ -1,0 +1,103 @@
+RESPAWN BIRD BUG INVESTIGATION
+===============================
+
+## Summary
+
+When a player dies, they are added to `respawnQueue`. A timer periodically dequeues one entry and adds it to `activeBirdList`, which causes the bird (and the dead player riding it) to fly across the screen from right to left. If no living player hops on it, the bird goes off the left edge and is supposed to be re-queued for another pass.
+
+---
+
+## Root Cause
+
+The bug is in `update_respawns()` in `respawnbirds.lua` (lines 40–55).
+
+The variable `returnToQueue` is a **single value** that is overwritten each loop iteration:
+
+```lua
+local returnToQueue = nil
+for _, respawn in ipairs(activeBirdList) do
+    ...
+    if newPos < camera_x - 8 then
+       returnToQueue = respawn   -- OVERWRITES PREVIOUS!
+    end
+end
+-- only re-queues the LAST off-screen bird
+```
+
+If two or more birds are in `activeBirdList` simultaneously and both go off-screen in the same frame, only the **last** one gets re-queued. All earlier birds remain stuck in `activeBirdList` with `xpos` decreasing to negative infinity — permanently off-screen. Those players never get another revive pass.
+
+The comment in the code even says "remove first bird to go out of bounds" but the code actually removes the LAST one (since `returnToQueue` is overwritten on each iteration).
+
+---
+
+## When Does This Happen?
+
+- With **higher player counts**, the timer interval shrinks significantly:
+  - `lerp(10, 1, playerCount/32)` → at 32 players, interval = 1 second
+  - Screen crossing time is ~3–6 seconds (birdSpeed = 0.8 px/frame)
+  - So multiple birds can pile up in `activeBirdList` at once
+
+- If the **camera moves fast** enough, multiple birds can pass `camera_x - 8` in the same frame.
+
+- The **first/oldest** bird added to `activeBirdList` (i.e., the player who died earliest) is always the one that gets dropped — since later iterations overwrite `returnToQueue`. This explains the "specific player" pattern.
+
+---
+
+## Files Examined
+
+- `respawnbirds.lua` — contains the bug
+- `players.lua` — `disablePlayer()` calls `queue_respawn_bird(player.id)`
+- `actor.lua` — `drawActors()` draws ALL players (enabled and disabled), so dead players ARE visually drawn on the bird
+- `helper.lua` — Queue implementation; `enqueue_unique` uses `ipairs` which stops at nil entries (a minor secondary issue but not the main bug)
+- `main.lua` — draw order: `draw_respawn_birds()` then `drawActors(players)`
+
+---
+
+## Secondary Issue (Minor)
+
+In `helper.lua`, `Queue:enqueue_unique` uses `contains()` which relies on `ipairs`. After any dequeue, `items[head-1]` is nil and `ipairs` stops immediately — so the uniqueness check is bypassed after the first dequeue. In practice this doesn't cause harm since birds are never double-queued through normal flow, but it's a latent bug.
+
+---
+
+## Proposed Fix
+
+Replace the single `returnToQueue` variable with a list. After the main loop, re-queue and remove **all** off-screen birds:
+
+```lua
+function update_respawns()
+
+    if respawnTimer() and not(respawnQueue:isempty()) then
+        addRespawnBird()
+    end
+
+    local birdsToRequeue = {}
+    for _, respawn in ipairs(activeBirdList) do
+        local newPos = respawn.bird.xpos - birdSpeed
+        respawn.bird.xpos = newPos
+        local p = players[respawn.playerKey]
+        p.xpos = newPos
+
+        if newPos < camera_x - 8 then
+            add(birdsToRequeue, respawn)
+        end
+    end
+
+    for _, respawn in ipairs(birdsToRequeue) do
+        respawnQueue:enqueue_unique(respawn)
+        del(activeBirdList, respawn)
+    end
+
+end
+```
+
+The two-phase approach (collect, then remove) is safe — we finish iterating `activeBirdList` before modifying it.
+
+---
+
+## Verification Steps
+
+1. Run the cart in PICO-8.
+2. Have multiple players die in quick succession so several are waiting in the respawn queue.
+3. Let all their birds fly across without rescuing them.
+4. Confirm every dead player's bird eventually loops back for another pass — none should disappear permanently.
+5. Also verify the normal revive flow still works (hop on a bird to bring the player back).

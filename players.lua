@@ -3,14 +3,10 @@ poke(0x5F2D, 0x1) -- enable keyboard input
 -- game variables
 local GRAVITY = 15  -- Gravity value
 local BOUNCE_FACTOR = -8  -- Factor to bounce back after collision
-
-keys = {}
-key_index = 1 -- used for sorting through keys
-playerCount = 0
 local playerWonCount = 0
 local maxPlayers = 32
 local maxFallVelocity = 200
-disabledPlayerCount = 0
+
 
 local jump_acceleration_x = 10
 local jump_acceleration_y = 20
@@ -30,12 +26,25 @@ local posy = 0
 local xOffset = 0
 local row = 1
 
+function getLeadPlayer()
+    local lead = nil
+    for key, player in pairs(players) do
+        if player.enabled then
+            if lead == nil or player.xpos > lead.xpos then
+                lead = player
+            end
+        end
+    end
+    return lead
+end
+
 function initPlayers()
     players = {}
+    keys = {}
     playerCount = 0
     playerWonCount = 0
     init_respawn_birds()
-    disabledPlayerCount = 0
+    setDisabledPlayerCount(0)
     posx = 0
     posy = 16
     xOffset = 0
@@ -43,23 +52,23 @@ function initPlayers()
     initActorPool(32, players, {type = "player", width = 8, height = 8, sprite = 0, sprite2 = 0})
 end
 
-function disablePlayer(player)
+function disablePlayer(player, left)
+    add(death_icons,{player.xpos,player.ypos,3,player.sprite,left})
     queue_respawn_bird(player.id)
     disableActor(player)
-    disabledPlayerCount = disabledPlayerCount + 1
-    
+    setDisabledPlayerCount(disabledPlayerCount + 1)
 end
 
 function enablePlayer(player)
-    enableActor(players, player.key, player.xpos,player.ypos)
-    disabledPlayerCount = disabledPlayerCount - 1
+    enableActor(players, player.key, player.xpos, player.ypos)
+    setDisabledPlayerCount(disabledPlayerCount - 1)
 end
 
 function createPlayer(xpos, ypos, keyInput)
     local spr = nil
 
-    if keyboard_input == 1 then
-        local sprites = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
+    if keyboard_input == 0 or keyboard_input == 2 then
+        local sprites = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}
         spr = sprites[playerCount + 1]
     else
         spr = player_sprite_index[keyInput]
@@ -70,13 +79,29 @@ function createPlayer(xpos, ypos, keyInput)
     end
 
     playerCount = playerCount + 1
-    local p = players[playerCount]
+    local p = nil
+    if keyboard_input == 2 then
+        for i = 6, 32 do
+            if players[i] ~= nil and players[i].enabled == false then
+                p = players[i]
+                players[i] = nil
+                break
+            end
+        end
+    else
+        p = players[playerCount]
+        players[playerCount] = nil
+    end
+
+    if p == nil then
+        return nil
+    end
+
     p.id = keyInput
     p.sprite = spr
     p.xpos = xpos
     p.ypos = ypos
-    players[playerCount] = nil
-    players[keyInput] = p     
+    players[keyInput] = p
 
     enableActor(players, keyInput, xpos, posy)
     add(keys, keyInput)
@@ -85,51 +110,48 @@ function createPlayer(xpos, ypos, keyInput)
 end
 
 function addPlayers(startingCamPos_x, startingCamPos_y, dt, ready)
-
-    if ready and stat(30) then 
-        local keyInput = stat(31)
-        
-        if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then 
-
-            if not players[keyInput] then
-                start_timer = 5.9 -- plus .9 so the players see "5"
-
-                local p = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)    
-                if p == nil then
-                    return
-                end
-                p.startPosition = posy
-
-                posx = posx + 9
-                if (posx >= 100) then
-                    
-                    if xOffset >= 8 then
-                        xOffset = 0
-                    else
-                        xOffset = xOffset + 2
-                    end
-
-                    posx = xOffset
-
-                    posy = posy + 9
-                end
-            end
-            
-            players[keyInput].ypos = players[keyInput].startPosition - 2
+    local function joinPlayer(keyInput)
+        start_timer = 5.9
+        local p = createPlayer(posx + startingCamPos_x, posy + startingCamPos_y, keyInput)
+        if p == nil then return nil end
+        p.startPosition = posy
+        posx = posx + 9
+        if posx >= 100 then
+            xOffset = xOffset >= 8 and 0 or xOffset + 2
+            posx = xOffset
+            posy = posy + 9
         end
-    
-        -- exit player selection and start the game
-        if (keyInput == "\32" and playerCount > 0) then            
-            return true
-        end  
-        
+        return p
     end
 
-    -- bounce affect 
-    for key, player in pairs(players) do
-            if player.ypos < player.startPosition then
-                player.ypos = min(player.startPosition, player.ypos + (20 * dt))
+    if keyboard_input ~= 2 then
+        if ready and stat(30) then
+            local keyInput = stat(31)
+            if not (keyInput == "\32") and not (keyInput == "\13") and not (keyInput == "\112") and playerCount < 32 then
+                if not players[keyInput] then
+                    if joinPlayer(keyInput) == nil then return end
+                end
+                players[keyInput].ypos = players[keyInput].startPosition - 2
             end
+            if keyInput == "\32" and playerCount > 0 then return true end
+        end
+    else
+        if ready then
+            for b = 0, 5 do
+                local joined = players[b] ~= nil and players[b].enabled == true
+                if btnp(b, 0) and not joined and playerCount < 6 then
+                    joinPlayer(b)
+                elseif joined then
+                    players[b].ypos = players[b].startPosition - 2
+                end
+            end
+        end
+    end
+
+    for key, player in pairs(players) do
+        if player.ypos < player.startPosition then
+            player.ypos = min(player.startPosition, player.ypos + (20 * dt))
+        end
     end
 
     return false
@@ -160,23 +182,25 @@ function update_players(game_progress_x, game_progress_y, dt)
                 player.jump_distance = lerp(min_jump_distance, max_jump_distance, t)
             end
 
-
             -- Apply final position updates, if any
             player.xpos = min(checked_position.x, game_progress_x+128-player.width)
             player.ypos = checked_position.y
 
             if checkActorOutOfBounds(player) then
-                disablePlayer(player)
+                disablePlayer(player, player.xpos+8<camera_x)
                 player.xpos = -8
                 player.ypos = -8
+                break;
             end
 
-             -- Check for respawn bird collisions
-             for _, respawn in ipairs(activeBirdList) do
+            -- Check for respawn bird collisions
+            for _, respawn in ipairs(activeBirdList) do
                 if check_object_collision(player, respawn.bird) then
                     enableActor(players, respawn.playerKey, player.xpos, player.ypos) -- update this
-                    disabledPlayerCount = disabledPlayerCount - 1
+                    setDisabledPlayerCount(disabledPlayerCount - 1)
                     del(activeBirdList, respawn)
+                    player.reviveCount = player.reviveCount + 1
+                    break;
                 end
             end   
             
@@ -186,19 +210,21 @@ function update_players(game_progress_x, game_progress_y, dt)
                     disablePlayer(player)
                     player.xpos = -8
                     player.ypos = -8
-                    sfx(1)
+                    sfx(sfx_player_death_to_zombie)
+                    break;
                 end
             end
 
             for _, ufo in ipairs(ufos) do
                 if check_object_collision(player, ufo) then
-                    // if colliding with top of ufo, bounce
+                    --if colliding with top of ufo, bounce
                     if check_object_collision_on_top(player, ufo) then
-                        sfx(2)
+                        sfx(sfx_hop)
                         if ufo.type == "king" then
                             final_boss_health -= 1
                         end
                         player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
+                        player.vx = 50
                         player.vy = -100
                     end       
                 end
@@ -220,9 +246,9 @@ function bouncePlayer(key)
     
     local player = players[key]
 
-    if not (player == nil) and not(player.inputDisabled) then
+    if not (player == nil) and not(player.inputDisabled) and player.enabled then
         bounceActor(player)
-    elseif gameMode == gMode.freeplay and playerCount < 32 then
+    elseif (player == nil) and gameMode == gMode.freeplay and playerCount < 32 then
         createPlayer(camera_x + 64, camera_y, key)
         setRespawnTimer()
     end

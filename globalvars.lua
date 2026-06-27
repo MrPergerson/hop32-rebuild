@@ -3,7 +3,7 @@ debug_fast_travel = false
 debug_player_cannon = false
 debug_camera_x = 0 --??
 debug_camera_y = 0
-keyboard_input = 1 -- 1 or 0
+keyboard_input = 0 -- 0=any key, 1=strict, 2=gamepad
 gstate = {
     mainMenu = 0,
     playerSelect = 1,
@@ -17,7 +17,7 @@ gMode = {
     tournament = 0,
     freeplay = 1
 }
-gameMode = gMode.tournament
+gameMode = gMode.freeplay
 
 
 --camera
@@ -27,6 +27,10 @@ old_camera_y_pos = 0
 new_camera_y_pos = 0
 new_camera_y_lerp_t = 1
 new_camera_y_lerp_r = 0
+camera_push_cells = 7   
+camera_ease_speed = 1.5 
+camera_min_speed  = 8    
+tournament_mode_base_camera_speed = 250
 
 function setCameraYPos(y_pos)
     old_camera_y_pos = camera_y
@@ -42,6 +46,23 @@ gameover_menu_timer = 3
 
 -- players
 win_order = {}
+revive_order = {}
+game_start_time = 0
+game_elapsed_time = 0
+playerCount = 0
+disabledPlayerCount = 0
+keys = {}
+key_index = 1 -- used for sorting through keys
+
+function setDisabledPlayerCount(value)
+
+    if value > playerCount then
+        value = playerCount
+    end
+
+    disabledPlayerCount = value
+    --printh("disPC " .. disabledPlayerCount)
+end
 
 -- actors
 ufos = {}
@@ -62,29 +83,18 @@ final_boss_health = 4
 
 TILE = {
     NONE = 0,
-    GRASS = 2,
-    GROUND = 3,
-    WALL = 4,
-    SAND_1 = 93,
-    SAND_2 = 94,
-    SAND_3 = 95,
-    MOUNTAIN_1 = 96,
-    MOUNTAIN_2 = 97,
-    MOUNTAIN_3 = 99,
-    SNOW_1 = 99,
-    SNOW_2 = 100,
-    SNOW_3 = 101,
-    ORELAND_1 = 102,
-    ORELAND_2 = 103,
-    ORELAND_3 = 104,
-    HELL_1 = 105,
-    HELL_2 = 106,
-    HELL_3 = 107,
-    CLOUD_1 = 89,
-    CLOUD_2 = 90,
-    CLOUD_3 = 91,
-    CLOUD_4 = 92,
-    GLITCH = 88
+    GRASS = 96,
+    GROUND = 97,
+    SAND_1 = 98,
+    SAND_2 = 99,
+    MOUNTAIN_1 = 100,
+    MOUNTAIN_2 = 101,
+    SNOW_1 = 102,
+    ORELAND_1 = 104,
+    ORELAND_2 = 105,
+    ORELAND_3 = 106,
+    GLITCH = 107,
+    CLOUD_1 = 108
 }
 
 BIOME_DIST_UNIT = {
@@ -96,3 +106,13 @@ BIOME_DIST_UNIT = {
     VOID = 336,
     KINGDOM = 384 
 }
+
+-- SFX
+sfx_hop = 23
+sfx_player_death_to_zombie = 24
+
+-- death icons
+death_icons={}
+icon_x_spr=128
+icon_arrow_spr=129
+icon_arrow_left_spr=130
