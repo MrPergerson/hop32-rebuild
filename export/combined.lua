@@ -43,6 +43,8 @@ start_timer = 5.9
 gamemode_timer = 0
 score_timer = 15
 gameover_menu_timer = 3
+scoreboard_timer = 0
+scroll_y = 0
 
 -- players
 win_order = {}
@@ -1937,7 +1939,7 @@ function showInputModeText()
 end
 
 
-function drawCompleteMenu()
+function drawCompleteMenu(dt)
 
     if gameover_menu_timer > 0 then        
         if gameState == gstate.complete then
@@ -1948,14 +1950,14 @@ function drawCompleteMenu()
     else
         
         rectfill(camera_x, camera_y, camera_x + 128, camera_y + 128, 12)
-        draw_winners(camera_x, camera_y)
+        draw_winners(camera_x, camera_y, dt)
         
     end
     
 
 end
 
-function draw_winners(x, y)
+function draw_winners(x, y, dt)
 
     -- game time
     local time_str = "time: " .. format_time(game_elapsed_time)
@@ -1974,33 +1976,33 @@ function draw_winners(x, y)
         end
     end
 
-    -- top 3 survivors
+    -- leaderboard (full scrolling list)
+    scoreboard_timer += dt
     print("leaderboard", x + 42, y + 30, 7)
-    local survivor_xs = {x + 16, x + 56, x + 96}
-    for i = 1, 3 do
-        if win_order[i] then
-            local sx = survivor_xs[i]
-            spr(win_order[i][1], sx, y + 36)
-            print(tostr(i) .. ".", sx, y + 45, 7)
-            print(win_order[i][3], sx, y + 52, 10)
-        end
-    end
-
-    -- rest (players 4+)
-    if #win_order > 3 then
-        ---print("rest", x + 2, y + 62, 7)
-        local per_row = 13
-        for i = 4, #win_order do
-            local slot = i - 4
-            local col = slot % per_row
-            local row = flr(slot / per_row)
-            local rx = x + 6 + col * 9
-            local ry = y + 68 + row * 8
-            if ry < y + 110 then
-                spr(win_order[i][1], rx, ry)
+    clip(0, 36, 128, 80)
+    local speed = 20
+    local overflow = #win_order * 8 - 80
+    if overflow > 0 then
+        if scroll_y >= overflow then
+            scroll_y = overflow
+            if scoreboard_timer > 2 then
+                scroll_y = 0
+                scoreboard_timer = 0
+            end
+        elseif scoreboard_timer > 4 then
+            scroll_y += speed * dt
+            if scroll_y >= overflow then
+                scroll_y = overflow
+                scoreboard_timer = 0
             end
         end
     end
+    for i = 1, #win_order do
+        local ry = y + 36 + (i - 1) * 8 - scroll_y
+        spr(win_order[i][1], x + 8, ry)
+        print(win_order[i][3], x + 96, ry + 1, 10)
+    end
+    clip()
 
     -- countdown footer
     local countdown_str = "continue in " .. flr(score_timer)
@@ -2009,39 +2011,11 @@ function draw_winners(x, y)
 
 end
 
-function appendLosersToWinOrder()
-    local lose_order = {}
-
-    for _, key in ipairs(keys) do
-        local player = players[key]
-        if player and player.enabled == false then
-            add(lose_order, {player.sprite, player.disabledCount, player.totalTimeEnabled})
-        end
-    end
-
-    local n = #lose_order
-    for i = 1, n - 1 do
-        for j = 1, n - i do
-            local a = lose_order[j]
-            local b = lose_order[j + 1]
-            -- Compare by disabledCount (ascending)
-            -- If disabledCount is the same, compare by totalTimeEnabled (descending)
-            if a[2] > b[2] or (a[2] == b[2] and a[3] < b[3]) then
-                lose_order[j], lose_order[j + 1] = lose_order[j + 1], lose_order[j]
-            end
-            
-        end
-    end
-
-    for i = 1, #lose_order do 
-        add(win_order, lose_order[i])    
-    end
-
-end
-
 function initCompleteMenu()
     -- Compute total game time
     game_elapsed_time = time() - game_start_time
+    scoreboard_timer = 0
+    scroll_y = 0
 
     -- Finalize totalTimeEnabled for still-enabled players
     for key, player in pairs(players) do
@@ -2296,7 +2270,7 @@ function _update()
     elseif gameState == gstate.complete then
         resetGameAfterTimer()
         gameover_menu_timer = processTimer(gameover_menu_timer, delta_time)
-        
+
     end
 end
 
@@ -2342,7 +2316,7 @@ function _draw()
         elseif gameState == gstate.game then
 
         elseif gameState == gstate.complete or gameState == gstate.gameover then
-            drawCompleteMenu()
+            drawCompleteMenu(delta_time)
         end
 
         if gameState == gstate.game or gameState == gstate.playerSelect then

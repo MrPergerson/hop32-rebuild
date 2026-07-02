@@ -209,7 +209,7 @@ function _update()
     elseif gameState == gstate.complete then
         resetGameAfterTimer()
         gameover_menu_timer = processTimer(gameover_menu_timer, delta_time)
-        
+
     end
 end
 
@@ -255,7 +255,7 @@ function _draw()
         elseif gameState == gstate.game then
 
         elseif gameState == gstate.complete or gameState == gstate.gameover then
-            drawCompleteMenu()
+            drawCompleteMenu(delta_time)
         end
 
         if gameState == gstate.game or gameState == gstate.playerSelect then

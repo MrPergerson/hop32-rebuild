@@ -43,6 +43,8 @@ start_timer = 5.9
 gamemode_timer = 0
 score_timer = 15
 gameover_menu_timer = 3
+scoreboard_timer = 0
+scroll_y = 0
 
 -- players
 win_order = {}
