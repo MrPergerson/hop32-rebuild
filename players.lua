@@ -222,6 +222,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                         sfx(sfx_hop)
                         if ufo.type == "king" then
                             final_boss_health -= 1
+                            player.kingHits += 1
                         end
                         player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
                         player.vx = 50

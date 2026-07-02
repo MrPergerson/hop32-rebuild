@@ -941,6 +941,7 @@ function createActor(actor_data, id)
         state = 1,
         totalTimeEnabled = 0,
         reviveCount = 0,
+        kingHits = 0,
         last_enabled_time = 0,
         won = false,
         timer_1 = 0,
@@ -1744,6 +1745,7 @@ function update_players(game_progress_x, game_progress_y, dt)
                         sfx(sfx_hop)
                         if ufo.type == "king" then
                             final_boss_health -= 1
+                            player.kingHits += 1
                         end
                         player.ypos = ufo.ypos-8  -- best way to guarantee this code runs once
                         player.vx = 50
@@ -1980,7 +1982,7 @@ function draw_winners(x, y)
             local sx = survivor_xs[i]
             spr(win_order[i][1], sx, y + 36)
             print(tostr(i) .. ".", sx, y + 45, 7)
-            print(format_time(win_order[i][3]), sx, y + 52, 10)
+            print(win_order[i][3], sx, y + 52, 10)
         end
     end
 
@@ -2048,12 +2050,13 @@ function initCompleteMenu()
         end
     end
 
-    -- Build win_order: ALL players sorted by totalTimeEnabled descending
+    -- Build win_order: ALL players sorted by score descending
     win_order = {}
     for _, key in ipairs(keys) do
         local player = players[key]
         if player then
-            add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled, player.reviveCount})
+            local score = flr(player.totalTimeEnabled) * 10 + player.reviveCount * 100 + player.kingHits * 50
+            add(win_order, {player.sprite, player.disabledCount, score, player.reviveCount})
         end
     end
     local n = #win_order

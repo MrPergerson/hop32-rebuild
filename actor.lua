@@ -58,6 +58,7 @@ function createActor(actor_data, id)
         state = 1,
         totalTimeEnabled = 0,
         reviveCount = 0,
+        kingHits = 0,
         last_enabled_time = 0,
         won = false,
         timer_1 = 0,

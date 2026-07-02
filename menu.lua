@@ -196,7 +196,7 @@ function draw_winners(x, y)
             local sx = survivor_xs[i]
             spr(win_order[i][1], sx, y + 36)
             print(tostr(i) .. ".", sx, y + 45, 7)
-            print(format_time(win_order[i][3]), sx, y + 52, 10)
+            print(win_order[i][3], sx, y + 52, 10)
         end
     end
 
@@ -264,12 +264,13 @@ function initCompleteMenu()
         end
     end
 
-    -- Build win_order: ALL players sorted by totalTimeEnabled descending
+    -- Build win_order: ALL players sorted by score descending
     win_order = {}
     for _, key in ipairs(keys) do
         local player = players[key]
         if player then
-            add(win_order, {player.sprite, player.disabledCount, player.totalTimeEnabled, player.reviveCount})
+            local score = flr(player.totalTimeEnabled) * 10 + player.reviveCount * 100 + player.kingHits * 50
+            add(win_order, {player.sprite, player.disabledCount, score, player.reviveCount})
         end
     end
     local n = #win_order
