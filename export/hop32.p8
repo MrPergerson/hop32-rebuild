@@ -17,7 +17,7 @@ end for e=1,#d[n]do?d[n][e].text,16,o,d[n][e].color
 o+=10end?"menu controls: ⬆️⬇️ and ❎",12,120,6
 end function X(e,o)local o=o or n d[o][l].color=6d[n][e].color,l=7,e end function W(e)local o=n n=e X(1,o)end function nw()w=(w+1)%2if w==c.playerSelect or w==c.game do F=3end end function e2()k=(k+1)%3end function nd()if w==E.tournament do return{title="tournament",description="auto scrolling \ncamera. \nplayers cannot \njoin after the \ngame has started."}elseif w==E.freeplay do return{title="freeplay",description="camera follows \nplayers. \nplayers can \njoin after the \ngame has started."}end end function e3()if k==0do return{title="any key",description="characters can be \nassigned to \nany key."}elseif k==1do return{title="strict",description="characters are \nassigned to \nspecific keys."}elseif k==2do return{title="gamepad",description="each button is\nassigned to a\nunique player."}end end function e4(n)if D>0do if h==c.complete do?"⁶w⁶tyou win!",i+30,a+60,10
 else?"⁶w⁶tnext time...",i+20,a+60,10
-end else rectfill(i,a,i+128,a+128,12)e5(i,a,n)end end function e5(n,e,d)local o="time: "..nI(ni)?o,n+flr((128-#o*4)/2),e+2,10
+end else rectfill(i,a,i+128,a+128,0)e5(i,a,n)end end function e5(n,e,d)local o="time: "..nI(ni)?o,n+flr((128-#o*4)/2),e+2,10
 ?"most revives",n+40,e+9,7
 local o={n+16,n+56,n+96}for n=1,3do if g[n]and g[n][2]>0do local o=o[n]spr(g[n][1],o,e+15)local n=tostr(g[n][2])local o=o+4-#n*2?n,o,e+24,10
 end end q+=d?"leaderboard",n+42,e+30,7

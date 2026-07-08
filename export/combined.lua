@@ -1949,7 +1949,7 @@ function drawCompleteMenu(dt)
         end
     else
         
-        rectfill(camera_x, camera_y, camera_x + 128, camera_y + 128, 12)
+        rectfill(camera_x, camera_y, camera_x + 128, camera_y + 128, 0)
         draw_winners(camera_x, camera_y, dt)
         
     end
