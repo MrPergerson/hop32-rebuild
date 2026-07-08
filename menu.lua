@@ -209,10 +209,14 @@ function draw_winners(x, y, dt)
             end
         end
     end
+    local score_w = win_order[1] and #tostr(win_order[1][3]) * 4 or 4
+    local block_w = 8 + 2 + 76 + 2 + score_w
+    local row_x = x + flr((128 - block_w) / 2)
     for i = 1, #win_order do
         local ry = y + 36 + (i - 1) * 8 - scroll_y
-        spr(win_order[i][1], x + 8, ry)
-        print(win_order[i][3], x + 96, ry + 1, 10)
+        spr(win_order[i][1], row_x, ry)
+        print("...................", row_x + 10, ry + 1, 5)
+        print(win_order[i][3], row_x + 88, ry + 1, 10)
     end
     clip()
 
