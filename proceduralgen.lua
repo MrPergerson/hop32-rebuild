@@ -1,7 +1,6 @@
 poke(0x5F2D, 0x1) -- enable keyboard input
 chunks = {} -- 2 or 3 chunk tables
 local TERRAIN_Y_OFFSET = 0
-biome_length = 48
 chunk_x_size = 16
 map_x_size = 0
 map_y_size = 32
@@ -345,6 +344,39 @@ function get_surface_tile_at_pos(x_pos)
         
     end
 
+end
+
+local biome_test_cache = {}
+
+function getBiomeTestChunk(x_offset)
+    if biome_test_cache[x_offset] then
+        return biome_test_cache[x_offset]
+    end
+
+    local chunk
+    if x_offset >= BIOME_DIST_UNIT.VOID then
+        chunk = generateCloudChunk(x_offset, 0)
+    elseif x_offset >= BIOME_DIST_UNIT.CITY then
+        chunk = generateVoidChunk(x_offset, 0, 8)
+    elseif x_offset >= BIOME_DIST_UNIT.SNOW then
+        chunk = generateCityChunk(x_offset, 0)
+    else
+        chunk = generateChunk(x_offset)
+    end
+
+    biome_test_cache[x_offset] = chunk
+    return chunk
+end
+
+function drawBiomeTestChunk(chunk)
+    for x = chunk.x, chunk.x+15 do
+        for y = 0, 15 do
+            local tile = chunk.tiles[x][y]
+            if tile.sprite > 0 then
+                spr(tile.sprite, tile.x * 8, tile.y * 8)
+            end
+        end
+    end
 end
 
 function debug_draw_asteroid_polys()

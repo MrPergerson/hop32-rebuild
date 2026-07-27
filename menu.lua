@@ -69,9 +69,7 @@ function drawMenu()
     local y_pos = 60
 
     if active_menu == menu_option.main then
-        print("\^w\^thop32", 46,16, 7)
     elseif active_menu == menu_option.settings then
-        print("\^w\^thop32", 46,16, 7)
         if active_option == 2 then
             gmodetext = showGameModeText()
             print(gmodetext.title, x_pos + 44 ,y_pos + 10, 6)

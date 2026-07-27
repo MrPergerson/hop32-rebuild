@@ -3,7 +3,8 @@
     "allow": [
       "Bash(./hop32.p8)",
       "Bash(powershell:*)",
-      "Bash(grep -E \"\\\\.lua$|^d\")"
+      "Bash(grep -E \"\\\\.lua$|^d\")",
+      "PowerShell(./hop32.p8)"
     ]
   }
 }

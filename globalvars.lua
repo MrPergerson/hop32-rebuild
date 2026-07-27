@@ -9,7 +9,8 @@ gstate = {
     playerSelect = 1,
     game = 2,
     gameover = 3,
-    complete = 4
+    complete = 4,
+    biomeTest = 5
 }
 gameState = gstate.mainMenu
 
@@ -97,14 +98,16 @@ TILE = {
     CLOUD_1 = 108
 }
 
+biome_length = 16
+
 BIOME_DIST_UNIT = {
-    GRASS = 48,
-    DESERT = 96,
-    MOUNTAIN = 144,
-    SNOW = 192,
-    CITY = 240,
-    VOID = 336,
-    KINGDOM = 384 
+    GRASS = biome_length,
+    DESERT = biome_length*2,
+    MOUNTAIN = biome_length*3,
+    SNOW = biome_length*4,
+    CITY = biome_length*5,
+    VOID = biome_length*5 + biome_length*2 + 100, -- void/asteroid section is double-length
+    KINGDOM = biome_length*5 + biome_length*2 + biome_length + 32
 }
 
 -- SFX

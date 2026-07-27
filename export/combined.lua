@@ -9,7 +9,8 @@ gstate = {
     playerSelect = 1,
     game = 2,
     gameover = 3,
-    complete = 4
+    complete = 4,
+    biomeTest = 5
 }
 gameState = gstate.mainMenu
 
@@ -97,14 +98,16 @@ TILE = {
     CLOUD_1 = 108
 }
 
+biome_length = 16
+
 BIOME_DIST_UNIT = {
-    GRASS = 48,
-    DESERT = 96,
-    MOUNTAIN = 144,
-    SNOW = 192,
-    CITY = 240,
-    VOID = 336,
-    KINGDOM = 384 
+    GRASS = biome_length,
+    DESERT = biome_length*2,
+    MOUNTAIN = biome_length*3,
+    SNOW = biome_length*4,
+    CITY = biome_length*5,
+    VOID = biome_length*5 + biome_length*2 + 100, -- void/asteroid section is double-length
+    KINGDOM = biome_length*5 + biome_length*2 + biome_length + 32
 }
 
 -- SFX
@@ -281,7 +284,6 @@ player_sprite_index = {
 poke(0x5F2D, 0x1) -- enable keyboard input
 chunks = {} -- 2 or 3 chunk tables
 local TERRAIN_Y_OFFSET = 0
-biome_length = 48
 chunk_x_size = 16
 map_x_size = 0
 map_y_size = 32
@@ -625,6 +627,39 @@ function get_surface_tile_at_pos(x_pos)
         
     end
 
+end
+
+local biome_test_cache = {}
+
+function getBiomeTestChunk(x_offset)
+    if biome_test_cache[x_offset] then
+        return biome_test_cache[x_offset]
+    end
+
+    local chunk
+    if x_offset >= BIOME_DIST_UNIT.VOID then
+        chunk = generateCloudChunk(x_offset, 0)
+    elseif x_offset >= BIOME_DIST_UNIT.CITY then
+        chunk = generateVoidChunk(x_offset, 0, 8)
+    elseif x_offset >= BIOME_DIST_UNIT.SNOW then
+        chunk = generateCityChunk(x_offset, 0)
+    else
+        chunk = generateChunk(x_offset)
+    end
+
+    biome_test_cache[x_offset] = chunk
+    return chunk
+end
+
+function drawBiomeTestChunk(chunk)
+    for x = chunk.x, chunk.x+15 do
+        for y = 0, 15 do
+            local tile = chunk.tiles[x][y]
+            if tile.sprite > 0 then
+                spr(tile.sprite, tile.x * 8, tile.y * 8)
+            end
+        end
+    end
 end
 
 function debug_draw_asteroid_polys()
@@ -1855,9 +1890,7 @@ function drawMenu()
     local y_pos = 60
 
     if active_menu == menu_option.main then
-        print("\^w\^thop32", 46,16, 7)
     elseif active_menu == menu_option.settings then
-        print("\^w\^thop32", 46,16, 7)
         if active_option == 2 then
             gmodetext = showGameModeText()
             print(gmodetext.title, x_pos + 44 ,y_pos + 10, 6)
@@ -2090,6 +2123,8 @@ local delta_time,last_time
 local timeUntilCameraMoves,timeUntilRestart = 1.5,2
 local timer_1,timer_2,new_chunk_threshold,mouse_x,mouse_y = 0,0,0,0,0
 
+local biome_test_progress,biome_test_chunk = 0,nil
+
 function updatePlayerPushedCamera(dt)
     local lead = getLeadPlayer()
     local min_advance = camera_x + tournament_mode_base_camera_speed * dt
@@ -2113,11 +2148,7 @@ end
 
 function _init()
     delta_time,last_time,timer_1 = 0,0,0
-    if gameState == gstate.complete or gameState == gstate.gameover then
-        gameState = gstate.playerSelect
-    else
-        gameState = gstate.mainMenu
-    end
+    gameState = gstate.biomeTest
     switchGameState(gameState)
 end
 
@@ -2130,37 +2161,7 @@ function switchGameState(state)
 
     gameState = state
 
-    if gameState == gstate.mainMenu then
-        camera_x = 0
-        camera_y = 0
-        initMenu(function() switchGameState(gstate.playerSelect) end)
-        music(0, 1000, 1)
-    elseif gameState == gstate.playerSelect then
-        chunk_progress_x = 0
-        chunk_progress_y = 0
-        new_chunk_threshold = (chunk_progress_x + 1) * 128
-        camera_x = chunk_progress_x * 16 * 8
-        camera_y = chunk_progress_y * 16 * 8
-        finalBossEnabled = false
-        initUFOPool()
-        initZombiePool(5)
-        init_respawn_birds()
-        initProceduralGen()
-        initLevelLoad(chunk_progress_x)
-        max_distance = map_x_size * 8 - 128 + 80
-        initPlayers()
-        win_order = {}
-        death_icons={}
-        timer_2 = .4
-        menuitem(2, "set gamemode", changeGameMode)
-        score_timer = 15
-        actors = {
-            [1] = players,
-            [2] = zombies
-        }
-        music(-1, 1000, 1)
-        music(4, 1000, 2)
-    elseif gameState == gstate.game then
+    if gameState == gstate.game then
         music(-1, 1000, 2)
         music(6, 1000, 3)
         setRespawnTimer()
@@ -2172,6 +2173,12 @@ function switchGameState(state)
 
         initCompleteMenu()
 
+    elseif gameState == gstate.biomeTest then
+        camera_x = 0
+        camera_y = 0
+        initProceduralGen()
+        biome_test_progress = 0
+        biome_test_chunk = getBiomeTestChunk(0)
     end
 
 
@@ -2183,28 +2190,7 @@ function _update()
     delta_time = current_time - last_time  -- Calculate delta time
     last_time = current_time  
 
-    if gameState == gstate.mainMenu then
-        updateMenu(delta_time)
-    elseif gameState == gstate.playerSelect then
-        local complete = addPlayers(camera_x, camera_y, delta_time, timer_2 == 0)
-
-        if timer_2 > 0 then
-            stat(31)
-        end
-        timer_2 = max(0, timer_2 - delta_time)        
-        
-        if playerCount > 0 then 
-            start_timer = max(0, start_timer - delta_time)
-            if start_timer == 0 then
-                complete = true
-            end
-        end
-
-        if complete then
-            switchGameState(gstate.game)
-        end
-    
-    elseif gameState == gstate.game then
+    if gameState == gstate.game then
         if debug_mode then
             debug_controls()
 
@@ -2296,11 +2282,32 @@ function _update()
     elseif gameState == gstate.complete then
         resetGameAfterTimer()
         gameover_menu_timer = processTimer(gameover_menu_timer, delta_time)
-        
+
+    elseif gameState == gstate.biomeTest then
+        if btnp(0) then
+            biome_test_progress = max(0, biome_test_progress - 1)
+            camera_x = biome_test_progress * 128
+            biome_test_chunk = getBiomeTestChunk(biome_test_progress * 16)
+        elseif btnp(1) then
+            biome_test_progress += 1
+            camera_x = biome_test_progress * 128
+            biome_test_chunk = getBiomeTestChunk(biome_test_progress * 16)
+        end
     end
 end
 
 function _draw()
+        if gameState == gstate.biomeTest then
+            cls()
+            camera(camera_x, camera_y)
+            map(0,0,0,camera_y,128,16)
+            map(0,0,1024,camera_y,128,16)
+            map(0,0,2048,camera_y,128,16)
+            map(0,0,3072,camera_y,128,16)
+            drawBiomeTestChunk(biome_test_chunk)
+            return
+        end
+
         cls()
         camera(camera_x, camera_y)
         map(0,0,0,camera_y,128,16)
@@ -2324,28 +2331,11 @@ function _draw()
         end
 
         -- UI
-        if gameState == gstate.mainMenu then
-            drawMenu()
-
-        elseif gameState == gstate.playerSelect then
-
-            rectfill(camera_x, 0, camera_x + 128, camera_y + 5, camera_y)
-
-            print("press any button to join", camera_x + 4, camera_y, 7)
-
-            if playerCount > 0 then 
-                print("starting in " .. flr(start_timer), camera_x + 4, camera_y+8, 7)
-            end
-
-            print("\^w\^thop" .. playerCount, camera_x + 46,camera_y + 56, 7)
-
-        elseif gameState == gstate.game then
-
-        elseif gameState == gstate.complete or gameState == gstate.gameover then
+        if gameState == gstate.complete or gameState == gstate.gameover then
             drawCompleteMenu()
         end
 
-        if gameState == gstate.game or gameState == gstate.playerSelect then
+        if gameState == gstate.game then
             if gamemode_timer > 0 then
                 rectfill(camera_x, 0, camera_x + 128, camera_y + 5, camera_y)
                 print("set gamemode to " .. showGameModeText().title, camera_x + 16, camera_y, 7)
