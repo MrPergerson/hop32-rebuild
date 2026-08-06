@@ -1,0 +1,17 @@
+editing assets: 
+./hop32.p8
+
+testing/production:
+python build.py hop32.p8 export/hop32.p8
+
+mac --
+python3 build.py hop32.p8 export/hop32.p8
+
+
+export/hop32.p8
+
+mac--
+
+go to export folder and run hop32.p8
+
+make sure all edits are not in export as it will be rebuilt
